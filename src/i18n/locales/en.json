@@ -1,0 +1,15 @@
+{
+    "theme":{
+        "dark": "Dark mode",
+        "light": "Light mode"
+    },
+    "example":{
+        "welcome": "Welcome",
+        "currentValue": "Current value",
+        "increase": "Increase",
+        "decrease": "Decrease",
+        "save": "Save",
+        "modeDescription": "Dark mode working without bookstores"
+
+    }
+}

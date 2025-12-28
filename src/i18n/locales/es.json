@@ -1,0 +1,14 @@
+{
+    "theme":{
+        "dark": "Modo oscuro",
+        "light": "Modo claro"
+    },
+    "example":{
+        "welcome": "Bienvenido",
+        "currentValue": "Valor actual",
+        "increase": "Incrementar",
+        "decrease": "Decrementar",
+        "save": "Guardar",
+        "modeDescription": "Modo oscuro funcionando sin librerías"
+    }
+}

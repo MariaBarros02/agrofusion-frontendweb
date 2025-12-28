@@ -1,0 +1,9 @@
+{
+    "entryPoints": ["src"],
+    "entryPointStrategy": "expand",
+    "tsconfig": "tsconfig.app.json",
+    "out": "docs",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "excludeExternals": true
+}
