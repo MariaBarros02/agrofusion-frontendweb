@@ -1,15 +1,105 @@
 {
-    "theme":{
-        "dark": "Dark mode",
-        "light": "Light mode"
-    },
-    "example":{
-        "welcome": "Welcome",
-        "currentValue": "Current value",
-        "increase": "Increase",
-        "decrease": "Decrease",
-        "save": "Save",
-        "modeDescription": "Dark mode working without bookstores"
-
-    }
+  "common": {
+    "rightsReserved": "All rights reserved",
+    "accept": "Accept"
+  },
+  "theme": {
+    "dark": "Dark mode",
+    "light": "Light mode"
+  },
+  "example": {
+    "welcome": "Welcome",
+    "currentValue": "Current value",
+    "increase": "Increase",
+    "decrease": "Decrease",
+    "save": "Save",
+    "modeDescription": "Dark mode working without libraries"
+  },
+  "login": {
+    "login": "Login",
+    "email": "Email address",
+    "mail": "Email",
+    "emailPlaceholder": "name@company.com",
+    "emailHelper": "Use your corporate or personal email",
+    "password": "Password",
+    "passwordHelper": "Minimum 8 characters",
+    "forgottenPassword": "Forgot your password?",
+    "recuperateIt": "Recover it here.",
+    "tabulationOrder": "Tabulation order",
+    "sent": "Submit",
+    "sending": "Logging in...",
+    "activeAccount": "Haven't activated your account?",
+    "activeHere": "Activate it here.",
+    "mfaAuth": "Complete two-factor authentication",
+    "mfaAuthHelper": "Enter the code sent to ",
+    "codeExpired": "The code has expired. ",
+    "resendCode": "Resend code",
+    "timeoutWarning": "Time remaining: ",
+    "verify": "Verify code",
+    "comeback": "Go back"
+  },
+  "resetPassword": {
+    "resetPassword": "Set a new password.",
+    "instructions": "This change will update the password for your accounts across all active AgroFusion projects. Remember it for your next login.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "resetButton": "Reset password",
+    "resetting": "Resetting...",
+    "backToLogin": "Login",
+    "rememberPassword": "Did you remember your password?",
+    "successAlert": "Your password has been successfully reset"
+  },
+  "reqResetPassword": {
+    "requestReset": "Recover your account!",
+    "instructions": "Enter your registered email address in the system.",
+    "sendResetLink": "Find my account",
+    "sending": "Searching account...",
+    "rememberPassword": "Did you remember your password?",
+    "backToLogin": "Log in.",
+    "sentEmail": "We have sent a verification link to your email.",
+    "sentEmailInstruction": "It contains a unique token and expires in 30 minutes.",
+    "sendingAgain": "Sending again...",
+    "sendAgain": "I didn't receive the email. Send again."
+  },
+  "validation": {
+    "emailRequired": "The email address is required.",
+    "emailInvalid": "You must enter a valid email address (e.g., name@company.com).",
+    "passwordRequired": "The password is required.",
+    "confirmPasswordRequired": "You must confirm the password.",
+    "passwordMinLength": "The password must be at least 10 characters long.",
+    "passwordMaxLength": "The password cannot exceed 128 characters.",
+    "passwordLowercase": "The password must contain at least one lowercase letter.",
+    "passwordUppercase": "The password must contain at least one uppercase letter.",
+    "passwordNumber": "The password must contain at least one number.",
+    "passwordSpecialChar": "The password must contain at least one special character.",
+    "passwordsMustMatch": "Passwords do not match."
+  },
+  "errors": {
+    "AUTH_USER_NOT_FOUND": "The user does not exist or was deleted from the system.",
+    "AUTH_USER_DELETED": "The user does not exist or was deleted from the system.",
+    "AUTH_INVALID_PASSWORD": "Incorrect email or password. Please try again.",
+    "AUTH_USER_BLOCKED": "Your account has been temporarily blocked due to multiple failed attempts. Try again in {{minutes}} minute(s).",
+    "AUTH_ACCOUNT_NOT_ACTIVATED": "Your account has not been activated. Check your email to activate access.",
+    "AUTH_OTP_EXPIRED": "The OTP code has expired. Please request a new code.",
+    "AUTH_INVALID_OTP": "The entered OTP code is incorrect. Verify and try again.",
+    "AUTH_OTP_BLOCKED": "You have exceeded the maximum number of attempts for the OTP code. Your access has been temporarily blocked. Please try again later.",
+    "AUTH_PASSWORD_REUSED": "You cannot reuse a previous password.",
+    "AUTH_PASSWORD_MISMATCH": "Passwords do not match.",
+    "AUTH_PASSWORD_TOO_SHORT": "The password is too short. It must be at least {{min}} characters.",
+    "AUTH_PASSWORD_TOO_LONG": "The password is too long. It cannot exceed {{max}} characters.",
+    "AUTH_PASSWORD_REQUIRE_UPPERCASE": "The password must contain at least one uppercase letter.",
+    "AUTH_PASSWORD_REQUIRE_LOWERCASE": "The password must contain at least one lowercase letter.",
+    "AUTH_PASSWORD_REQUIRE_NUMBER": "The password must contain at least one number.",
+    "AUTH_PASSWORD_REQUIRE_SPECIAL_CHAR": "The password must contain at least one special character.",
+    "AUTH_PASSWORD_INVALID_CHARACTER": "The password contains invalid characters.",
+    "AUTH_PASSWORD_POLICY_VIOLATION": "The password does not meet security policies.",
+    "AUTH_PASSWORD_TOO_WEAK": "The password is not strong enough.",
+    "AUTH_PASSWORD_REUSE": "You cannot reuse a previous password.",
+    "AUTH_PASSWORD_RESET_SUCCESS": "Password has been successfully reset.",
+    "AUTH_INVALID_RESET_TOKEN": "The password reset link is invalid or has expired.",
+    "AUTH_RESET_TOKEN_EXPIRED": "The password reset link has expired.",
+    "AUTH_RESET_TOKEN_USED": "This link has already been used.",
+    "AUTH_PASSWORD_RESET_FAILED": "It was not possible to reset the password.",
+    "AUTH_GENERIC": "An unexpected error occurred. Please try again."
+  }
 }
