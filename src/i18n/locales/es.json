@@ -1,4 +1,11 @@
 {
+    "common":{
+        "rightsReserved": "Todos los derechos reservados",
+        "accept": "Aceptar",
+        "goToDisriego": "Ir a Disriego",
+        "goToSigma": "Ir a Sigma",
+        "logout": "Cerrar Sesión"
+    },
     "theme":{
         "dark": "Modo oscuro",
         "light": "Modo claro"
@@ -10,5 +17,103 @@
         "decrease": "Decrementar",
         "save": "Guardar",
         "modeDescription": "Modo oscuro funcionando sin librerías"
-    }
+    },
+    "login":{
+        "login": "Iniciar sesión",
+        "email": "Correo electrónico",
+        "mail": "Correo",
+        "emailPlaceholder": "nombre@empresa.com",
+        "emailHelper": "Usa tu correo corporativo o personal",
+        "password": "Contraseña",
+        "passwordHelper": "Mínimo 8 caracteres",
+        "forgottenPassword": "¿Olvidaste tu contraseña?",
+        "recuperateIt": "Recupérala aquí.",
+        "tabulationOrder": "Orden de tabulación",
+        "sent": "Enviar",
+        "sending": "Ingresando...",
+        "activeAccount": "¿No has activado tu cuenta?",
+        "activeHere": "Activala aquí.",
+        "mfaAuth": "Completa el doble factor de autenticación",
+        "mfaAuthHelper": "Ingresa el código enviado a ",
+        "codeExpired": "El código ha expirado. ",
+        "resendCode": "Reenviar código",
+        "timeoutWarning": "Tiempo restante: ",
+        "verify": "Verificar código",
+        "comeback": "Volver",
+        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente."
+    },
+    "resetPassword":{
+        "resetPassword": "Establece una nueva contraseña.",
+        "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword": "Confirmar contraseña",
+        "resetButton": "Restablecer contraseña",
+        "resetting": "Restableciendo...",
+        "backToLogin": "Inicia de sesión",
+        "rememberPassword": "¿Recordaste tu contraseña?",
+        "successAlert": "Tu contraseña ha sido reestablecida correctamente",
+        "errorExtPro": "{{service}}. No se pudo realizar el cambio de contraseña."
+    },
+    "reqResetPassword":{
+        "requestReset": "¡Recupera tu cuenta!",
+        "instructions": "Ingresa tu dirección de correo electrónico registrada en el sistema.",
+        "sendResetLink": "Buscar mi cuenta",
+        "sending": "Buscando cuenta...",
+        "rememberPassword": "¿Recordaste tu contraseña?",
+        "backToLogin": "Inicia sesión.",
+        "sentEmail": "Hemos enviado un enlace de verificación a tu correo electrónico.",
+        "sentEmailInstruction": "Contiene un token único y tiene un tiempo de expiración de 30 minutos.",
+        "sendingAgain": "Enviando de nuevo...",
+        "sendAgain": "No he recibido el correo. Enviar de nuevo.",
+        "errorExtPro": "{{service}}. No se pudo solicitar el cambio de contraseña."
+    },
+    "validation": {
+        "emailRequired": "El correo electrónico es obligatorio.",
+        "emailInvalid": "Debe introducir un correo electrónico válido (ej. nombre@empresa.com).",
+        "passwordRequired": "La contraseña es obligatoria.",
+        "confirmPasswordRequired": "Debes confirmar la contraseña.",
+
+        "passwordMinLength": "La contraseña debe tener al menos 10 caracteres.",
+        "passwordMaxLength": "La contraseña no puede exceder los 128 caracteres.",
+
+        "passwordLowercase": "La contraseña debe contener al menos una letra minúscula.",
+        "passwordUppercase": "La contraseña debe contener al menos una letra mayúscula.",
+        "passwordNumber": "La contraseña debe contener al menos un número.",
+        "passwordSpecialChar": "La contraseña debe contener al menos un carácter especial.",
+
+    "passwordsMustMatch": "Las contraseñas no coinciden."
+    },
+    "errors": {
+    "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_USER_DELETED": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_INVALID_PASSWORD": "Correo o contraseña incorrectos. Intenta nuevamente.",
+    "AUTH_USER_BLOCKED": "Tu cuenta ha sido bloqueada temporalmente por múltiples intentos fallidos. Intenta nuevamente en {{minutes}} minuto(s).",
+    "AUTH_ACCOUNT_NOT_ACTIVATED": "Tu cuenta no ha sido activada. Revisa tu correo para activar el acceso.",
+    "AUTH_OTP_EXPIRED": "El código OTP ha expirado. Solicita un nuevo código.",
+    "AUTH_INVALID_OTP": "El código OTP ingresado es incorrecto. Verifica e intenta nuevamente.",
+    "AUTH_OTP_BLOCKED": "Has excedido el número máximo de intentos para ingresar el código OTP. Tu acceso ha sido bloqueado temporalmente. Intenta nuevamente en otro momento.",
+    "AUTH_PASSWORD_REUSED": "No puedes reutilizar una contraseña anterior.",
+    "AUTH_PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
+    "AUTH_PASSWORD_TOO_SHORT": "La contraseña es demasiado corta. Debe tener al menos {{min}} caracteres.",
+    "AUTH_PASSWORD_TOO_LONG": "La contraseña es demasiado larga. No puede superar los {{max}} caracteres.",
+
+    "AUTH_PASSWORD_REQUIRE_UPPERCASE": "La contraseña debe contener al menos una letra mayúscula.",
+    "AUTH_PASSWORD_REQUIRE_LOWERCASE": "La contraseña debe contener al menos una letra minúscula.",
+    "AUTH_PASSWORD_REQUIRE_NUMBER": "La contraseña debe contener al menos un número.",
+    "AUTH_PASSWORD_REQUIRE_SPECIAL_CHAR": "La contraseña debe contener al menos un carácter especial.",
+
+    "AUTH_PASSWORD_INVALID_CHARACTER": "La contraseña contiene caracteres no permitidos.",
+
+    "AUTH_PASSWORD_POLICY_VIOLATION": "La contraseña no cumple con las políticas de seguridad.",
+    "AUTH_PASSWORD_TOO_WEAK": "La contraseña no es lo suficientemente segura.",
+    "AUTH_PASSWORD_REUSE": "No puedes reutilizar una contraseña anterior.",
+    "AUTH_PASSWORD_RESET_SUCCESS": "La contraseña ha sido restablecida exitosamente.",
+    "AUTH_INVALID_RESET_TOKEN": "El enlace para restablecer la contraseña es inválido o ha expirado.",
+    "AUTH_RESET_TOKEN_EXPIRED": "El enlace para restablecer la contraseña ha expirado.",
+    "AUTH_RESET_TOKEN_USED": "Este enlace ya fue utilizado.",
+    
+    "AUTH_PASSWORD_RESET_FAILED": "No fue posible restablecer la contraseña.",
+    "AUTH_GENERIC": "Ocurrió un error inesperado. Inténtalo nuevamente."
+    }   
+
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
 
 /**
@@ -27,26 +28,22 @@ const ThemeContext = createContext<ThemeContextType | undefined>(
 );
 
 /**
- * Proveedor del contexto de tema.
- *
- * Responsabilidades:
- * - Inicializar el tema desde localStorage o preferencias del sistema
- * - Sincronizar la clase `dark` en el elemento `<html>`
- * - Persistir el tema seleccionado
- *
- * @param {object} props
- * @param {React.ReactNode} props.children - Componentes hijos
- *
- * @example
- * <ThemeProvider>
- *   <App />
- * </ThemeProvider>
+ * Proveedor del contexto de tema (ThemeProvider).
+ * * Lógica de inicialización:
+ * 1. Busca en `localStorage` una preferencia guardada.
+ * 2. Si no existe, consulta las preferencias del Sistema Operativo (`prefers-color-scheme`).
+ * * @param {Object} props - Propiedades del componente.
+ * @param {React.ReactNode} props.children - Componentes envueltos por el proveedor.
  */
 export const ThemeProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
+  /**
+   * Estado del tema con inicializador perezoso (Lazy Initializer).
+   * Solo se ejecuta en el primer renderizado.
+   */
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
 
@@ -61,6 +58,11 @@ export const ThemeProvider = ({
     return prefersDark ? "dark" : "light";
   });
 
+
+  /**
+   * Sincronización del tema con el DOM y almacenamiento local.
+   * Aplica o remueve la clase `.dark` en el elemento raíz (<html>).
+   */
   useEffect(() => {
     const root = document.documentElement;
 
@@ -88,14 +90,9 @@ export const ThemeProvider = ({
 };
 
 /**
- * Hook para consumir el contexto de tema.
- *
- * @throws {Error} Si se usa fuera de `ThemeProvider`
- *
- * @returns {ThemeContextType} Contexto de tema
- *
- * @example
- * const { theme, toggleTheme } = useTheme();
+ * Hook personalizado para acceder a las propiedades del tema.
+ * * @returns {ThemeContextType} Objeto con el tema actual y función toggle.
+ * @throws {Error} Si el hook es llamado fuera de un `<ThemeProvider />`.
  */
 export const useTheme = () => {
   const context = useContext(ThemeContext);

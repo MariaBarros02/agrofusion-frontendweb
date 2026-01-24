@@ -1,25 +1,36 @@
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import { BsSun, BsMoon } from "react-icons/bs";
+
 /**
- * Botón para alternar el tema de la aplicación entre modo claro y oscuro.
+ * Componente de interfaz para alternar el tema (Modo Oscuro/Claro).
+ * * Funcionalidad:
+ * - Utiliza un Contexto Global (`useTheme`) para persistir la preferencia.
+ * - Cambia dinámicamente el ícono basándose en el estado actual.
+ * - Aplica clases de Tailwind para transiciones suaves y estados de enfoque (focus).
  *
- * Este componente:
- * - Consume el contexto de tema mediante el hook `useTheme`
- * - Cambia el tema global al hacer click
- * - Actualiza la UI usando clases `dark:` de Tailwind CSS
- *
- * @example
- * <ThemeToggle />
+ * @returns {JSX.Element} Un botón circular con un ícono que representa el estado del tema.
  */
 export default function ThemeToggle() {
+  /** @type {{ theme: 'light' | 'dark', toggleTheme: Function }} */
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
+
+  // Si el tema actual es 'light' (claro), mostramos la luna (para cambiar a oscuro).
+  // Si el tema actual es 'dark' (oscuro), mostramos el sol (para cambiar a claro).
+  const Icon = theme === "light" ? BsMoon : BsSun;
+  
+  /** * Color del ícono basado en el tema actual para asegurar contraste.
+   */
+  const iconColor = theme === "light" ? "text-gray-800" : "text-gray-100";
+
   return (
     <button
       onClick={toggleTheme}
-      className="px-4 py-2 text-gray-900 transition bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-100"
+      className="flex items-center justify-center w-10 h-10 transition bg-gray-200 rounded-full dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+      aria-label={t("toggleTheme")} 
     >
-      {theme === "light" ? `🌙 ${t("theme.dark")}` : `☀️ ${t("theme.light")}`}
+      <Icon className={`w-5 h-5 ${iconColor}`} />
     </button>
   );
 }
