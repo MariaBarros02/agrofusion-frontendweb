@@ -84,6 +84,7 @@ const Login = () => {
     enableReinitialize: true,
     validationSchema: LoginSchema(t),
     onSubmit: async (values) => {
+      
       try {
         setGlobalError(null);
         setPasswordError(null);
@@ -98,7 +99,7 @@ const Login = () => {
           response.access_token ?? "",
           response.refresh_token ?? ""
         );
-        navigate("/");
+        navigate("/dashboard");
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
