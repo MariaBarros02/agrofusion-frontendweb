@@ -25,7 +25,7 @@ const LanguageSwitcher: React.FC = () => {
     <div className="flex gap-2 p-1 bg-gray-200 rounded-lg dark:bg-gray-700">
       <button
         onClick={() => changeLanguage("es")}
-        className={`flex items-center gap-2 px-3 py-1 rounded-md transition text-xs
+        className={`flex items-center gap-2 px-2 py-1 rounded-md transition text-xs
           ${
             currentLang.startsWith("es")
               ? "bg-white dark:bg-gray-900 dark:text-white font-semibold"
@@ -37,7 +37,7 @@ const LanguageSwitcher: React.FC = () => {
 
       <button
         onClick={() => changeLanguage("en")}
-        className={`flex items-center gap-2 px-3 py-1 rounded-md transition text-xs
+        className={`flex items-center gap-2 px-2 py-1 rounded-md transition text-xs
           ${
             currentLang.startsWith("en")
               ? "bg-white dark:bg-gray-900 dark:text-white font-semibold"

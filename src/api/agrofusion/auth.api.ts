@@ -13,7 +13,7 @@ export const authApi = {
      * Obtiene la lista de proyectos externos vinculados.
      * @returns {Promise<ExternalProject[]>} Lista de proyectos.
      */
-    getExternalProjects: () => authAgrofusionAxios.get<ExternalProject[]>("auth/external-projects"),
+    getExternalProjects: () => authAgrofusionAxios.get<ExternalProject[]>("/external-projects"),
     /**
      * Realiza el inicio de sesión primario del usuario.
      * @param {LoginDto} data - Credenciales del usuario (email y password).

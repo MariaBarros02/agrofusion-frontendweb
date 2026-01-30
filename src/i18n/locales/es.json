@@ -4,7 +4,9 @@
         "accept": "Aceptar",
         "goToDisriego": "Ir a Disriego",
         "goToSigma": "Ir a Sigma",
-        "logout": "Cerrar Sesión"
+        "logout": "Cerrar Sesión",
+        "goTo": "Ir a",
+        "go": "Ir"
     },
     "theme":{
         "dark": "Modo oscuro",
@@ -17,6 +19,19 @@
         "decrease": "Decrementar",
         "save": "Guardar",
         "modeDescription": "Modo oscuro funcionando sin librerías"
+    },
+    "nav": {
+        "profile": "Perfil",
+        "admin": "Administración",
+        "check": "Comprobante",
+        "audit": "Auditoria",
+        "digitalSig": "Firma Digital",
+        "modules": "Módulos",
+        "submodules": "Submódulos",
+        "projects": "Proyectos",
+        "users":"Usuarios",
+        "emailGes": "Gestor de correos",
+        "roles":"Roles / Permisos"
     },
     "login":{
         "login": "Iniciar sesión",
@@ -66,6 +81,12 @@
         "sendingAgain": "Enviando de nuevo...",
         "sendAgain": "No he recibido el correo. Enviar de nuevo.",
         "errorExtPro": "{{service}}. No se pudo solicitar el cambio de contraseña."
+    },
+    "dashboard":{
+        "title":"Acceso a proyectos externos",
+        "description": "Ingresa a tus cuentas en los proyectos externos asociados a AgroFusion",
+        "loading": "Cargando proyectos externos ...",
+        "loadingError": "¡Error al cargar proyectos externos!"
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",

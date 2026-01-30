@@ -14,7 +14,7 @@ export function PublicRoute({ children }: { children: JSX.Element }) {
 
   if (isAuth) {
     // Si el usuario ya está autenticado, no tiene sentido que vea el Login
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
