@@ -86,7 +86,8 @@
         "title":"Acceso a proyectos externos",
         "description": "Ingresa a tus cuentas en los proyectos externos asociados a AgroFusion",
         "loading": "Cargando proyectos externos ...",
-        "loadingError": "¡Error al cargar proyectos externos!"
+        "loadingError": "¡Error al cargar proyectos externos!",
+        "integrate": "Integra con costos y activos fijos"
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
