@@ -6,6 +6,7 @@ import { PublicRoute } from "./PublicRoute";
 import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import RequestResetPass from "../pages/RequestResetPass";
+import Dashboard from "../pages/Dashboard";
 
 
 /**
@@ -53,6 +54,16 @@ export function AppRouter() {
             <PublicRoute>
               <ResetPassword />
             </PublicRoute>
+          }
+        />
+
+        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
           }
         />
       </Routes>

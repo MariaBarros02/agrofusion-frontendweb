@@ -1,5 +1,3 @@
-import type { ExternalProject } from "../shared/external-project.dto";
-
 
 /**
  * Respuesta del servidor tras un intento de login o verificación MFA.
@@ -19,7 +17,6 @@ export interface LoginResponse {
     mfa_required?: boolean;
     /** Propósito del código OTP enviado (ej: 'login', 'reset_password') */
     otp_purpose?: string;
-    /** Lista de proyectos externos a los que el usuario tiene acceso vía SSO */
-    external_projects?: ExternalProject[];
+
 }
 
