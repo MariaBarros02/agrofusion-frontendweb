@@ -12,7 +12,8 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 import ToastSimple, { type ToastData } from "../components/layout/ToastSimple";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { iconMapper } from "../utils/iconMapper";
-import { FiTool } from "react-icons/fi";
+import { FiLink, FiTool } from "react-icons/fi";
+import { Link } from "react-router-dom";
 const Dashboard = () => {
   const { t } = useTranslation();
   const [projects, setProjects] = useState<ExternalProject[]>([]);
@@ -202,6 +203,10 @@ const Dashboard = () => {
                       );
                     })}
                   </div>
+                  <Link className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 md:text-sm hover:underline" to="/dashboard">
+                    <FiLink/>
+                    {t("dashboard.integrate")}
+                  </Link>
                 </div>
               </div>
             ))}
