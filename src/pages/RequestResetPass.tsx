@@ -16,8 +16,8 @@ import {
 } from "../services/agrofusion/auth.service";
 import { Link } from "react-router-dom";
 import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/auth/authOrchestrator.service";
-import { handleReqResPasswordEP } from "../services/auth/authOrchestrator.service";
+import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
+import { handleReqResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente de Recuperación de Contraseña.

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Example from "../pages/Example";
+//import Example from "../pages/Example";
 import "../index.css";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PublicRoute } from "./PublicRoute";
@@ -7,6 +7,8 @@ import Login from "../pages/Login";
 import ResetPassword from "../pages/ResetPassword";
 import RequestResetPass from "../pages/RequestResetPass";
 import Dashboard from "../pages/Dashboard";
+import UsersList from "../pages/users/UsersList";
+import CreateUser from "../pages/users/CreateUser";
 
 
 /**
@@ -20,7 +22,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
+        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login
         <Route
           path="/"
           element={
@@ -28,7 +30,7 @@ export function AppRouter() {
               <Example initial={10} />
             </ProtectedRoute>
           }
-        />
+        /> */}
         {/* Ruta de Login: Pública. Si ya está logueado, rebota a / */}
         <Route
           path="/login"
@@ -66,6 +68,20 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
+
+
+      {/* RUTA PADRE ADMINISTRACION */}
+      <Route path="administration">
+        
+        {/* USERS */}
+        <Route path="users" element={<UsersList />} />
+        <Route path="users/create-user" element={<CreateUser />} />
+        {/* <Route path="users/edit-user/:userId" element={<EditUser />} />
+
+        <Route path="projects" element={<ProjectsList />} />  */}
+
+      </Route>
+
       </Routes>
     </BrowserRouter>
   );

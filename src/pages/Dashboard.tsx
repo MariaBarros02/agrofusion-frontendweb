@@ -5,7 +5,7 @@ import TitleTarget from "../components/layout/TitleTarget";
 import { getExternalProjects } from "../services/agrofusion/auth.service";
 import type { ExternalProject } from "../dto/shared/external-project.dto";
 import { useTranslation } from "react-i18next";
-import { handleSSOLoginEP } from "../services/auth/authOrchestrator.service";
+import { handleSSOLoginEP } from "../services/orchestrator/authOrchestrator.service";
 import { GiBigGear } from "react-icons/gi";
 import { Button } from "flowbite-react";
 import { HiOutlineArrowRight } from "react-icons/hi";
@@ -56,7 +56,7 @@ const Dashboard = () => {
       setSSOLogged(project.instance_code);
       window.open(
         `${project.client_name}sso?token=${result.sso_token}`,
-        "_blank"
+        "_blank",
       );
       return;
     }
@@ -78,15 +78,14 @@ const Dashboard = () => {
 
   const goToModule = async (project: ExternalProject, moduleUrl: string) => {
     if (!isSSOLogged(project.instance_code)) {
-      // No asumimos sesión → disparamos SSO primero
+      // No asumime sesión  dispara SSO primero
       await ssoLogin(project);
 
-      // pequeña espera
       setTimeout(() => {
         window.location.href = moduleUrl;
       }, 1500);
     } else {
-      // Ya asumimos sesión
+      // asume sesión
       window.location.href = moduleUrl;
     }
   };
@@ -113,7 +112,6 @@ const Dashboard = () => {
     }
   };
 
-
   return (
     <AppLayoutSB>
       <div className="flex flex-col h-full">
@@ -122,14 +120,14 @@ const Dashboard = () => {
           description="dashboard.description"
         />
         {loading && (
-          <div className="flex items-center justify-center p-3 bg-white border dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          <div className="flex items-center justify-center p-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
             {" "}
             <p className="text-3xl font-bold">{t("dashboard.loading")}</p>{" "}
           </div>
         )}
 
         {error && (
-          <div className="flex items-center justify-center bg-white border dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          <div className="flex items-center justify-center bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
             {" "}
             <p className="text-3xl font-bold">{t("dashboard.loading")}</p>{" "}
           </div>
@@ -137,79 +135,92 @@ const Dashboard = () => {
 
         {!loading && !error && (
           <div className="space-y-3 max-h-[calc(100vh-135px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
-            {projects.map((project) => (
-              <div
-                key={project.external_project_id}
-                className="flex items-center gap-3 p-5 bg-white border dark:border-gray-600 rounded-2xl dark:bg-gray-700 "
-              >
-                <div className="flex-shrink-0 w-48 h-64 overflow-hidden md:w-60 rounded-2xl">
-                  <img
-                    src={`${import.meta.env.VITE_API_AUTH_AF_URL}${project.project_image_url}`}
-                    alt={project.project_name}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <div>
-                  <p className="flex mb-1 items-center justify-center w-8 h-8 bg-[#E1E8F5]  rounded-xl">
-                    <GiBigGear size={25} className="dark:text-gray-800" />
-                  </p>
-                  <p className="text-lg font-bold md:w-2/3 md:text-2xl ">
-                    {project.project_name} - {project.instance_code}
-                  </p>
-                  <p className="my-1 text-xs text-gray-700 md:text-base dark:text-gray-300">
-                    {project.description}
-                  </p>
-
-                  <Button
-                    className="my-3 text-left"
-                    size="md"
-                    color="blue"
-                    onClick={() => ssoLogin(project)}
-                  >
-                    {" "}
-                    <HiOutlineArrowRight size={24} className="mr-1" />
-                    {t("common.goTo")} <br /> {project.instance_code}
-                  </Button>
-
-                  <div className="grid gap-2 md:grid-cols-3">
-                    {project.systems.map((module) => {
-                      const Icon = iconMapper[module.module_icon] ?? FiTool;
-                      return (
-                        <div
-                          key={module.ext_id}
-                          className="bg-[#E1E8F5] dark:bg-gray-800 dark:border-gray-600 rounded-xl p-2 border border-gray-300 flex md:justify-between items-center gap-2"
-                        >
-                          <Icon className="text-2xl md:text-3xl dark:text-gray-200" />
-                          <div className="">
-                            <p className="text-xs font-bold ">{module.name}</p>
-                            <p className="hidden text-xs text-gray-800 md:block dark:text-gray-200">
-                              {module.description}
-                            </p>
-                          </div>
-                          <a
-                            className="flex items-center ml-auto font-bold "
-                            onClick={(e) => {
-                              e.preventDefault();
-                              goToModule(
-                                project,
-                                project.client_name + module.base_url,
-                              );
-                            }}
-                          >
-                            <p>{t("common.go")}</p>
-                            <MdOutlineKeyboardArrowRight />
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <Link className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 md:text-sm hover:underline" to="/dashboard">
-                    <FiLink/>
-                    {t("dashboard.integrate")}
-                  </Link>
-                </div>
+            {projects.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-10 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl">
+                <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                  {t("dashboard.noProjects")}
+                </p>
               </div>
-            ))}
+            ) : (
+              projects.map((project) => (
+                <div
+                  key={project.external_project_id}
+                  className="flex items-center gap-3 p-5 bg-white border shadow-sm dark:border-gray-600 rounded-2xl dark:bg-gray-700 "
+                >
+                  <div className="flex-shrink-0 w-48 h-64 overflow-hidden md:w-60 rounded-2xl">
+                    <img
+                      src={`${import.meta.env.VITE_API_AUTH_AF_URL}${project.project_image_url}`}
+                      alt={project.project_name}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div>
+                    <p className="flex mb-1 items-center justify-center w-8 h-8 bg-[#E1E8F5]  rounded-xl">
+                      <GiBigGear size={25} className="dark:text-gray-800" />
+                    </p>
+                    <p className="text-lg font-bold md:w-2/3 md:text-xl ">
+                      {project.project_name} - {project.instance_code}
+                    </p>
+                    <p className="my-1 text-xs text-gray-700 md:text-sm dark:text-gray-300">
+                      {project.description}
+                    </p>
+
+                    <Button
+                      className="my-3 text-left"
+                      size="md"
+                      color="blue"
+                      onClick={() => ssoLogin(project)}
+                    >
+                      {" "}
+                      <HiOutlineArrowRight size={24} className="mr-1" />
+                      {t("common.goTo")} <br /> {project.instance_code}
+                    </Button>
+
+                    <div className="grid gap-2 md:grid-cols-3">
+                      {project.systems.map((module) => {
+                        const Icon = iconMapper[module.module_icon] ?? FiTool;
+                        return (
+                          <div
+                            key={module.ext_id}
+                            className="bg-[#E1E8F5] dark:bg-gray-800 dark:border-gray-600 rounded-xl p-2 border border-gray-300 flex md:justify-between items-center gap-2"
+                          >
+                            <Icon className="text-2xl md:text-3xl dark:text-gray-200" />
+                            <div className="">
+                              <p className="text-xs font-bold ">
+                                {module.name}
+                              </p>
+                              <p className="hidden text-xs text-gray-800 md:block dark:text-gray-200">
+                                {module.description}
+                              </p>
+                            </div>
+                            <a
+                              className="flex items-center ml-auto font-bold "
+                              onClick={(e) => {
+                                e.preventDefault();
+                                goToModule(
+                                  project,
+                                  project.client_name + module.base_url,
+                                );
+                              }}
+                            >
+                              <p>{t("common.go")}</p>
+                              <MdOutlineKeyboardArrowRight />
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Link
+                      className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 hover:underline"
+                      to="/dashboard"
+                    >
+                      <FiLink />
+                      {t("dashboard.integrate")}
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
         <div className="fixed z-50 flex flex-col gap-2 top-4 right-4">

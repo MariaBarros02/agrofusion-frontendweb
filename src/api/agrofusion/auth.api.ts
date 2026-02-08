@@ -2,7 +2,8 @@ import type { LoginDto, MfaDto } from "../../dto/request/login-request.dto";
 import type { LoginResponse } from "../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
-import type { ResetTokenMap } from "../../services/auth/authOrchestrator.service";
+import type { User } from "../../dto/shared/users.dto";
+import type { ResetTokenMap } from "../../services/orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
 
 /**
@@ -58,5 +59,13 @@ export const authApi = {
      * @param {string} data.project - Nombre del proyecto origen.
      * @param {string} data.detail - Descripción técnica del error.
      */
-    logErrorPE: (data: { project: string,  detail: string }) => authAgrofusionAxios.post('auth/log-error-EP', data)
+    logErrorPE: (data: { project: string,  detail: string }) => authAgrofusionAxios.post('auth/log-error-EP', data),
+
+    /**
+     * Consulta si existe un usuario por su correo o numero de identificación.
+     * @param {string} email - Email del usuario
+     * @param {string} numIdent - Número de identidad del usuario
+     * @returns {User} Respuesta con datos de sesión o estado de MFA.
+     */
+    userExists: (data: {email:string, numIdent:string}) => authAgrofusionAxios.post<User>("users/user-exists", data),
 }

@@ -21,5 +21,10 @@ export const authApiDisriego = {
      * @returns {Promise<any>} Resultado de la operación de cambio de contraseña.
      */
     resetPassword: (data: { token: string; newPassword: string, confirmPassword: string }) => authAxios.post(`/base/auth/reset-password/${data.token}`, {new_password: data.newPassword, confirm_password: data.confirmPassword,}),
+    /**
+     * Solicita los roles del sistema.
+     * @returns {Promise<any>} Respuesta del servidor sobre los roles.
+     */
+    getRoles: () => authAxios.get("/base/roles/"),
     
 }

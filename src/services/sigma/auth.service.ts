@@ -25,3 +25,13 @@ export const resetPasswordService = async (
   const { data } = await authApiSigma.resetPassword({ token, newPassword, confirmPassword });
   return data;
 }
+
+/**
+ * Obtiene los roles del proyecto
+ */
+export const getRolesService = async () => {
+  const response = await authApiSigma.getRoles();
+  console.log(response);
+  const roles = response.data.data;
+  return roles;
+}

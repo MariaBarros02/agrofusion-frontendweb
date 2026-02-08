@@ -49,7 +49,7 @@ import {
   getExternalProjects,
   reqResetPasswordService,
 } from "../../services/agrofusion/auth.service";
-import { handleReqResPasswordEP } from "../../services/auth/authOrchestrator.service";
+import { handleReqResPasswordEP } from "../../services/orchestrator/authOrchestrator.service";
 
 /* ======================================================
    Helpers

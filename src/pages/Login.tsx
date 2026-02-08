@@ -39,7 +39,7 @@ const LoginSchema = (
       .required(t("validation.emailRequired")),
     password: yup
       .string()
-      .min(8, t("validation.passwordMin", { min: 10 }))
+      .min(10, t("validation.passwordMin", { min: 10 }))
       .required(t("validation.passwordRequired")),
   });
 

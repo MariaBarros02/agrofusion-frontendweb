@@ -1,4 +1,4 @@
-import { handleSSOLoginEP } from '../../services/auth/authOrchestrator.service';
+import { handleSSOLoginEP } from '../../services/orchestrator/authOrchestrator.service';
 import { ssoLoginService } from '../../services/agrofusion/auth.service';
 import { registerErrorPEService } from '../../services/agrofusion/audit.service';
 

@@ -53,10 +53,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
 
   const subItem =
     "group ml-8 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm " +
-    "text-gray-700 hover:text-blue-600 hover:bg-white transition-colors " +
+    "text-gray-700 hover:text-blue-600  hover:bg-white transition-colors " +
     "[&_svg]:!text-current";
 
-  const activeItem = "bg-white text-blue-600 [&_svg]:!text-current";
+  const activeItem = "bg-white text-blue-600 [&_svg]:!text-current dark:bg-gray-400";
 
   const logoutItem =
     "font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors dark:text-gray-300 " +
@@ -123,7 +123,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
 
           {/* ITEMS */}
           <SidebarItems
-            className="!bg-transparent overflow-y-auto [scrollbar-width:thin]
+            className="!bg-transparent overflow-y-auto [scrollbar-width:thin] 
           /* Firefox */
             [scrollbar-color:rgba(100,116,139,0.4)_transparent]
 
@@ -133,7 +133,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             [&::-webkit-scrollbar-thumb]:bg-slate-400/50
             [&::-webkit-scrollbar-track]:bg-transparent
 
-            /* ⛔ eliminar flechas */
+            /*  eliminar flechas */
             [&::-webkit-scrollbar-button]:hidden
             [&::-webkit-scrollbar-button]:w-0
             [&::-webkit-scrollbar-button]:h-0"
@@ -157,7 +157,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                 hover:bg-white dark:hover:bg-slate-700
                 transition-colors `}
               >
-                <div className="flex items-center gap-2 dark:text-white">
+                <div className="flex items-center gap-3 dark:text-white">
                   <HiChartPie size={22} />
                   <span>{t("nav.admin")}</span>
                 </div>
@@ -170,60 +170,60 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               {adminOpen && (
                 <div className="mt-1 space-y-1 ">
                   <SidebarItem
-                    href="/admin/projects"
+                    href="/admininistration/projects"
                     icon={LuFolderKanban}
                     className={`${subItem} ${
-                      isActive("/admin/projects") ? activeItem : ""
+                      isActive("/administration/projects") ? activeItem : ""
                     }`}
                   >
                     {t("nav.projects")}
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/admin/modules"
+                    href="/administration/modules"
                     icon={LuFolderGit2}
                     className={`${subItem} ${
-                      isActive("/admin/modules") ? activeItem : ""
+                      isActive("/administration/modules") ? activeItem : ""
                     }`}
                   >
                     {t("nav.modules")}
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/admin/submodules"
+                    href="/administration/submodules"
                     icon={LiaCubesSolid}
                     className={`${subItem} ${
-                      isActive("/admin/submodules") ? activeItem : ""
+                      isActive("/administration/submodules") ? activeItem : ""
                     }`}
                   >
                     {t("nav.submodules")}
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/admin/roles"
+                    href="/administration/roles"
                     icon={FiShield}
                     className={`${subItem} ${
-                      isActive("/admin/roles") ? activeItem : ""
+                      isActive("/administration/roles") ? activeItem : ""
                     }`}
                   >
                     {t("nav.roles")}
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/admin/users"
+                    href="/administration/users"
                     icon={LuUsers}
                     className={`${subItem} ${
-                      isActive("/admin/users") ? activeItem : ""
+                      isActive("/administration/users") ? activeItem : ""
                     }`}
                   >
                     {t("nav.users")}
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/admin/email"
+                    href="/administration/email"
                     icon={FiMail}
                     className={`${subItem} ${
-                      isActive("/admin/email") ? activeItem : ""
+                      isActive("/administration/email") ? activeItem : ""
                     }`}
                   >
                     {t("nav.emailGes")}

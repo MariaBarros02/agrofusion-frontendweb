@@ -1,5 +1,5 @@
 import { authApi } from "../../api/agrofusion/auth.api";
-import type { ResetTokenMap } from "../auth/authOrchestrator.service";
+import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
 
 
 /**
@@ -85,3 +85,16 @@ export const resetPasswordService = async (
   return data;
 }
 
+/**
+ * Consultar si existe un usuario por su correo electrónico o numero de identificación.
+ * @param email Correo electrónico del usuario.
+ * @param numIdent Número de identificación.
+ * @returns Datos del usuario o respuesta si el usuario no existe.
+ */
+export const userExistsService = async (
+  email: string,
+  numIdent: string
+) => {
+  const { data } = await authApi.userExists({ email, numIdent });
+  return data;
+};

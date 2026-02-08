@@ -2,7 +2,7 @@
 import  { useState } from "react";
 import ToastSimple from "../components/layout/ToastSimple";
 import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/auth/authOrchestrator.service";
+import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
 import Header from "../components/layout/Header";
 import { Label, TextInput, Card, Button } from "flowbite-react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import type { AlertState } from "../components/layout/AlertSimple";
 import AlertSimple from "../components/layout/AlertSimple";
-import { handleResPasswordEP } from "../services/auth/authOrchestrator.service";
+import { handleResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente para el establecimiento de una nueva contraseña.

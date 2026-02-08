@@ -6,7 +6,28 @@
         "goToSigma": "Ir a Sigma",
         "logout": "Cerrar Sesión",
         "goTo": "Ir a",
-        "go": "Ir"
+        "go": "Ir",
+        "search": "Buscar",
+        "state": "Estado",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "filterActive": "Filtros activos",
+        "filterReset": "Reiniciar filtros",
+        "cancel": "Cancelar",
+        "masculine": "Masculino",
+        "feminine": "Femenino",
+        "other": "Otro",
+        "civilReg": "Registro civíl",
+        "identTarget": "Targeta de identidad",
+        "ID": "ID",
+        "foreingerTar": "Tarjeta de extranjería",
+        "foreingerID": "Cédula de extranjería",
+        "nit": "NIT",
+        "passport": "Pasaporte",
+        "forID": "Documento de identificación extranjero",
+        "pep": "PEP",
+        "nitOtherCountry": "Nit de otro país",
+        "nuip": "NUIP"
     },
     "theme":{
         "dark": "Modo oscuro",
@@ -89,13 +110,52 @@
         "loadingError": "¡Error al cargar proyectos externos!",
         "integrate": "Integra con costos y activos fijos"
     },
+    "users":{
+        "title": "Gestion de usuarios",
+        "description": "Crea y administra usuarios del sistema",
+        "searchNameEmail": "Buscar por nombre o correo...",
+        "associateRole": "Rol asociado",
+        "roles": "Roles",
+        "admin": "Administrador",
+        "basicUser": "Usuario Basico",
+        "createUser": "Crear usuario",
+        "noUsers": "No se encontraron usuarios registrados",
+        "error": "Error al cargar usuarios...",
+        "loading": "Cargando usuarios..."
+    },
+    "createUser":{
+        "title": "Registro de usuario",
+        "description": "Crea usuarios en el sistema de agroFusion y proyectos asociados en un solo registro",
+        "name": "Nombre",
+        "namePlaceholder": "Nombres completos",
+        "first": "Primer",
+        "lastName":"Apellido",
+        "second": "Segundo",
+        "documentNumber": "Número de documento",
+        "dateIssuanceDoc": "Fecha de expedición",
+        "birthday": "Fecha de nacimiento",
+        "email": "Correo electrónico",
+        "password": "Contraseña temporal",
+        "confirmPassword": "Confirmar contraseña",
+        "typeDocNumber": "Tipo de identificación",
+        "gender": "Género",
+        "role": "Rol",
+        "placeholderTypDoc": "Selecciona el tipo de identificación",
+        "placeholderGender": "Selecciona el género",
+        "placeholderRole": "Selecciona un rol",
+        "helperPassword": "Se enviará el usuario tras el registro",
+        "regenerate": "Regenerar",
+        "userRegister": "Registrar usuario",
+        "errorLoadingRoles": "{{service}}. Hubo un error al cargar los roles.",
+        "loadUserRegister": "Registrando usuario"
+    },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
         "emailInvalid": "Debe introducir un correo electrónico válido (ej. nombre@empresa.com).",
         "passwordRequired": "La contraseña es obligatoria.",
         "confirmPasswordRequired": "Debes confirmar la contraseña.",
 
-        "passwordMinLength": "La contraseña debe tener al menos 10 caracteres.",
+        "passwordMin": "La contraseña debe tener al menos 10 caracteres.",
         "passwordMaxLength": "La contraseña no puede exceder los 128 caracteres.",
 
         "passwordLowercase": "La contraseña debe contener al menos una letra minúscula.",
@@ -103,7 +163,9 @@
         "passwordNumber": "La contraseña debe contener al menos un número.",
         "passwordSpecialChar": "La contraseña debe contener al menos un carácter especial.",
 
-    "passwordsMustMatch": "Las contraseñas no coinciden."
+        "completeField": "Completa este campo",
+
+        "passwordsMustMatch": "Las contraseñas no coinciden."
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
