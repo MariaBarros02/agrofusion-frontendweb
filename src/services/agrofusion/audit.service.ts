@@ -1,4 +1,4 @@
-import { auditApi } from "../../api/agrofusion/audit.api";
+import { auditApi } from "./api/audit.api";
 /**
  * Define la estructura de datos para el registro de errores en proyectos externos (PE).
  * Se utiliza para auditar fallos de sincronización, errores de red o excepciones de lógica.
@@ -33,3 +33,4 @@ export const registerErrorPEService = async (
   const { data } = await auditApi.registerErrorPE(errors);
   return data;
 };
+

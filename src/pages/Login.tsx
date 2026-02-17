@@ -97,7 +97,8 @@ const Login = () => {
         // Flujo B: Acceso directo
         loginStore.login(
           response.access_token ?? "",
-          response.refresh_token ?? ""
+          response.refresh_token ?? "",
+          values.email,
         );
         navigate("/dashboard");
 
@@ -261,13 +262,7 @@ const Login = () => {
                     {t("login.forgottenPassword")} {" "}
                     <span className="font-medium text-blue-600 hover:underline">{t("login.recuperateIt")}</span>
                   </Link>
-                  <Link
-                    className="text-sm font-semibold text-stone-900 dark:text-white"
-                    to="/"
-                  >
-                    {t("login.activeAccount")}{" "}
-                    <span className="font-medium text-blue-600 hover:underline">{t("login.activeHere")}</span>
-                  </Link>
+                 
                 </div>
 
                 <Button

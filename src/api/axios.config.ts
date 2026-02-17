@@ -98,7 +98,7 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
 
             const { access_token, refresh_token } = res.data;
 
-            store.login(access_token, refresh_token);
+            store.login(access_token, refresh_token, store.email || '' );
             onRefreshed(access_token);
 
             originalRequest.headers.Authorization =

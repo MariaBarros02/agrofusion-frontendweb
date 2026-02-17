@@ -1,47 +1,52 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-useless-escape */
-import  { useState } from "react";
-import ToastSimple from "../components/layout/ToastSimple";
-import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
-import Header from "../components/layout/Header";
+import { useState } from "react";
+import ToastSimple from "../../components/layout/ToastSimple";
+import { type ToastData } from "../../components/layout/ToastSimple";
+import Header from "../../components/layout/Header";
 import { Label, TextInput, Card, Button } from "flowbite-react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
+  accountActivateService,
   getExternalProjects,
-  resetPasswordService,
-} from "../services/agrofusion/auth.service";
-import { type AuthErrorCode } from "../scope/auth/authError.scope";
+} from "../../services/agrofusion/auth.service";
+import { type AuthErrorCode } from "../../scope/auth/authError.scope";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import { FaLock } from "react-icons/fa";
-import type { AlertState } from "../components/layout/AlertSimple";
-import AlertSimple from "../components/layout/AlertSimple";
-import { handleResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
+import { FaLock, FaRegClock } from "react-icons/fa";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
+import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
+import { handleAccountActivationEP } from "../../services/orchestrator/userOrchestrator.services";
+import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente para el establecimiento de una nueva contraseña.
  * * Este componente procesa tokens de reseteo de AgroFusion y proyectos satélites
  * (Disriego/Sigma) extraídos de la URL para actualizar las credenciales en cascada.
  */
-const ResetPassword = () => {
+const AccountActivation = () => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [alert, setAlert] = useState<AlertState>(null);
   const { t } = useTranslation();
 
   // --- HELPERS DE URL ---
   /** Extrae el token principal de AgroFusion */
-  const getTokenFromUrl = () => new URLSearchParams(window.location.search).get("token") || "";
-  /** Extrae el token específico para la instancia Disriego */
-  const gettDisriegoFromUrl = () => new URLSearchParams(window.location.search).get("tDisriego") || "";
-  /** Extrae el token específico para la instancia Sigma */
-  const gettSigmaFromUrl = () => new URLSearchParams(window.location.search).get("tSigma") || "";
-  
+  const getTokenFromUrl = () =>
+    new URLSearchParams(window.location.search).get("token") || "";
+  /** Extrae el token específico para la instancias de proyectos externos */
+  const getExtTokenFromUrl = () =>
+    JSON.parse(
+      new URLSearchParams(window.location.search).get("ext_tokens") || "{}",
+    );
+  console.log(getExtTokenFromUrl());
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [globalError, setGlobalError] = useState<string | null>(null);
-  
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const InputIcon = FaLock;
 
@@ -55,6 +60,7 @@ const ResetPassword = () => {
     initialValues: {
       newPassword: "",
       confirmPassword: "",
+      oldPassword: "",
     },
     validationSchema: Yup.object({
       newPassword: Yup.string()
@@ -72,67 +78,94 @@ const ResetPassword = () => {
         .required("validation.confirmPasswordRequired")
         .oneOf([Yup.ref("newPassword")], "validation.passwordsMustMatch"),
     }),
-    onSubmit: async (values) => {
-      try {
-        setGlobalError(null);
-        // 1. Actualizar contraseña en el servicio central de AgroFusion
-        await resetPasswordService(
-          getTokenFromUrl(),
-          values.newPassword,
-          values.confirmPassword,
-        );
+onSubmit: async (values) => {
+  try {
+    setGlobalError(null);
 
-        // 2. Identificar proyectos externos vinculados
-        const externalProjects = await getExternalProjects();
+    const payloadAgrofusion: AccountActivateRequest = {
+      token: getTokenFromUrl(),
+      new_password: values.newPassword,
+      confirm_password: values.confirmPassword,
+      old_password: values.oldPassword,
+    };
 
-        // 3. Orquestar la actualización en proyectos externos
-        const { errors } = await handleResPasswordEP(
-          gettDisriegoFromUrl(),
-          gettSigmaFromUrl(),
-          values.newPassword,
-          values.confirmPassword,
-          externalProjects,
-        );
+    /* ======================================
+       1. ACTIVAR CUENTA CENTRAL
+    ====================================== */
 
-        // 4. Notificar éxito al usuario
-        setAlert({
-          type: "success",
-          message: t("resetPassword.successAlert"),
-          to: "/login",
-        });
+    const userActivate = await accountActivateService(payloadAgrofusion);
 
-        // 5. Si hubo errores en proyectos secundarios, mostrar notificaciones tipo Toast
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
+    if (!userActivate) return;
 
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: "error",
-              ...(link ?? {}),
-            },
-          ]);
-        });
+    /* ======================================
+       2. OBTENER PROYECTOS EXTERNOS + TOKENS ACTIVACIÓN
+    ====================================== */
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.log("Error resetting password:", error.response.data);
-        const data = error?.response?.data;
-        const code = data?.detail.code as AuthErrorCode;
-        if (code === "AUTH_INVALID_RESET_TOKEN") {
-          setAlert({
-            type: "error",
-            message: t("errors.AUTH_INVALID_RESET_TOKEN"),
-            to: "/request-reset-password",
-          });
-          return;
-        }
-        handleAuthError(code ?? "AUTH_GENERIC");
-      }
-    },
+    const externalProjects = await getExternalProjects();
+    const activationTokens = await getExtTokenFromUrl();
+
+    /* ======================================
+       3. ORQUESTAR ACTIVACIÓN + RESET PASSWORD EXTERNOS
+    ====================================== */
+
+    const { errors } = await handleAccountActivationEP(
+      {
+        activationTokens,
+        email: userActivate.email, // importante
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      },
+      externalProjects
+    );
+
+    /* ======================================
+       4. ALERTA ÉXITO GLOBAL
+    ====================================== */
+
+    setAlert({
+      type: "success",
+      message: t("accountActivation.successAlert"),
+      to: "/login",
+    });
+
+    /* ======================================
+       5. TOASTS ERRORES PARCIALES EXTERNOS
+    ====================================== */
+
+    errors.forEach((err) => {
+      const link = projectsLinks[err.project];
+
+      setToasts((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          messageKey: err.messageKey,
+          messageParams: err.messageParams,
+          type: err.type ?? "warning",
+          ...(link ?? {}),
+        },
+      ]);
+    });
+
+  } catch (error: any) {
+    console.log("Error activating account:", error?.response?.data);
+
+    const data = error?.response?.data;
+    const code = data?.detail?.code as AuthErrorCode;
+
+    if (code === "AUTH_INVALID_RESET_TOKEN") {
+      setAlert({
+        type: "error",
+        message: t("errors.AUTH_INVALID_RESET_TOKEN"),
+        to: "/request-reset-password",
+      });
+      return;
+    }
+
+    handleAuthError(code ?? "AUTH_GENERIC");
+  }
+}
+
   });
 
   const handleAuthError = (errorCode: AuthErrorCode) => {
@@ -140,7 +173,6 @@ const ResetPassword = () => {
 
     setGlobalError(errorCode);
   };
-
 
   return (
     <>
@@ -158,14 +190,54 @@ const ResetPassword = () => {
           <Card className="w-full bg-white rounded-xl sm:max-w-lg dark:bg-slate-950">
             <div>
               <h1 className="text-2xl font-semibold dark:text-white">
-                {t("resetPassword.resetPassword")}
+                {t("accountActivation.resetPassword")}
               </h1>
               <p className="my-3 text-sm text-stone-700 dark:text-gray-400">
-                {t("resetPassword.instructions")}
+                {t("accountActivation.instructions")}
               </p>
 
               <div>
                 <form onSubmit={formik.handleSubmit}>
+                  <div className="mb-4">
+                    <div className="block mb-2">
+                      <Label htmlFor="oldPassword">
+                        {t("accountActivation.oldPassword")}
+                      </Label>
+                    </div>
+
+                    <div className="relative">
+                      <TextInput
+                        id="oldPassword"
+                        type={showOldPassword ? "text" : "password"}
+                        icon={FaRegClock}
+                        placeholder="••••••••"
+                        required
+                        {...formik.getFieldProps("oldPassword")}
+                        color={
+                          formik.touched.oldPassword &&
+                          formik.errors.oldPassword
+                            ? "failure"
+                            : "default"
+                        }
+                      />
+
+                      {/* Botón de Toggle (Ojo) */}
+                      <Button
+                        type="button"
+                        onClick={() => setShowOldPassword(v => !v)}
+                        color="gray"
+                        className="absolute inset-y-0 right-0 flex items-center justify-center w-10 h-full p-0 text-gray-500 bg-transparent border-0 hover:bg-transparent focus:ring-0 dark:text-gray-400 dark:hover:bg-transparent dark:bg-transparent"
+                      >
+                        {showOldPassword ? <FiEyeOff /> : <FiEye />}
+                      </Button>
+                      {formik.touched.oldPassword &&
+                        formik.errors.oldPassword && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {t(formik.errors.oldPassword)}
+                          </p>
+                        )}
+                    </div>
+                  </div>
                   <div className="mb-4">
                     <div className="block mb-2">
                       <Label htmlFor="newPassword">
@@ -263,16 +335,6 @@ const ResetPassword = () => {
                       : t("resetPassword.resetButton")}{" "}
                   </Button>
                 </form>
-
-                <Link
-                  className="block my-3 text-sm text-center text-stone-900 dark:text-white"
-                  to="/login"
-                >
-                  {t("reqResetPassword.rememberPassword")}{" "}
-                  <span className="font-medium text-blue-600 hover:underline">
-                    {t("reqResetPassword.backToLogin")}
-                  </span>
-                </Link>
               </div>
             </div>
           </Card>
@@ -298,4 +360,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default AccountActivation;

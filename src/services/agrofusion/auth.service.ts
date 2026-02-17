@@ -1,5 +1,8 @@
-import { authApi } from "../../api/agrofusion/auth.api";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { authApi } from "./api/auth.api";
 import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
+import type { createUserRequest } from "../../dto/request/createUser-request.dto";
+import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 
 
 /**
@@ -91,10 +94,46 @@ export const resetPasswordService = async (
  * @param numIdent Número de identificación.
  * @returns Datos del usuario o respuesta si el usuario no existe.
  */
+
 export const userExistsService = async (
   email: string,
   numIdent: string
-) => {
-  const { data } = await authApi.userExists({ email, numIdent });
-  return data;
+): Promise<boolean> => {
+  try {
+  const { data } = await authApi.userExists({ email, numDoc: numIdent });
+  
+
+    // Si responde OK → existe
+    return Boolean(data);
+  } catch (error: any) {
+    // 404 = no existe → seguimos
+    if (error.response?.status === 404) {
+      return false;
+    }
+
+    // cualquier otro error sí es real
+    throw error;
+  }
 };
+
+/**
+ * Crear usuario.
+ * @param user Datos del usuario a crear.
+ */
+export const createUserService = async (
+  user: createUserRequest
+) => {
+  const { data } = await authApi.createUser(user);
+  return data;
+} 
+
+/*
+ *Activar cuenta y cambiar contraseña anterior
+ *
+ */
+export const accountActivateService = async (
+  payload: AccountActivateRequest
+)=>{
+  const {data} = await authApi.accountActivation(payload);
+  return data;
+}

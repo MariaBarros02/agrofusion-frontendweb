@@ -14,12 +14,14 @@ interface AuthState {
     /** Booleano para verificar rápidamente si hay una sesión activa */
     isAuthenticated: boolean;
 
+    email: string | null;
     /**
      * Función para hidratar el estado al iniciar sesión.
      * @param access - JWT de acceso.
      * @param refresh - JWT de refresco.
+     * @param email - Email del usuario autenticado.
      */
-    login: (access:string, refresh:string) => void;
+    login: (access:string, refresh:string, email:string) => void;
     /** * Limpia el estado y cierra la sesión del usuario.
      */
     logout: () => void;
@@ -36,23 +38,26 @@ export const useAuthStore = create<AuthState>()(
             accessToken: null,
             refreshToken: null,
             isAuthenticated: false,
+            email: null,
 
             // --- ACCIONES ---
 
             /**
              * Establece los tokens y marca al usuario como autenticado.
              */
-            login: (access, refresh) =>
+            login: (access, refresh, email) =>
                 set({
                     accessToken: access,
                     refreshToken: refresh,
                     isAuthenticated: true,
+                    email: email,
                 }),
             logout: () =>
                 set({
                     accessToken: null,
                     refreshToken: null,
                     isAuthenticated: false,
+                    email: null,
                 }),
                 
         }),

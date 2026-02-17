@@ -8,7 +8,7 @@ import {
 } from "flowbite-react";
 import { HiChartPie, HiX, HiChevronDown } from "react-icons/hi";
 import { FaRegUser } from "react-icons/fa";
-import { FiClipboard, FiBookOpen, FiMail, FiShield } from "react-icons/fi";
+import { FiClipboard, FiBookOpen, FiShield } from "react-icons/fi";
 import { GoPencil } from "react-icons/go";
 import {
   LuFolderGit2,
@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
-
+import { useNavigate } from "react-router-dom";
 
 interface NavSideBarProps {
   isOpen: boolean;
@@ -34,6 +34,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const authStore = useAuthStore();
+  const navigate = useNavigate();
 
   // helpers
   const isActive = (path: string) => pathname.startsWith(path);
@@ -73,6 +74,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
         await logoutService();
         
       }
+
+      navigate('/login')
 
     } catch (error) {
       console.error("Logout backend failed", error);
@@ -219,15 +222,6 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     {t("nav.users")}
                   </SidebarItem>
 
-                  <SidebarItem
-                    href="/administration/email"
-                    icon={FiMail}
-                    className={`${subItem} ${
-                      isActive("/administration/email") ? activeItem : ""
-                    }`}
-                  >
-                    {t("nav.emailGes")}
-                  </SidebarItem>
                 </div>
               )}
 
@@ -260,7 +254,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               <SidebarItem
                 onClick={() => logout()}
                 icon={LuLogOut}
-                className={logoutItem}
+                className={`${logoutItem} hover:cursor-pointer`}
               >
                 {t("common.logout")}
               </SidebarItem>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { authApi } from "../../../api/agrofusion/auth.api";
-import { authAgrofusionAxios } from "../../../api/agrofusion/axios";
+import { authApi } from "../../../services/agrofusion/api/auth.api";
+import { authAgrofusionAxios } from "../../../services/agrofusion/api/axios";
 jest.mock("../../../api/agrofusion/axios", () => ({
   authAgrofusionAxios: {
     get: jest.fn(),

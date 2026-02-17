@@ -146,8 +146,26 @@
         "helperPassword": "Se enviará el usuario tras el registro",
         "regenerate": "Regenerar",
         "userRegister": "Registrar usuario",
-        "errorLoadingRoles": "{{service}}. Hubo un error al cargar los roles.",
-        "loadUserRegister": "Registrando usuario"
+        "errorLoadingRoles": "Hubo un error al cargar los roles de los proyectos externos.",
+        "loadUserRegister": "Registrando usuario",
+        "userAlreadyExists": "Ya existe un usuario con ese correo o número de documento.",
+        "errorRegisteringUser": "{{service}}. No se pudo registrar el usuario.Gestiona la cuenta manualmente en {{service}}.",
+        "successRegisteringUser": "Usuario registrado exitosamente. Se ha enviado un correo con la contraseña temporal.",
+        "errorLoadingTypeDocs": "Hubo un error al cargar los tipos de documentos de los proyectos externos.",
+        "userCreatedSuccessfully": "Usuario creado exitosamente",
+        "successMessage": "Usuario creado correctamente",
+        "successMessageDetails": "Se ha enviado una notificación al correo del usuario.",
+        "goToUsers": "Volver al listado",
+        "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente."
+
+    },
+    "accountActivation": {
+        "resetPassword": "Establece una nueva contraseña.",
+        "instructions":"Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
+        "oldPassword": "Contraseña temporal",
+        "externalActivationFailed": "{{service}}. Hubo un error al activar la cuenta. Intentelo manualmente.",
+        "externalUpdateFailed": "{{service}}. Hubo un error al activar la cuenta. Intentelo manualmente."
+
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
@@ -155,7 +173,7 @@
         "passwordRequired": "La contraseña es obligatoria.",
         "confirmPasswordRequired": "Debes confirmar la contraseña.",
 
-        "passwordMin": "La contraseña debe tener al menos 10 caracteres.",
+        "passwordMinLength": "La contraseña debe tener al menos 10 caracteres.",
         "passwordMaxLength": "La contraseña no puede exceder los 128 caracteres.",
 
         "passwordLowercase": "La contraseña debe contener al menos una letra minúscula.",
@@ -164,8 +182,15 @@
         "passwordSpecialChar": "La contraseña debe contener al menos un carácter especial.",
 
         "completeField": "Completa este campo",
+        "invalidDate": "La fecha no es válida",
+        "dateMustBeAfterBirthday": "La fecha debe ser posterior a la fecha de nacimiento",
+        "dateNotInFuture": "La fecha no puede ser futura",
 
-        "passwordsMustMatch": "Las contraseñas no coinciden."
+        "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
+
+        "passwordsMustMatch": "Las contraseñas no coinciden.",
+        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres."
+        
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",

@@ -1,4 +1,5 @@
-import { authApiDisriego } from "../../api/disriego/auth.api";
+import { authApiDisriego } from "./api/auth.api";
+import type { ExternalUser } from "../../dto/request/externalUser-request.dto";
 
 /**
  * Solicita un token de recuperación de contraseña específicamente para Disriego.
@@ -34,3 +35,45 @@ export const getRolesService = async () => {
   const roles = response.data.data;
   return roles;
 }
+export const getTypeDocumentsService = async () => {
+  const response = await authApiDisriego.getTypeDocuments();
+  const typeDocuments = response.data.data;
+  return typeDocuments;
+}
+/**
+ * Solicita autenticación de un servicio externo para endpoints protegidos.
+ * @param {Object} data - Información de autenticación del servicio.
+ * @param {string} data.client_id - Identificador único del cliente.
+ * @param {string} data.client_secret - Secreto del cliente para autenticación.
+ * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+ */
+export const serviceTokenService = async (
+  clientId: string,
+  clientSecret: string,
+  email: string
+) => {
+  const { data } = await authApiDisriego.serviceToken({ client_id: clientId, client_secret: clientSecret, email });
+  return data;
+
+}
+
+ /**
+     * Como administrador crea un usuario en el sistema.
+     * @param {ExternalUser} data - Información de autenticación del servicio.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+export const createUserByAdminService = async (user: ExternalUser) => {
+  const {data} = await  authApiDisriego.createUserByAdmin(user);
+  return data;
+}
+
+ /**
+     * Activar una cuenta de usuario.
+     * @param {string} token - Información de autenticación del servicio.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+export const accountActivationService = async (token:string) => {
+  const {data} = await  authApiDisriego.accountActivation(token);
+  return data;
+}
+

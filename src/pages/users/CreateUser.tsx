@@ -9,13 +9,30 @@ import { useEffect, useState, useRef } from "react";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
 import type { ToastData } from "../../components/layout/ToastSimple";
-import { getExternalProjects } from "../../services/agrofusion/auth.service";
+import { useMemo } from "react";
+import {
+  createUserService,
+  getExternalProjects,
+  userExistsService,
+} from "../../services/agrofusion/auth.service";
 import ToastSimple from "../../components/layout/ToastSimple";
-import { handleGetRolesEP } from "../../services/orchestrator/userOrchestrator.services";
-
+import {
+  handleCreateUserEP,
+  handleGetRolesEP,
+  handleGetTypeDocumentsEP,
+  projectsLinks,
+} from "../../services/orchestrator/userOrchestrator.services";
+import type { createUserRequest } from "../../dto/request/createUser-request.dto";
+import {useNavigate} from "react-router-dom";
+import { FiUserCheck } from "react-icons/fi";
 interface ProjectRole {
   role_id: number;
   role_name: string;
+}
+
+interface ProjectTypeDocument {
+  id: number;
+  name: string;
 }
 
 /*Estructura de datos para el formulario de inicio de sesión.
@@ -24,12 +41,12 @@ interface RegisterValues {
   name: string;
   firstLastName: string;
   secondLastName?: string;
-  typeDocument: number | null;
-  documentNumber: number | null;
-  dateIssuanceDoc: Date | null;
-  birthday: Date | null;
-  genderId: number | null;
-  roles: number[];
+  typeDocumentByProject: Record<string, string>;
+  documentNumber: string;
+  dateIssuanceDoc: string;
+  birthday: string;
+  genderId: string | null;
+  roles: string | null;
   rolesByProject: Record<string, number[]>;
   email: string;
   password: string;
@@ -50,33 +67,68 @@ const RegisterSchema = (
 
     secondLastName: yup.string(),
 
-    typeDocument: yup.number().required(t("validation.completeField")),
-
-    documentNumber: yup.number().required(t("validation.completeField")),
+    typeDocumentByProject: yup
+      .object()
+      .test(
+        "each-project-has-type-doc",
+        t("validation.completeField"),
+        (value) => {
+          if (!value) return false;
+          return Object.values(value).every((v) => !!v);
+        },
+      ),
+    documentNumber: yup
+      .string()
+      .max(10, t("validation.documentNumberMax", { max: 10 }))
+      .required(t("validation.completeField")),
 
     dateIssuanceDoc: yup
-      .date()
-      .nullable()
-      .required(t("validation.completeField")),
+      .string()
+      .required(t("validation.completeField"))
+      .test("valid-date", t("validation.invalidDate"), (value) => {
+        return !!toDate(value);
+      })
+      .test(
+        "after-birthday",
+        t("validation.dateMustBeAfterBirthday"),
+        function (value) {
+          const birthday = toDate(this.parent.birthday);
+          const issuance = toDate(value);
 
-    birthday: yup.date().nullable().required(t("validation.completeField")),
+          if (!birthday || !issuance) return true;
+          return issuance > birthday;
+        },
+      )
+      .test("not-future", t("validation.dateNotInFuture"), (value) => {
+        const date = toDate(value);
+        return !date || date <= new Date();
+      }),
+    birthday: yup
+      .string()
+      .required(t("validation.completeField"))
+      .test("valid-date", t("validation.invalidDate"), (value) => {
+        return !!toDate(value);
+      })
+      .test("not-future", t("validation.dateNotInFuture"), (value) => {
+        const date = toDate(value);
+        return !date || date <= new Date();
+      }),
 
-    genderId: yup.number().required(t("validation.completeField")),
+    genderId: yup.string().required(t("validation.completeField")),
 
-    roles: yup
-      .array()
-      .of(yup.number().required())
-      .required(t("validation.completeField")),
+    roles: yup.string().required(t("validation.completeField")),
     rolesByProject: yup
       .object()
       .test(
-        "at-least-one-role",
+        "each-project-has-at-least-one-role",
         t("validation.completeField"),
-        (value) =>
-          value &&
-          Object.values(value).some(
+        (value) => {
+          if (!value) return false;
+
+          return Object.values(value).every(
             (roles) => Array.isArray(roles) && roles.length > 0,
-          ),
+          );
+        },
       ),
     email: yup
       .string()
@@ -86,7 +138,14 @@ const RegisterSchema = (
     password: yup
       .string()
       .min(10, t("validation.passwordMin", { min: 10 }))
-      .required(t("validation.completeField")),
+      .required(t("validation.completeField"))
+      .matches(/[a-z]/, t("validation.passwordLowercase"))
+      .matches(/[A-Z]/, t("validation.passwordUppercase"))
+      .matches(/\d/, t("validation.passwordNumber"))
+      .matches(
+        /[!@#$%^&*()_\-+=.{};:'",<>/?\\|]/,
+        t("validation.passwordSpecialCharacter"),
+      ),
 
     confirmPassword: yup
       .string()
@@ -94,17 +153,27 @@ const RegisterSchema = (
       .required(t("validation.completeField")),
   });
 
+const toDate = (value?: string | null) =>
+  value ? new Date(value + "T00:00:00") : null;
+
 const CreateUser = () => {
   const { t } = useTranslation();
-  const [projects, setProjects] = useState<ExternalProject[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [existUserError, setExistUserError] = useState<boolean | null>(null);
+  const [userCreate, setUserCreate] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [projects, setProjects] = useState<ExternalProject[]>([]);
+ 
   /** Lista de notificaciones activas en pantalla */
   const [toast, setToast] = useState<ToastData[]>([]);
 
   const [rolesByProject, setRolesByProject] = useState<
     Record<string, ProjectRole[]>
+  >({});
+
+  const [typeDocsByProject, setTypeDocsByProject] = useState<
+    Record<string, ProjectTypeDocument[]>
   >({});
 
   const buildInitialRoles = (projects: ExternalProject[]) =>
@@ -113,6 +182,21 @@ const CreateUser = () => {
       return acc;
     }, {});
 
+  const buildInitialTypeDocs = (projects: ExternalProject[]) =>
+    projects.reduce<Record<string, string>>((acc, p) => {
+      acc[p.instance_code] = "";
+      return acc;
+    }, {});
+
+  const initialRolesByProject = useMemo(
+    () => buildInitialRoles(projects),
+    [projects],
+  );
+
+  const initialTypeDocsByProject = useMemo(
+    () => buildInitialTypeDocs(projects),
+    [projects],
+  );
   useEffect(() => {
     /**
      * Obtiene los proyectos externos activos.
@@ -133,66 +217,185 @@ const CreateUser = () => {
     getProjects();
   }, []);
 
-const rolesFetchedRef = useRef(false);
+  const rolesFetchedRef = useRef(false);
+  const typeDocsFetchedRef = useRef(false);
 
-useEffect(() => {
-  if (projects.length === 0) return;
-  if (rolesFetchedRef.current) return;
+  useEffect(() => {
+    if (projects.length === 0) return;
+    if (rolesFetchedRef.current) return;
 
-  rolesFetchedRef.current = true;
-  fetchProjectRoles(projects);
-}, [projects]);
+    rolesFetchedRef.current = true;
+    fetchProjectRoles(projects);
+    typeDocsFetchedRef.current = true;
+    fetchProjectTypeDocs(projects);
+  }, [projects]);
 
-   /** Inicialización de Formik para la gestión del formulario.
+  /** Inicialización de Formik para la gestión del formulario.
    */
-  const formik = useFormik<RegisterValues>({
-    initialValues: {
+  const initialValues = useMemo<RegisterValues>(
+    () => ({
       name: "",
       firstLastName: "",
       secondLastName: "",
-      typeDocument: null,
-      documentNumber: null,
-      dateIssuanceDoc: null,
-      birthday: null,
-      genderId: null,
-      roles: [],
-      rolesByProject: buildInitialRoles(projects),
+      typeDocumentByProject: initialTypeDocsByProject,
+      documentNumber: "",
+      dateIssuanceDoc: "",
+      birthday: "",
+      genderId: "",
+      roles: "",
+      rolesByProject: initialRolesByProject,
       email: "",
       password: "",
       confirmPassword: "",
-    },
+    }),
+    [initialRolesByProject, initialTypeDocsByProject],
+  );
+  const formik = useFormik<RegisterValues>({
+    initialValues: initialValues,
     enableReinitialize: true,
     validationSchema: RegisterSchema(t),
     onSubmit: async (values) => {
-      // try {
+      setExistUserError(null);
 
-      //   const userExist = await 
-      //   // setGlobalError(null);
-      //   // setPasswordError(null);
-      //   // const response = await loginService(values.email, values.password);
-      //   // // Flujo A: Requiere Segundo Factor
-      //   // if (response.mfa_required) {
-      //   //   setStep("mfa");
-      //   //   return;
-      //   // }
-      //   // // Flujo B: Acceso directo
-      //   // loginStore.login(
-      //   //   response.access_token ?? "",
-      //   //   response.refresh_token ?? ""
-      //   // );
-      //   // navigate("/dashboard");
-      //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // } catch (error: any) {
-      //   // console.log(error);
-      //   // const data = error?.response?.data;
-      //   // const code = data?.detail.code as AuthErrorCode;
-      //   // const meta = data?.detail.meta;
-      //   // setRetryAfter(null);
-      //   // if (code === "AUTH_USER_BLOCKED" && meta?.retry_after_seconds) {
-      //   //   setRetryAfter(meta.retry_after_seconds);
-      //   // }
-      //   // handleAuthError(code ?? "AUTH_GENERIC");
-      // }
+      try {
+        /* =========================================================
+          VALIDAR SI EL USUARIO YA EXISTE
+    ========================================================== */
+        const userExist = await userExistsService(
+          values.email,
+          values.documentNumber?.toString() || "",
+        );
+
+        if (userExist) {
+          setExistUserError(true);
+
+          formik.setFieldError("email", t("createUser.userAlreadyExists"));
+          formik.setFieldError(
+            "documentNumber",
+            t("createUser.userAlreadyExists"),
+          );
+
+          formik.setFieldTouched("email", true, false);
+          formik.setFieldTouched("documentNumber", true, false);
+
+          setToast((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              type: "error",
+              messageKey: "createUser.userAlreadyExists",
+            },
+          ]);
+
+          return;
+        }
+
+        /* =========================================================
+       CONSTRUIR USUARIO BASE
+    ========================================================== */
+        const baseUser = {
+          name: values.name,
+          first_last_name: values.firstLastName,
+          second_last_name: values.secondLastName,
+          document_number: String(values.documentNumber),
+          date_issuance_document: new Date(values.dateIssuanceDoc),
+          birthday: new Date(values.birthday),
+          gender_id: Number(values.genderId),
+          email: values.email,
+          password: values.password,
+        };
+
+        /* =========================================================
+       CONSTRUIR USUARIOS POR PROYECTO
+    ========================================================== */
+        const usersByProject = projects.reduce((acc, project) => {
+          acc[project.instance_code] = {
+            ...baseUser,
+            type_document_id: Number(
+              values.typeDocumentByProject[project.instance_code],
+            ),
+            roles: values.rolesByProject[project.instance_code] ?? [],
+          };
+
+          return acc;
+        }, {} as any);
+
+        /* =========================================================
+       CREAR USUARIO EN SISTEMAS EXTERNOS
+    ========================================================== */
+        const result = await handleCreateUserEP(usersByProject, projects);
+
+        /* =========================================================
+       MOSTRAR ERRORES POR SERVICIO (NEGOCIO)
+    ========================================================== */
+        if (result.errors.length > 0) {
+          result.errors.forEach((err) => {
+            const link = projectsLinks[err.project];
+
+            setToast((prev) => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                type: err.type ?? "error",
+                messageKey: err.messageKey,
+                messageParams: err.messageParams,
+                ...(link ?? {}),
+              },
+            ]);
+          });
+        }
+
+        /* =========================================================
+        SI NO HUBO TOKENS → CREACIÓN FALLÓ TOTALMENTE
+    ========================================================== */
+        const hasTokens = Object.keys(result.tokens).length > 0;
+
+        if (!hasTokens) {
+          return;
+        }
+
+        /* =========================================================
+        ÉXITO → USAR TOKENS (LO QUE NECESITES)
+    ========================================================== */
+    
+        const createUserPayload: createUserRequest = {
+          name: values.name+" "+values.firstLastName+" "+values.secondLastName,
+          email: values.email,
+          password: values.password,
+          confirm_password: values.confirmPassword,
+          identity_number: values.documentNumber.toString(),
+          tokens: result.tokens,
+        };
+        const user = await createUserService(createUserPayload);
+        setUserCreate(user);
+        
+      
+        
+        /* =========================================================
+        TOAST DE ÉXITO GENERAL
+    ========================================================== */
+        // if(user){
+          
+        // }
+        setToast((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            type: "success",
+            messageKey: "createUser.userCreatedSuccessfully",
+          },
+        ]);
+      } catch (error: any) {
+        setToast((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            type: "error",
+            messageKey: error?.messageKey || "createUser.errorCreatingUser",
+            messageParams: error?.messageParams,
+          },
+        ]);
+      }
     },
   });
   /** Helper para renderizar errores de validación local (Yup) */
@@ -244,6 +447,36 @@ useEffect(() => {
     }
   };
 
+  const fetchProjectTypeDocs = async (projects: ExternalProject[]) => {
+    try {
+      const { typeDocuments, errors } =
+        await handleGetTypeDocumentsEP(projects);
+
+      setTypeDocsByProject(typeDocuments);
+
+      if (errors.length > 0) {
+        setToast((prev) => [
+          ...prev,
+          ...errors.map((e) => ({
+            id: crypto.randomUUID(),
+            type: e.type ?? "error",
+            messageKey: e.messageKey,
+            messageParams: e.messageParams,
+          })),
+        ]);
+      }
+    } catch (err) {
+      console.log(err);
+      setToast([
+        {
+          id: crypto.randomUUID(),
+          type: "error",
+          messageKey: "createUser.errorLoadingTypeDocs",
+        },
+      ]);
+    }
+  };
+
   const generatePassword = () => {
     const base = "agrofusion";
 
@@ -263,18 +496,18 @@ useEffect(() => {
 
     return `${mixedBase}${separator}${numbers}`;
   };
-    const isButtonDisabled = formik.isSubmitting;
+  const isButtonDisabled = formik.isSubmitting;
 
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-      <div className="p-4 bg-white border shadow-sm rounded-2xl">
-        <div className="my-5">
+      <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+        <div className={userCreate ? "block mb-5" : "hidden mb-5"}>
           <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
           <p className="text-sm text-gray-700">{t("createUser.description")}</p>
         </div>
-        <form>
-          <div className="gap-5 md:flex">
+        <form className={userCreate ? "hidden" : "block"}>
+          <div className="gap-5 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="name">{t("createUser.name")}*</Label>
@@ -334,43 +567,41 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="flex gap-5 mt-2">
-            <div className="w-full">
-              <div className="block mb-2">
-                <Label htmlFor="typeDocument">
-                  {t("createUser.typeDocNumber")}*
+          <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+            {projects.map((project) => (
+              <div key={project.instance_code} className="w-full">
+                <Label className="block mb-2">
+                  {t("createUser.typeDocNumber")} – {project.instance_code}*
                 </Label>
+
+                <Select
+                  sizing="sm"
+                  value={
+                    formik.values.typeDocumentByProject[
+                      project.instance_code
+                    ] || ""
+                  }
+                  onChange={(e) =>
+                    formik.setFieldValue(
+                      `typeDocumentByProject.${project.instance_code}`,
+                      e.target.value,
+                    )
+                  }
+                >
+                  <option value="" disabled>
+                    {t("createUser.placeholderTypDoc")}
+                  </option>
+
+                  {(typeDocsByProject[project.instance_code] ?? []).map(
+                    (doc) => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.name}
+                      </option>
+                    ),
+                  )}
+                </Select>
               </div>
-              <Select
-                id="typeDocument"
-                required
-                defaultValue=""
-                
-                sizing="sm"
-                {...formik.getFieldProps("typeDocument")}
-                color={
-                  formik.touched.typeDocument && formik.errors.typeDocument
-                    ? "failure"
-                    : "gray"
-                }
-              >
-                <option value="" disabled>
-                  {t("createUser.placeholderTypDoc")}
-                </option>
-                <option value="1">{t("common.civilReg")}</option>
-                <option value="2">{t("common.identTarget")}</option>
-                <option value="3">{t("common.ID")}</option>
-                <option value="4">{t("common.foreingerTar")}</option>
-                <option value="5">{t("common.foreingerID")}</option>
-                <option value="6">{t("common.nit")}</option>
-                <option value="7">{t("common.passport")}</option>
-                <option value="8">{t("common.forID")}</option>
-                <option value="9">{t("common.pep")}</option>
-                <option value="10">{t("common.nitOtherCountry")}</option>
-                <option value="11">{t("common.nuip")}</option>
-              </Select>
-              {displayError("typeDocument")}
-            </div>
+            ))}
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="documentNumber">
@@ -391,6 +622,9 @@ useEffect(() => {
               />
               {displayError("documentNumber")}
             </div>
+          </div>
+
+          <div className="flex gap-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] mt-2">
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="dateIssuanceDoc">
@@ -412,9 +646,6 @@ useEffect(() => {
               />
               {displayError("dateIssuanceDoc")}
             </div>
-          </div>
-
-          <div className="flex gap-5 mt-2">
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="birthday">{t("createUser.birthday")}*</Label>
@@ -440,7 +671,6 @@ useEffect(() => {
               <Select
                 id="genderId"
                 required
-                defaultValue=""
                 sizing="sm"
                 {...formik.getFieldProps("genderId")}
                 color={
@@ -454,7 +684,6 @@ useEffect(() => {
                 </option>
                 <option value="1">{t("common.masculine")}</option>
                 <option value="2">{t("common.feminine")}</option>
-                <option value="3">{t("common.other")}</option>
               </Select>
               {displayError("genderId")}
             </div>
@@ -465,7 +694,6 @@ useEffect(() => {
               <Select
                 id="roles"
                 required
-                defaultValue=""
                 sizing="sm"
                 {...formik.getFieldProps("roles")}
                 color={
@@ -477,49 +705,61 @@ useEffect(() => {
                 <option value="" disabled>
                   {t("createUser.placeholderRole")}
                 </option>
-                <option value="active">{t("common.active")}</option>
-                <option value="inactive">{t("common.inactive")}</option>
+                <option value="1">{t("common.active")}</option>
+                <option value="2">{t("common.inactive")}</option>
               </Select>
               {displayError("roles")}
             </div>
           </div>
-          <div className="flex gap-5 mt-2">
+          <div className="flex gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] ">
             {projects.map((project) => (
               <div key={project.external_project_id} className="w-full ">
-                <Label className="block mb-1 font-semibold">
+                <Label className="block mb-2 font-semibold">
                   {t("createUser.role")} – {project.instance_code}
                 </Label>
 
-                <Select
-                  sizing="sm"
-                  value={(
-                    formik.values.rolesByProject[project.instance_code] ?? []
-                  ).map(String)}
-                  onChange={(e) => {
-                    const selected = Array.from(e.target.selectedOptions).map(
-                      (o) => Number(o.value),
-                    );
+                <div className="flex flex-col w-full h-24 gap-2 overflow-auto">
+                  {(rolesByProject[project.instance_code] ?? []).map((role) => {
+                    const checked = formik.values.rolesByProject[
+                      project.instance_code
+                    ]?.includes(role.role_id);
 
-                    formik.setFieldValue(
-                      `rolesByProject.${project.instance_code}`,
-                      selected,
-                    );
-                  }}
-                >
-                  <option disabled value="">
-                    {t("createUser.placeholderRole")}
-                  </option>
+                    return (
+                      <label
+                        key={role.role_id}
+                        className="flex items-center gap-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          className="dark:bg-transparent"
+                          onChange={(e) => {
+                            const currentRoles =
+                              formik.values.rolesByProject[
+                                project.instance_code
+                              ] ?? [];
 
-                  {(rolesByProject[project.instance_code] ?? []).map((role) => (
-                    <option className="capitalize" key={role.role_id} value={String(role.role_name)}>
-                      {role.role_name}
-                    </option>
-                  ))}
-                </Select>
+                            const updatedRoles = e.target.checked
+                              ? [...currentRoles, role.role_id]
+                              : currentRoles.filter(
+                                  (id) => id !== role.role_id,
+                                );
+
+                            formik.setFieldValue(
+                              `rolesByProject.${project.instance_code}`,
+                              updatedRoles,
+                            );
+                          }}
+                        />
+                        <span className="capitalize">{role.role_name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
-          <div className="gap-5 mt-2 md:flex">
+          <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="email">{t("createUser.email")}*</Label>
@@ -601,11 +841,27 @@ useEffect(() => {
             <Button color="alternative" onClick={handleCancel}>
               {t("common.cancel")}
             </Button>
-            <Button color="blue" disabled={isButtonDisabled}>
-               {formik.isSubmitting ? t("createUser.loadUserRegister"): t("createUser.userRegister") } <MdKeyboardArrowRight size={25} />
+            <Button
+              color="blue"
+              disabled={isButtonDisabled}
+              onClick={() => formik.handleSubmit()}
+            >
+              {formik.isSubmitting
+                ? t("createUser.loadUserRegister")
+                : t("createUser.userRegister")}{" "}
+              <MdKeyboardArrowRight size={25} />
             </Button>
           </div>
         </form>
+        {userCreate && (
+        <div className="flex flex-col items-center justify-center h-full gap-2 m-auto text-center">
+          <FiUserCheck size={100} className="text-green-500 " />
+          <p className="text-2xl font-bold">{t("createUser.successMessage")}</p>
+          <p className="text-sm text-gray-700">{t("createUser.successMessageDetails")}</p>
+          <Button className="mt-2" color="dark" onClick={() => navigate("/administration/users")}>
+              {t("createUser.goToUsers")}
+          </Button>
+        </div>)}
       </div>
       <div className="fixed z-50 flex flex-col gap-2 top-4 right-4">
         {toast.map((t) => (
@@ -622,6 +878,7 @@ useEffect(() => {
           />
         ))}
       </div>
+      
     </AppLayoutSB>
   );
 };

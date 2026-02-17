@@ -9,7 +9,7 @@ import RequestResetPass from "../pages/RequestResetPass";
 import Dashboard from "../pages/Dashboard";
 import UsersList from "../pages/users/UsersList";
 import CreateUser from "../pages/users/CreateUser";
-
+import AccountActivation from "../pages/users/AccountActivation";
 
 /**
  * Router Principal de la Aplicación.
@@ -55,6 +55,15 @@ export function AppRouter() {
           element={
             <PublicRoute>
               <ResetPassword />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/activate-account"
+          element={
+            <PublicRoute>
+              <AccountActivation />
             </PublicRoute>
           }
         />
