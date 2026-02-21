@@ -10,6 +10,7 @@ import Dashboard from "../pages/Dashboard";
 import UsersList from "../pages/users/UsersList";
 import CreateUser from "../pages/users/CreateUser";
 import AccountActivation from "../pages/users/AccountActivation";
+import ViewUser from "../pages/users/ViewUser";
 
 /**
  * Router Principal de la Aplicación.
@@ -22,15 +23,15 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login
+        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <Example initial={10} />
+              <Login />
             </ProtectedRoute>
           }
-        /> */}
+        /> 
         {/* Ruta de Login: Pública. Si ya está logueado, rebota a / */}
         <Route
           path="/login"
@@ -85,6 +86,7 @@ export function AppRouter() {
         {/* USERS */}
         <Route path="users" element={<UsersList />} />
         <Route path="users/create-user" element={<CreateUser />} />
+        <Route path="users/:userId" element={<ViewUser />} />
         {/* <Route path="users/edit-user/:userId" element={<EditUser />} />
 
         <Route path="projects" element={<ProjectsList />} />  */}

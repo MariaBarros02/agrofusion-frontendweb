@@ -1,6 +1,8 @@
 import type { AccountActivateRequest } from "../../../dto/request/accountActivate-request.dto";
 import type { createUserRequest } from "../../../dto/request/createUser-request.dto";
+import type { listUsersRequest } from "../../../dto/request/listUsers-request.dto";
 import type { LoginDto, MfaDto } from "../../../dto/request/login-request.dto";
+import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/response/listUsers-response.dto";
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
@@ -93,14 +95,29 @@ export const authApi = {
    * @returns {User} Respuesta con datos de sesión o estado.
    */
   createUser: (data: createUserRequest) =>
-    authAgrofusionAxios.post<User>("users/admin/create-user", data, {
-    }),
+    authAgrofusionAxios.post<User>("users/admin/create-user", data),
 
   /**
-   * Activar usuario y cambiar constraseña temposra.
+   * Activar usuario y cambiar constraseña temporal.
    * @param {AccountActivateRequest} payload - Token y contraseña nueva
    * @returns {any} Respuesta con datos de sesión o estado.
    */
   accountActivation: (data: AccountActivateRequest) =>
     authAgrofusionAxios.post("users/account-activation", data),
+
+  /**
+ * Listar usuarios del sistema.
+ * @param {ListUsersRequest} data - Información de busqueda y paginación
+ * @returns {PaginatedListUsers} Respuesta con datos de usuarios y paginación.
+ */
+  listUsers: (data: listUsersRequest) =>
+    authAgrofusionAxios.get<PaginatedUsersResponse>("users/list-users?", {params: data}),
+
+  /**
+ * Listar usuario del sistema por su id.
+ * @param {string} user_id - id del usuario por buscar
+ * @returns {ListUserResponse} Respuesta con datos de usuarios y paginación.
+ */
+  getDetailsUser: (user_id:string) =>
+    authAgrofusionAxios.get<ListUserResponse>("users/get_user_details", {params: {user_id}}),
 };

@@ -194,7 +194,7 @@ const Dashboard = () => {
                               </p>
                             </div>
                             <a
-                              className="flex items-center ml-auto font-bold "
+                              className="flex items-center ml-auto font-bold hover:cursor-pointer"
                               onClick={(e) => {
                                 e.preventDefault();
                                 goToModule(

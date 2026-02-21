@@ -1,71 +1,181 @@
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Label, Select, TextInput } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
 import { FiFilter, FiFlag } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { LuList } from "react-icons/lu";
+import { listUsersService } from "../../services/agrofusion/auth.service";
+import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
+import type {
+  PaginatedUsersResponse,
+  ListUserResponse,
+} from "../../dto/response/listUsers-response.dto";
+import DataTable, { type Column } from "../../components/DataTable";
+
 const UsersList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const [paginatedUsers, setPaginatedUsers] =
+    useState<PaginatedUsersResponse | null>(null);
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // estado de paginación
+  const [page, setPage] = useState(1);
+  const [size] = useState(6);
+
+  // filtros
+  const [search, setSearch] = useState("");
+  const [state, setState] = useState("");
+  const [rol, setRol] = useState("");
+
+//   const columns: Column<ListUserResponse>[] = [
+//   {
+//     key: "user_id",
+//     label: t("users.code"),
+//     type: "text",
+//     format: (value: string) => value?.slice(0, 7),
+//   },
+//   { key: "name", label: t("users.name"), type: "text" },
+//   { key: "email", label: t("users.email"), type: "text" },
+//   { key: "rol", label: t("users.role"), type: "text" },
+
+//   // SOLO UNA COLUMNA DE ESTADO
+//   {
+//     key: "state", //  IMPORTANTE
+//     label: t("common.state"),
+//     type: "statusEditable",
+//     allowedStatuses: ["ACTIVE", "INACTIVE", "PENDING", "DELETE"],
+//     onChange: async (user, newStatus) => {
+//       console.log("Cambiar estado:", user.user_id, newStatus);
+
+//       // await updateUserStatusService(user.user_id, newStatus);
+
+//       getUsers(page);
+//     },
+//   },
+  
+
+//   {
+//     key: "created_at",
+//     label: t("users.createdAt"),
+//     type: "text",
+//     format: (value: string) => value?.split("T")[0],
+//   },
+
+//   {
+//       key: "edit",
+//       label: t("users.actions"),
+//       type: "action",
+//       action: {
+//         label: t("users.viewDetail"),
+//         onClick: (user: ListUserResponse) =>
+//           navigate(`/administration/users/${user.user_id}`),
+//       },
+//     },
+// ];
+  const columns: Column<ListUserResponse>[] = [
+    { key: "user_id", label: t("users.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
+    { key: "name", label: t("users.name"), type: "text" },
+    { key: "email", label: t("users.email"), type: "text" },
+    { key: "rol", label: t("users.role"), type: "text" },
+    { key: "state", label: t("common.state"), type: "status" },
+    { key: "created_at", label: t("users.createdAt"), type: "text", 
+    format: (value: string) => value?.split("T")[0], },
+    {
+      key: "edit",
+      label: t("users.actions"),
+      type: "action",
+      action: {
+        label: t("users.viewDetail"),
+        onClick: (user: ListUserResponse) =>
+          navigate(`/administration/users/${user.user_id}`),
+      },
+    },
+    
+  ];
+
+  //  función principal paginada real
+  const getUsers = async (pageParam = page) => {
+    try {
+      setLoading(true);
+
+      const payload: listUsersRequest = {
+        page_index: pageParam,
+        page_size: size,
+        search: search || undefined,
+        state: state || undefined,
+        rol: rol || undefined,
+      };
+
+      const response = await listUsersService(payload);
+      setPaginatedUsers(response);
+      setPage(pageParam);
+    } catch (err) {
+      console.log(err);
+      setError("Error loading users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // cargar al montar o cambiar filtros
+  useEffect(() => {
+    getUsers(1);
+  }, [search, state, rol]);
+
+  
+  const handlePageChange = (newPage: number) => {
+    getUsers(newPage);
+  };
+
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-
-      <div className="p-3 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex gap-2 ">
+      {/* filtros */}
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex gap-2">
           <div className="w-72">
-            <div className="block ">
-              <Label className="text-xs" htmlFor="nameEmail">
-                {t("common.search")}
-              </Label>
-            </div>
+            <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
-              id="nameEmail"
-              type="email"
               icon={HiSearch}
-              placeholder={t("users.searchNameEmail")}
-              required
               sizing="sm"
+              placeholder={t("users.searchNameEmail")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+
           <div className="w-52">
-            <div className="block ">
-              <Label className="text-xs" htmlFor="usersState">
-                {t("common.state")}
-              </Label>
-            </div>
+            <Label className="text-xs">{t("common.state")}</Label>
             <Select
-              id="usersState"
-              required
               icon={FiFlag}
-              defaultValue=""
               sizing="sm"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
             >
-              <option value="" disabled>
-                {t("common.active")}/{t("common.inactive")}
+              <option value="">
+                {t("common.active")} / {t("common.inactive")}
               </option>
-              <option value="active">{t("common.active")}</option>
-              <option value="inactive">{t("common.inactive")}</option>
+              <option value="ACTIVE">{t("common.active")}</option>
+              <option value="INACTIVE">{t("common.inactive")}</option>
+              <option value="DELETE">{t("common.delete")}</option>
+              <option value="PENDING">{t("common.pending")}</option>
             </Select>
           </div>
+
           <div className="max-w-md">
-            <div className="block ">
-              <Label className="text-xs" htmlFor="usersRole">
-                {t("users.associateRole")}
-              </Label>
-            </div>
+            <Label className="text-xs">{t("users.associateRole")}</Label>
             <Select
-              id="usersRole"
-              required
               icon={LuList}
-              defaultValue=""
               sizing="sm"
+              value={rol}
+              onChange={(e) => setRol(e.target.value)}
             >
               <option value="">{t("users.roles")}</option>
               <option value="admin">{t("users.admin")}</option>
@@ -73,53 +183,65 @@ const UsersList = () => {
             </Select>
           </div>
         </div>
+
         <div className="flex items-end justify-end gap-2 mt-2 md:w-1/2 md:mt-0">
-          <Button color="alternative" size="xs" pill>
-            {" "}
+          <Button size="xs" onClick={() => getUsers(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-          <Button size="xs" color="blue">
+
+          <Button
+            color="blue"
+            size="xs"
+            onClick={() => {
+              setSearch("");
+              setState("");
+              setRol("");
+            }}
+          >
             {t("common.filterReset")}
           </Button>
-          <Button size="xs" color="blue" onClick={() => navigate("/administration/users/create-user")}>
+
+          <Button
+            color="blue"
+            size="xs"
+            onClick={() => navigate("/administration/users/create-user")}
+          >
             {t("users.createUser")}
           </Button>
         </div>
       </div>
-
-      <div className="h-full">
-        {loading && (
-          <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-            {" "}
-            <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
-          </div>
+      {/* tabla */}
+      {loading && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {error && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {!loading && !error && paginatedUsers?.items.length === 0 && (
+      
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              {" "}
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {" "}
+                {t("users.noUsers")}{" "}
+              </p>{" "}
+           
+        </div>
         )}
-
-        {error && (
-          <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-            {" "}
-            <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <div className="space-y-3 max-h-[calc(100vh-135px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
-            {users.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-10 mt-2 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl">
-                <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  {t("users.noUsers")}
-                </p>
-              </div>
-            ) : (
-              users.map((user) => (
-                <div className="items-center justify-center p-3 mt-2 font-bold bg-white border h-1/2 dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-                  <p className="text-2xl">{t("users.noUsers")}</p>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
+      {!loading && paginatedUsers && paginatedUsers.items.length !== 0  && (
+        <DataTable
+          data={paginatedUsers}
+          columns={columns}
+          onPageChange={handlePageChange}
+          paginationText="usuarios"
+        />
+      )}
     </AppLayoutSB>
   );
 };

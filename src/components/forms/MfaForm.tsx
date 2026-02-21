@@ -42,6 +42,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
   const [otpError, setOtpError] = useState<OptAuthError | null>(null);
   /** Estado de bloqueo por demasiados intentos fallidos */
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false); 
   const isExpired = secondsLeft <= 0;
 
   /**
@@ -62,7 +63,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
    * Valida que sea numérico y mueve el foco automáticamente al siguiente input.
    */
   const handleChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return;
+    
 
     const next = [...code];
     next[index] = value;
@@ -77,6 +78,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
    */
   const handleResendCode = async () => {
     try {
+      setLoading(true);
       await loginService(email, password);
       setOtpError(null);
       setIsBlocked(false);
@@ -84,6 +86,8 @@ export default function MfaForm({ email, password, onBack }: Props) {
       setSecondsLeft(OTP_TTL_SECONDS);
     } catch (error) {
       console.error("Error resending MFA code:", error);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -99,7 +103,8 @@ export default function MfaForm({ email, password, onBack }: Props) {
       const response = await verifyMfaService(email, enteredCode);
       loginStore.login(
         response.access_token ?? "",
-        response.refresh_token ?? ""
+        response.refresh_token ?? "",
+        email
       );
       navigate("/");
     } catch (error: any) {
@@ -194,7 +199,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
       <Button
         onClick={handleVerifyCode}
         className="w-full bg-blue-600"
-        disabled={isExpired || isBlocked}
+        disabled={isExpired || isBlocked || loading}
       >
         {t("login.verify")}
       </Button>

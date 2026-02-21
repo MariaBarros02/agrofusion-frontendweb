@@ -3,6 +3,7 @@ import { authApi } from "./api/auth.api";
 import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
+import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
 
 
 /**
@@ -135,5 +136,27 @@ export const accountActivateService = async (
   payload: AccountActivateRequest
 )=>{
   const {data} = await authApi.accountActivation(payload);
+  return data;
+}
+
+/*
+ * Listar usuarios del sistema
+ *
+ */
+export const listUsersService = async (
+  payload: listUsersRequest
+)=>{
+  const {data} = await authApi.listUsers(payload);
+  return data;
+}
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
+export const getUserDetailsService = async (
+  userId: string
+)=>{
+  const {data} = await authApi.getDetailsUser(userId);
   return data;
 }

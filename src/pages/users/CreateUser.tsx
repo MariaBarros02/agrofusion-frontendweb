@@ -751,7 +751,7 @@ const CreateUser = () => {
                             );
                           }}
                         />
-                        <span className="capitalize">{role.role_name}</span>
+                        <span className="text-sm capitalize">{role.role_name}</span>
                       </label>
                     );
                   })}
