@@ -160,3 +160,15 @@ export const getUserDetailsService = async (
   const {data} = await authApi.getDetailsUser(userId);
   return data;
 }
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
+export const deleteUserService = async (
+  userId: string
+)=>{
+  
+  const {data} = await authApi.deleteSoftUser(userId);
+  return data;
+}

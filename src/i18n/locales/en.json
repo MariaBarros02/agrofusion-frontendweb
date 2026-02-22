@@ -89,7 +89,7 @@
     "description": "Manage and view external projects associated with AgroFusion"
   },
   "resetPassword": {
-    "resetPassword": "Set a new password.",
+    "resetPassword": "Set a new password",
     "instructions": "This change will update the password for your accounts across all active AgroFusion projects. Remember it for your next login.",
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
@@ -176,7 +176,7 @@
     "errorCreatingUser": "An error occurred while creating the user. Please try again."
   },
   "accountActivation": {
-    "resetPassword": "Set a new password.",
+    "resetPassword": "Set a new password",
     "instructions": "This change will update the password for your accounts across all active AgroFusion projects. Remember it for your next login.",
     "oldPassword": "Temporary password",
     "externalActivationFailed": "{{service}}. There was an error activating the account. Please try manually.",

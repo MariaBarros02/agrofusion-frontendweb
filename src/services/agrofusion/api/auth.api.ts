@@ -119,5 +119,13 @@ export const authApi = {
  * @returns {ListUserResponse} Respuesta con datos de usuarios y paginación.
  */
   getDetailsUser: (user_id:string) =>
-    authAgrofusionAxios.get<ListUserResponse>("users/get_user_details", {params: {user_id}}),
+    authAgrofusionAxios.get<ListUserResponse>("users/get-user-details", {params: {user_id}}),
+
+  /**
+ * Eliminar (soft delete) de usuario en el sistema.
+ * @param {string} user_id - id del usuario por buscar
+ * @returns {Promise} Respuesta de borrado exitoso
+ */
+  deleteSoftUser: (user_id:string) =>
+    authAgrofusionAxios.delete("users/delete-user", {params: { user_id: user_id} }),
 };

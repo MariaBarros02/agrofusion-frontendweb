@@ -78,7 +78,16 @@ export const authApiSigma = {
    * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
    */
     getUserByEmail: (email: string) =>
-    authAxios.post(`users/users/get-user-by-email/${email}`),
+    authPrivateAxios.post(`users/users/get-user-by-email/${email}`),
+
+    /**
+   *  Cambiar el estado de un usuario
+   * @param {number} user_id
+   * @param {number} new_status
+   * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
+   */
+    changeUserStatus: (user_id: number, new_user: number) =>
+    authPrivateAxios.post(`users/users/change-user-status/`,{user_id, new_user}),
 
 
 };

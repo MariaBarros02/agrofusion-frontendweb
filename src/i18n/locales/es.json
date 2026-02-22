@@ -29,7 +29,7 @@
         "nitOtherCountry": "Nit de otro país",
         "nuip": "NUIP",
         "blocked": "Bloqueado",
-        "delete": "Eliminado",
+        "deleted": "Eliminado",
         "pending": "Pendiente",
         "showing": "Mostrando",
         "previous": "Anterior",
@@ -177,11 +177,12 @@
 
     },
     "accountActivation": {
-        "resetPassword": "Establece una nueva contraseña.",
+        "resetPassword": "Establece una nueva contraseña",
         "instructions":"Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
         "oldPassword": "Contraseña temporal",
         "externalActivationFailed": "{{service}}. Hubo un error al activar la cuenta. Intentelo manualmente.",
-        "externalUpdateFailed": "{{service}}. Hubo un error al activar la cuenta. Intentelo manualmente."
+        "externalUpdateFailed": "{{service}}. Hubo un error al activar la cuenta. Intentelo manualmente.",
+        "successAlert": "Tu cuenta ha sido activada correctamente. Inicia sesión"
 
     },
     "viewUser":{ 
@@ -198,7 +199,11 @@
         "editUser": "Editar usuario",
         "deleteUser": "Eliminar usuario",
         "loading": "Cargando detalles del usuario...",
-        "error": "Error al cargar detalles de usuario"
+        "error": "Error al cargar detalles de usuario",
+        "deleteUserQuestion": "¿Eliminar usuario?",
+        "deleteFDescription": "Esta acción desactivará al usuario",
+        "deleteSDescription": "Podrás reactivarlo más adelante.",
+        "confirmDeleted": "Confirmar eliminación"
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
@@ -255,7 +260,8 @@
     "AUTH_RESET_TOKEN_USED": "Este enlace ya fue utilizado.",
     
     "AUTH_PASSWORD_RESET_FAILED": "No fue posible restablecer la contraseña.",
-    "AUTH_GENERIC": "Ocurrió un error inesperado. Inténtalo nuevamente."
+    "AUTH_GENERIC": "Ocurrió un error inesperado. Inténtalo nuevamente.",
+    "OLD_PASSWORD_INCORRECT": "Contraseña temporal incorrecta, intente nuevamente."
     }   
 
 }

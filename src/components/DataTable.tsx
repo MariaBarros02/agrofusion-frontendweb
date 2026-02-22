@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 // TYPES
 // =============================
 
-type StatusValue = "ACTIVE" | "DELETE" | "INACTIVE" | "PENDING" | string;
+type StatusValue = "ACTIVE" | "DELETED" | "INACTIVE" | "PENDING" | string;
 
 type ColumnType = "text" | "status" | "statusEditable" | "action" | "actions";
 
@@ -76,7 +76,7 @@ interface DataTableProps<T> {
 
 const statusColors: Record<string, string> = {
   ACTIVE: "bg-green-500 text-white",
-  DELETE: "bg-red-500 text-white",
+  DELETED: "bg-red-500 text-white",
   INACTIVE: "bg-amber-400 text-black",
   PENDING: "bg-orange-100 text-orange-700",
 };

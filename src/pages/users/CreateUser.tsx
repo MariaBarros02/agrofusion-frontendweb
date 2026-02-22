@@ -500,13 +500,17 @@ const CreateUser = () => {
 
   return (
     <AppLayoutSB>
-      <TitleTarget title="users.title" description="users.description" />
+      <TitleTarget  title="users.title" description="users.description" />
+
+      
       <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
-        <div className={userCreate ? "block mb-5" : "hidden mb-5"}>
+        <div className={!userCreate ? "block mb-5" : "hidden mb-5"}>
           <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
           <p className="text-sm text-gray-700">{t("createUser.description")}</p>
         </div>
         <form className={userCreate ? "hidden" : "block"}>
+          <fieldset disabled={loading}>
+
           <div className="gap-5 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
             <div className="w-full">
               <div className="block mb-2">
@@ -548,7 +552,7 @@ const CreateUser = () => {
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="secondLastName">
-                  {t("createUser.second")} {t("createUser.lastName")}
+                  {t("createUser.second")} {t("createUser.lastName")}*
                 </Label>
               </div>
               <TextInput
@@ -852,6 +856,7 @@ const CreateUser = () => {
               <MdKeyboardArrowRight size={25} />
             </Button>
           </div>
+          </fieldset>
         </form>
         {userCreate && (
         <div className="flex flex-col items-center justify-center h-full gap-2 m-auto text-center">

@@ -56,4 +56,20 @@ export const authApiDisriego = {
      * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
      */
     accountActivation: (activation_token: string) => authAxios.get(`base/users/activate-account/${activation_token}`),
+    /**
+     *  Buscar usuario por email
+     * @param {string} email- Email del usuario que se quiere buscar
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+    getUserByEmail: (email: string) =>
+    authPrivateAxios.post(`base/users/get-user-by-email/${email}`),
+    
+    /**
+     *  Cambiar el estado de un usuario
+     * @param {number} user_id
+     * @param {number} new_status
+     * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
+     */
+    changeUserStatus: (user_id: number, new_user: number) =>
+    authPrivateAxios.post(`base/users/change-user-status/`,{user_id, new_user}),
 }

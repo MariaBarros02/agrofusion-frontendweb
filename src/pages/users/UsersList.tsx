@@ -50,7 +50,7 @@ const UsersList = () => {
 //     key: "state", //  IMPORTANTE
 //     label: t("common.state"),
 //     type: "statusEditable",
-//     allowedStatuses: ["ACTIVE", "INACTIVE", "PENDING", "DELETE"],
+//     allowedStatuses: ["ACTIVE", "INACTIVE", "PENDING", "DELETED"],
 //     onChange: async (user, newStatus) => {
 //       console.log("Cambiar estado:", user.user_id, newStatus);
 
@@ -164,8 +164,9 @@ const UsersList = () => {
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
-              <option value="DELETE">{t("common.delete")}</option>
+              <option value="DELETED">{t("common.deleted")}</option>
               <option value="PENDING">{t("common.pending")}</option>
+              <option value="BLOCKED"> {t("common.blocked")}</option>
             </Select>
           </div>
 

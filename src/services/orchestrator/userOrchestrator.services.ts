@@ -9,13 +9,16 @@ import {
   getRolesService as getRolesServiceDisriego,
   getTypeDocumentsService as getTypeDocumentsServiceDisriego,
   accountActivationService as accountActivationServiceDisriego,
+  getUserByEmailService as getUserByEmailServiceDisriego,
+  changeStateUserService as changeStateUserServiceDisriego,
 } from "../disriegos/auth.service";
 import {
   createUserByAdminService as createUserByAdminServiceSigma,
   getRolesService as getRolesServiceSigma,
   getTypeDocumentsService as getTypeDocumentsServiceSigma,
   accountActivationService as accountActivationServiceSigma,
-
+  changeStateUserService as changeStateUserServiceSigma,
+  getUserByEmailService as getUserByEmailServiceSigma,
 } from "../sigma/auth.service";
 import type { ExternalUser } from "../../dto/request/externalUser-request.dto";
 import { handleReqResPasswordEP, handleResPasswordEP } from "./authOrchestrator.service";
@@ -455,4 +458,197 @@ export const handleAccountActivationEP = async (
     },
     errors
   };
+};
+
+export const handleGetUserByEmailEP = async (
+  email: string,
+  projects?: ExternalProject[]
+): Promise<{
+  users: Record<string, any>;
+  errors: GetEPError[];
+}> => {
+  if (!projects || projects.length === 0) {
+    return { users: {}, errors: [] };
+  }
+
+  const tasks: {
+    service: string;
+    promise: Promise<any>;
+  }[] = [];
+
+  /* ================================
+     REGISTRO DINÁMICO
+  ================================= */
+
+  if (projects.some(p => p.instance_code === "DISRIEGO")) {
+    tasks.push({
+      service: "DISRIEGO",
+      promise: safePromise(() =>
+        getUserByEmailServiceDisriego(email)
+      )
+    });
+  }
+
+  if (projects.some(p => p.instance_code === "SIGMA")) {
+    tasks.push({
+      service: "SIGMA",
+      promise: safePromise(() =>
+        getUserByEmailServiceSigma(email)
+      )
+    });
+  }
+
+  const results = await Promise.allSettled(tasks.map(t => t.promise));
+
+  const auditErrors: RegisterErrorPEPayload[] = [];
+  const uiErrors: GetEPError[] = [];
+  const users: Record<string, any> = {};
+
+  results.forEach((result, index) => {
+    const service = tasks[index].service;
+
+    if (result.status === "fulfilled") {
+      users[service] = result.value;
+    } else {
+      const error = result.reason;
+
+      const message =
+        error?.response?.data?.detail?.message ??
+        "No se pudo consultar el usuario por email.";
+
+      auditErrors.push({
+        context: "GET_USER_BY_EMAIL",
+        project: service,
+        message,
+        severity: "MEDIUM",
+        payload_excerpt: {
+          status: error?.response?.status
+            ? String(error.response.status)
+            : "N/A",
+          data: error?.response?.data
+            ? JSON.stringify(error.response.data)
+            : "N/A"
+        },
+        error_code: "EXT_GET_USER_BY_EMAIL_FAILED",
+        component: "Consulta usuario por email"
+      });
+
+      uiErrors.push({
+        project: service,
+        messageKey: "userSearch.externalUserLookupFailed",
+        messageParams: { service },
+        type: "warning",
+        to: projectsLinks[service]?.to,
+        linkText: projectsLinks[service]?.linkText ?? ""
+      });
+    }
+  });
+
+  if (auditErrors.length > 0) {
+    await registerErrorPEService(auditErrors);
+  }
+
+  return { users, errors: uiErrors };
+};
+
+export const handleChangeUserStatusEP = async (
+  payload: {
+    user_id: number;
+    new_status: number;
+  },
+  projects?: ExternalProject[]
+): Promise<{
+  results: Record<string, any>;
+  errors: GetEPError[];
+}> => {
+  if (!projects || projects.length === 0) {
+    return { results: {}, errors: [] };
+  }
+
+  const tasks: {
+    service: string;
+    promise: Promise<any>;
+  }[] = [];
+
+  /* ================================
+     REGISTRO DINÁMICO
+  ================================= */
+
+  if (projects.some(p => p.instance_code === "DISRIEGO")) {
+    tasks.push({
+      service: "DISRIEGO",
+      promise: safePromise(() =>
+        changeStateUserServiceDisriego(
+          payload.user_id,
+          payload.new_status
+        )
+      )
+    });
+  }
+
+  if (projects.some(p => p.instance_code === "SIGMA")) {
+    tasks.push({
+      service: "SIGMA",
+      promise: safePromise(() =>
+        changeStateUserServiceSigma(
+          payload.user_id,
+          payload.new_status
+        )
+      )
+    });
+  }
+
+  const resultsSettled = await Promise.allSettled(
+    tasks.map(t => t.promise)
+  );
+
+  const auditErrors: RegisterErrorPEPayload[] = [];
+  const uiErrors: GetEPError[] = [];
+  const results: Record<string, any> = {};
+
+  resultsSettled.forEach((result, index) => {
+    const service = tasks[index].service;
+
+    if (result.status === "fulfilled") {
+      results[service] = result.value;
+    } else {
+      const error = result.reason;
+
+      const message =
+        error?.response?.data?.detail?.message ??
+        "No se pudo cambiar el estado del usuario.";
+
+      auditErrors.push({
+        context: "CHANGE_USER_STATUS",
+        project: service,
+        message,
+        severity: "MEDIUM",
+        payload_excerpt: {
+          status: error?.response?.status
+            ? String(error.response.status)
+            : "N/A",
+          data: error?.response?.data
+            ? JSON.stringify(error.response.data)
+            : "N/A"
+        },
+        error_code: "EXT_CHANGE_USER_STATUS_FAILED",
+        component: "Cambio estado usuario"
+      });
+
+      uiErrors.push({
+        project: service,
+        messageKey: "userStatus.externalStatusChangeFailed",
+        messageParams: { service },
+        type: "warning",
+        to: projectsLinks[service]?.to,
+        linkText: projectsLinks[service]?.linkText ?? ""
+      });
+    }
+  });
+
+  if (auditErrors.length > 0) {
+    await registerErrorPEService(auditErrors);
+  }
+
+  return { results, errors: uiErrors };
 };

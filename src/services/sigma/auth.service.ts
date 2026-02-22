@@ -81,3 +81,25 @@ export const accountActivationService = async (token:string) => {
   const {data} = await  authApiSigma.accountActivation(token);
   return data;
 }
+
+
+ /**
+     * Obtener un usuario por su correo.
+     * @param {string} email - Correo del usuario a buscar
+     * @returns {Promise<any>} Resultado de consulta.
+     */
+export const getUserByEmailService = async (email:string) => {
+  const {data} = await  authApiSigma.getUserByEmail(email);
+  return data;
+}
+
+ /**
+     * Cambiar el estado de un usuario.
+     * @param {number} user_id
+     * @param {number} new_status
+     * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
+     */
+export const changeStateUserService = async (user_id: number, new_status: number) => {
+  const {data} = await  authApiSigma.changeUserStatus(user_id, new_status);
+  return data;
+}
