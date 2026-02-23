@@ -27,7 +27,7 @@ const UsersList = () => {
 
   // estado de paginación
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
 
   // filtros
   const [search, setSearch] = useState("");

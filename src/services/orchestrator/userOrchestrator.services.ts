@@ -535,7 +535,7 @@ export const handleGetUserByEmailEP = async (
 
       uiErrors.push({
         project: service,
-        messageKey: "userSearch.externalUserLookupFailed",
+        messageKey: "editUser.externalUserLookupFailed",
         messageParams: { service },
         type: "warning",
         to: projectsLinks[service]?.to,
@@ -550,7 +550,6 @@ export const handleGetUserByEmailEP = async (
 
   return { users, errors: uiErrors };
 };
-
 export const handleChangeUserStatusEP = async (
   payload: {
     user_id: number;
@@ -618,6 +617,10 @@ export const handleChangeUserStatusEP = async (
         error?.response?.data?.detail?.message ??
         "No se pudo cambiar el estado del usuario.";
 
+      /* ================================
+         AUDITORÍA
+      ================================= */
+
       auditErrors.push({
         context: "CHANGE_USER_STATUS",
         project: service,
@@ -635,9 +638,13 @@ export const handleChangeUserStatusEP = async (
         component: "Cambio estado usuario"
       });
 
+      /* ================================
+         ERROR PARA UI
+      ================================= */
+
       uiErrors.push({
         project: service,
-        messageKey: "userStatus.externalStatusChangeFailed",
+        messageKey: "common.externalStatusChangeFailed",
         messageParams: { service },
         type: "warning",
         to: projectsLinks[service]?.to,
@@ -645,6 +652,10 @@ export const handleChangeUserStatusEP = async (
       });
     }
   });
+
+  /* ================================
+     REGISTRAR ERRORES EN AUDITORÍA
+  ================================= */
 
   if (auditErrors.length > 0) {
     await registerErrorPEService(auditErrors);

@@ -33,7 +33,8 @@
         "pending": "Pendiente",
         "showing": "Mostrando",
         "previous": "Anterior",
-        "next": "Siguiente"
+        "next": "Siguiente",
+        "externalStatusChangeFailed": "Ocurrió un error al actualizar el estado del usuario."
     },
     "theme":{
         "dark": "Modo oscuro",
@@ -83,6 +84,28 @@
         "verify": "Verificar código",
         "comeback": "Volver",
         "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente."
+    },
+    "editUser": {
+        "title": "Editar usuario",
+        "loading": "Cargando detalles del usuario...",
+        "error": "Hubo un error, lo sentimos.",
+        "editInformation": "Información editable",
+        "saveChange":"Guardar cambios",
+        "goBack": "Volver al listado",
+        "name": "Nombre",
+        "namePlaceholder": "Nombres completos",
+        "first": "Primer",
+        "lastName": "apellido",
+        "second": "Segundo",
+        "gender": "Género",
+        "placeholderGender": "Selecciona el género",
+        "status": "Estado",
+        "placeholderRole":"Selecciona un rol",
+        "role": "Rol",
+        "state": "Estado",
+        "placeholderState": "Selecciona un estado",
+        "noRole": "Sin rol",
+        "externalUserLookupFailed": "Hubo un error al buscar el usuario"
     },
     "project": {
         "title": "Administrar proyectos",
@@ -220,6 +243,7 @@
         "passwordSpecialChar": "La contraseña debe contener al menos un carácter especial.",
 
         "completeField": "Completa este campo",
+        "completedField": "Completa este campo",
         "invalidDate": "La fecha no es válida",
         "dateMustBeAfterBirthday": "La fecha debe ser posterior a la fecha de nacimiento",
         "dateNotInFuture": "La fecha no puede ser futura",

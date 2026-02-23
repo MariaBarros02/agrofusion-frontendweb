@@ -62,7 +62,7 @@ export const authApiDisriego = {
      * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
      */
     getUserByEmail: (email: string) =>
-    authPrivateAxios.post(`base/users/get-user-by-email/${email}`),
+    authPrivateAxios.get(`base/users/get-user-by-email/${email}`),
     
     /**
      *  Cambiar el estado de un usuario
@@ -70,6 +70,6 @@ export const authApiDisriego = {
      * @param {number} new_status
      * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
      */
-    changeUserStatus: (user_id: number, new_user: number) =>
-    authPrivateAxios.post(`base/users/change-user-status/`,{user_id, new_user}),
+    changeUserStatus: (user_id: number, new_status: number) =>
+    authPrivateAxios.post(`base/users/change-user-status/`,{user_id, new_status}),
 }

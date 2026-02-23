@@ -11,6 +11,7 @@ import UsersList from "../pages/users/UsersList";
 import CreateUser from "../pages/users/CreateUser";
 import AccountActivation from "../pages/users/AccountActivation";
 import ViewUser from "../pages/users/ViewUser";
+import EditUser from "../pages/users/EditUser";
 
 /**
  * Router Principal de la Aplicación.
@@ -87,9 +88,9 @@ export function AppRouter() {
         <Route path="users" element={<UsersList />} />
         <Route path="users/create-user" element={<CreateUser />} />
         <Route path="users/:userId" element={<ViewUser />} />
-        {/* <Route path="users/edit-user/:userId" element={<EditUser />} />
+        <Route path="users/edit-user/:userId" element={<EditUser />} />
 
-        <Route path="projects" element={<ProjectsList />} />  */}
+        {/* <Route path="projects" element={<ProjectsList />} />   */}
 
       </Route>
 
