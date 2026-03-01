@@ -1,4 +1,5 @@
 import type { AccountActivateRequest } from "../../../dto/request/accountActivate-request.dto";
+import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
 import type { createUserRequest } from "../../../dto/request/createUser-request.dto";
 import type { listUsersRequest } from "../../../dto/request/listUsers-request.dto";
 import type { LoginDto, MfaDto } from "../../../dto/request/login-request.dto";
@@ -122,10 +123,51 @@ export const authApi = {
     authAgrofusionAxios.get<ListUserResponse>("users/get-user-details", {params: {user_id}}),
 
   /**
+ * Listar usuario del sistema por su id.
+ * @param {string} user_id - id del usuario por buscar
+ * @returns {ListUserResponse} Respuesta con datos de usuarios y paginación.
+ */
+  getProfile: (user_id:string) =>
+    authAgrofusionAxios.get<ListUserResponse>("users/get-profile", {params: {user_id}}),
+
+
+
+  /**
  * Eliminar (soft delete) de usuario en el sistema.
  * @param {string} user_id - id del usuario por buscar
  * @returns {Promise} Respuesta de borrado exitoso
  */
   deleteSoftUser: (user_id:string) =>
     authAgrofusionAxios.delete("users/delete-user", {params: { user_id: user_id} }),
+
+
+/**
+ * Actualizar mi perfil de usuario
+ *  @param {string} user_id - id del usuario por buscar
+ * @param {string} name - nombre para actualizar el registro
+ * @param {string} identity_number - Número de identificación para actualizar el registro
+ * @returns {Promise} Actualización exitosa
+ */
+  editProfile: (user_id:string, name: string, identity_number: string) =>
+    authAgrofusionAxios.put("users/edit-profile", {name, identity_number}, {params: { user_id: user_id} }),
+
+
+  /**
+ * Actualizar mi perfil de usuario
+ *  @param {string} user_id - id del usuario por buscar
+ * @param {string} name - nombre para actualizar el registro
+ * @param {string} identity_number - Número de identificación para actualizar el registro
+ * @returns {Promise} Actualización exitosa
+ */
+  editUser: (user_id:string, name: string, identity_number: string, state: string, rol? : string) =>
+    authAgrofusionAxios.put("users/edit-user", {name, identity_number, state, rol}, {params: { user_id: user_id} }),
+/**
+ * Cambiar mi contraseña desde mi perfil de usuario
+ * @param {string} user_id - id del usuario por buscar
+ * @param {ChangePasswordRequest} payload - payload para cambiar contraseña de usuario
+ * @returns {Promise} Actualización exitosa
+ */
+  changePassword: (user_id:string, payload:ChangePasswordRequest) =>
+    authAgrofusionAxios.put("users/change-password", payload, {params: { user_id: user_id} }),
 };
+

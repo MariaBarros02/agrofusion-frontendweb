@@ -84,4 +84,11 @@ export interface ListUserResponse {
      * @example "2025-01-15T14:32:10Z"
      */
     created_at: string;
+
+        /**
+     * Número de identidad del usuario
+     * 
+     * 
+     */
+    identity_number? : string;
 }

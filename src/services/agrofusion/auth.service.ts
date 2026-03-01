@@ -4,6 +4,7 @@ import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
+import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 
 
 /**
@@ -165,10 +166,65 @@ export const getUserDetailsService = async (
  * Listar detalles de usuario por id
  *
  */
+export const getProfileService = async (
+  userId: string
+)=>{
+  const {data} = await authApi.getProfile(userId);
+  return data;
+}
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
 export const deleteUserService = async (
   userId: string
 )=>{
   
   const {data} = await authApi.deleteSoftUser(userId);
+  return data;
+}
+
+/*
+ * Actualizar perfil del usuario
+ *
+ */
+export const editProfileService = async (
+  userId: string,
+  name: string,
+  identityNumber: string
+)=>{
+  
+  const {data} = await authApi.editProfile(userId, name, identityNumber);
+  return data;
+}
+
+/*
+ * Actualizar perfil del usuario
+ *
+ */
+export const editUserService = async (
+  userId: string,
+  name: string,
+  identityNumber: string,
+  state: string,
+  rol?:string
+)=>{
+  
+  const {data} = await authApi.editUser(userId, name, identityNumber, state, rol);
+  return data;
+}
+
+
+/*
+ * Cambiar contraseña desde mi perfil
+ *
+ */
+export const changePasswordService = async (
+  userId: string,
+  payload: ChangePasswordRequest
+)=>{
+  
+  const {data} = await authApi.changePassword(userId, payload);
   return data;
 }

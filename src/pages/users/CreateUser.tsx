@@ -9,13 +9,13 @@ import { useEffect, useState, useRef } from "react";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
 import type { ToastData } from "../../components/layout/ToastSimple";
+import ToastSimple from "../../components/layout/ToastSimple";
 import { useMemo } from "react";
 import {
   createUserService,
   getExternalProjects,
   userExistsService,
 } from "../../services/agrofusion/auth.service";
-import ToastSimple from "../../components/layout/ToastSimple";
 import {
   handleCreateUserEP,
   handleGetRolesEP,
@@ -40,7 +40,7 @@ interface ProjectTypeDocument {
 interface RegisterValues {
   name: string;
   firstLastName: string;
-  secondLastName?: string;
+  secondLastName: string;
   typeDocumentByProject: Record<string, string>;
   documentNumber: string;
   dateIssuanceDoc: string;
@@ -65,7 +65,7 @@ const RegisterSchema = (
 
     firstLastName: yup.string().required(t("validation.completeField")),
 
-    secondLastName: yup.string(),
+    secondLastName: yup.string().required(t("validation.completeField")),
 
     typeDocumentByProject: yup
       .object()
@@ -137,7 +137,7 @@ const RegisterSchema = (
 
     password: yup
       .string()
-      .min(10, t("validation.passwordMin", { min: 10 }))
+      .min(12, t("validation.passwordMin", { min: 12 }))
       .required(t("validation.completeField"))
       .matches(/[a-z]/, t("validation.passwordLowercase"))
       .matches(/[A-Z]/, t("validation.passwordUppercase"))

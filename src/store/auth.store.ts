@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { jwtDecode } from 'jwt-decode';
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 
@@ -13,6 +15,8 @@ interface AuthState {
     refreshToken: string | null;
     /** Booleano para verificar rápidamente si hay una sesión activa */
     isAuthenticated: boolean;
+
+    id: string | null;
 
     email: string | null;
     /**
@@ -39,25 +43,29 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             isAuthenticated: false,
             email: null,
+            id: null,
 
             // --- ACCIONES ---
 
             /**
              * Establece los tokens y marca al usuario como autenticado.
              */
-            login: (access, refresh, email) =>
+            login: (access, refresh, email) => {
+                const decoded: any = jwtDecode(access);
                 set({
                     accessToken: access,
                     refreshToken: refresh,
                     isAuthenticated: true,
                     email: email,
-                }),
+                    id: decoded.sub
+                })},
             logout: () =>
                 set({
                     accessToken: null,
                     refreshToken: null,
                     isAuthenticated: false,
                     email: null,
+                    id:null
                 }),
                 
         }),

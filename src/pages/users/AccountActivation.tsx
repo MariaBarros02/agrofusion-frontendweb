@@ -65,7 +65,7 @@ const AccountActivation = () => {
     validationSchema: Yup.object({
       newPassword: Yup.string()
         .required("validation.passwordRequired")
-        .min(10, "validation.passwordMinLength")
+        .min(12, "validation.passwordMinLength")
         .max(128, "validation.passwordMaxLength")
         .matches(/[a-z]/, "validation.passwordLowercase")
         .matches(/\d/, "validation.passwordNumber")

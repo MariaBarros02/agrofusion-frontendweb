@@ -27,7 +27,7 @@ const UsersList = () => {
 
   // estado de paginación
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
 
   // filtros
   const [search, setSearch] = useState("");
@@ -221,7 +221,7 @@ const UsersList = () => {
       {error && (
         <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
           {" "}
-          <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
+          <p className="text-3xl font-bold">{t("users.error")}</p>{" "}
         </div>
       )}{" "}
       {!loading && !error && paginatedUsers?.items.length === 0 && (
@@ -240,7 +240,7 @@ const UsersList = () => {
           data={paginatedUsers}
           columns={columns}
           onPageChange={handlePageChange}
-          paginationText="usuarios"
+          paginationText={t("users.users")} 
         />
       )}
     </AppLayoutSB>

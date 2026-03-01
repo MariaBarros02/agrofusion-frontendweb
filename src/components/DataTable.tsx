@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 // =============================
 // TYPES
@@ -232,7 +233,7 @@ export default function DataTable<T extends Record<string, any>>({
                       return (
                         <td key={String(col.key)} className="px-3 py-3">
                           <button
-                            className="flex items-center gap-2 px-3 py-1 font-semibold bg-gray-100 border rounded-2xl hover:bg-gray-50"
+                            className="flex items-center gap-2 px-3 py-1 font-semibold dark:bg-gray-800 bg-gray-100 border rounded-2xl hover:bg-gray-50"
                             onClick={() => actionCol.action.onClick(row)}
                           >
                             {actionCol.action.icon}
@@ -308,8 +309,9 @@ export default function DataTable<T extends Record<string, any>>({
           <button
             disabled={data.page === 1}
             onClick={() => onPageChange(data.page - 1)}
-            className="px-3 py-1 border rounded disabled:opacity-40"
+            className="px-3 py-1 flex border items-center rounded disabled:opacity-40"
           >
+            <IoIosArrowBack/>
             {t("common.previous")}
           </button>
 
@@ -332,9 +334,10 @@ export default function DataTable<T extends Record<string, any>>({
           <button
             disabled={data.page === data.total_pages}
             onClick={() => onPageChange(data.page + 1)}
-            className="px-3 py-1 border rounded disabled:opacity-40"
+            className="px-3 py-1 border flex items-center rounded disabled:opacity-40"
           >
             {t("common.next")}
+            <IoIosArrowForward/>
           </button>
         </div>
 

@@ -30,7 +30,7 @@ export interface ExternalUser {
      * 
      * Referencia a un catálogo del sistema.
      */
-    type_document_id: number;
+    type_document_id?: number;
 
     /**
      * Número del documento de identidad.
@@ -61,17 +61,17 @@ export interface ExternalUser {
      * 
      * Cada valor representa el ID de un rol del sistema.
      */
-    roles: number[];
+    roles?: number[];
 
     /**
      * Correo electrónico del usuario.
      */
-    email: string;
+    email?: string;
 
     /**
      * Contraseña del usuario en el sistema destino.
      * 
      * Puede ser temporal o generada automáticamente en procesos de sincronización.
      */
-    password: string;
+    password?: string;
 }
