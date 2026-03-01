@@ -1,3 +1,4 @@
+import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
 import type { ExternalUser } from "../../../dto/request/externalUser-request.dto";
 import { authAxios } from "./axios";
 import { authPrivateAxios } from "./axiosPrivate";
@@ -72,22 +73,41 @@ export const authApiSigma = {
   accountActivation: (activation_token: string) =>
     authAxios.get(`users/users/activate-account/${activation_token}`),
 
-    /**
+  /**
    *  Buscar usuario por email
    * @param {string} email- Email del usuario que se quiere buscar
    * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
    */
-    getUserByEmail: (email: string) =>
+  getUserByEmail: (email: string) =>
     authPrivateAxios.get(`users/users/get_user_by_email/${email}`),
 
-    /**
+  /**
    *  Cambiar el estado de un usuario
    * @param {number} user_id
    * @param {number} new_status
    * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
    */
-    changeUserStatus: (user_id: number, new_status: number) =>
-    authPrivateAxios.post(`users/users/change-user-status/`,{user_id, new_status}),
+  changeUserStatus: (user_id: number, new_status: number) =>
+    authPrivateAxios.post(`users/users/change-user-status/`, {
+      user_id,
+      new_status,
+    }),
 
+  /**
+   *  Editar usuario como administrador
+   * @param {ExternalUser} payload
+   * @param {number} id
+   * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+   */
+  editUserByAdmin: (payload: ExternalUser, id: number) =>
+    authPrivateAxios.put(`/users/users/admin/edit/${id}`, payload),
 
+      /**
+       *  Cambiar la contraseña desde mi perfil
+       * @param {ChangePasswordRequest} payload
+       * @param {number} id
+       * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+       */
+      changePasswordUser: (payload: ChangePasswordRequest, id:number) =>
+      authPrivateAxios.post(`users/users/${id}/change-password`, payload),
 };

@@ -9,13 +9,13 @@ import { useEffect, useState, useRef } from "react";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
 import type { ToastData } from "../../components/layout/ToastSimple";
+import ToastSimple from "../../components/layout/ToastSimple";
 import { useMemo } from "react";
 import {
   createUserService,
   getExternalProjects,
   userExistsService,
 } from "../../services/agrofusion/auth.service";
-import ToastSimple from "../../components/layout/ToastSimple";
 import {
   handleCreateUserEP,
   handleGetRolesEP,

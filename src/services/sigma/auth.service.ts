@@ -1,5 +1,6 @@
 import { authApiSigma } from "./api/auth.api";
 import type { ExternalUser } from "../../dto/request/externalUser-request.dto";
+import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 
 /**
  * Solicita un token de recuperación de contraseña específicamente para Sigma.
@@ -103,3 +104,25 @@ export const changeStateUserService = async (user_id: number, new_status: number
   const {data} = await  authApiSigma.changeUserStatus(user_id, new_status);
   return data;
 }
+
+ /**
+     * Editar un usuario como administrador.
+     * @param {number} id
+     * @param {ExternalUser} payload
+     */
+export const editUserByAdminService = async (payload: ExternalUser, id: number) => {
+  const {data} = await  authApiSigma.editUserByAdmin(payload, id);
+  return data;
+}
+
+
+ /**
+     * Editar un usuario como administrador.
+     * @param {number} id
+     * @param {ChangePasswordRequest} payload
+     */
+export const changePasswordService = async (payload: ChangePasswordRequest, id: number) => {
+  const {data} = await  authApiSigma.changePasswordUser(payload, id);
+  return data;
+}
+

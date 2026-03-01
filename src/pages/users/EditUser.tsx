@@ -3,7 +3,7 @@
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import ToastSimple, {
@@ -12,19 +12,29 @@ import ToastSimple, {
 import { Button, Label, Select, TextInput } from "flowbite-react";
 import type { ListUserResponse } from "../../dto/response/listUsers-response.dto";
 import {
+  editUserService,
   getExternalProjects,
   getUserDetailsService,
 } from "../../services/agrofusion/auth.service";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
-import { handleGetUserByEmailEP } from "../../services/orchestrator/userOrchestrator.services";
+import {
+  handleChangeUserStatusEP,
+  handleEditUserProfileEP,
+  handleGetUserByEmailEP,
+} from "../../services/orchestrator/userOrchestrator.services";
 import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 interface EditValues {
   name: string;
-  firstLastName: string;
-  secondLastName: string;
-  gender?: number;
+  first_last_name: string;
+  second_last_name: string;
+  document_number: string;
+  birthday?: string;
+  date_issuance_document?: string;
+  gender_id?: number;
   state?: string;
   rol?: string;
 }
@@ -49,38 +59,68 @@ const mapStatusToText = (status?: number | string) => {
   return "";
 };
 
+const getStatusNumber = (statusText: string) => {
+  const entry = Object.entries(STATUS_VOCABULARY).find(
+    ([, value]) => value === statusText
+  );
+  return entry ? Number(entry[0]) : undefined;
+};
+
 const EditSchema = (t: any, hasExternal: boolean) =>
   yup.object({
-    name: yup.string().required(t("validation.completedField")),
-    rol: hasExternal
-      ? yup.string().required(t("validation.completedField"))
-      : yup.string().nullable(),
-    state: yup.string().required(t("validation.completedField")),
-    firstLastName: hasExternal
+    name: yup.string().required(t("validation.completeField")),
+
+    state: yup.string().required(t("validation.completeField")),
+
+    rol: yup.string().required(t("validation.completeField")),
+
+    first_last_name: hasExternal
       ? yup.string().required(t("validation.completeField"))
       : yup.string().nullable(),
-    secondLastName: hasExternal
+
+    second_last_name: hasExternal
       ? yup.string().required(t("validation.completeField"))
       : yup.string().nullable(),
-    gender: hasExternal
+
+    gender_id: hasExternal
       ? yup.number().required(t("validation.completeField"))
       : yup.number().nullable(),
+
+    document_number: yup.string().required(t("validation.completeField")),
+
+    birthday: hasExternal
+      ? yup.string().required(t("validation.completeField"))
+      : yup.string().nullable(),
+
+    date_issuance_document: hasExternal
+      ? yup.string().required(t("validation.completeField"))
+      : yup.string().nullable(),
   });
+
 const EditUser = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const [loading, setLoading] = useState(false);
-  const [deletingUser, setDeletingUser] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [userDetails, setUserDetails] = useState<ListUserResponse | null>(null);
   const [projects, setProjects] = useState<ExternalProject[] | undefined>(
     undefined,
   );
-  const [fieldsProjects, setFieldsProjects] = useState(false);
 
-  const [externalUsers, setExternalUsers] = useState<Record<string, any> | null>(null);
+  const [alert, setAlert] = useState<AlertState>(null);
+
+  const [externalLoaded, setExternalLoaded] = useState(false);
+  const [externalUsers, setExternalUsers] = useState<Record<
+    string,
+    any
+  > | null>(null);
+
+  const firstExternalUser = externalUsers
+    ? externalUsers[Object.keys(externalUsers)[0]]
+    : null;
+
   const getUserDetails = async () => {
     try {
       setLoading(true);
@@ -99,101 +139,290 @@ const EditUser = () => {
     }
   }, [userId]);
 
-useEffect(() => {
-  if (projects && userDetails) {
-    getExternalUsers();
-  }
-}, [projects, userDetails]);
+  useEffect(() => {
+    if (projects && userDetails) {
+      getExternalUsers();
+    }
+  }, [projects, userDetails]);
 
-useEffect(() => {
-  if (!userDetails) return;
-
-  const hasExternal =
-    externalUsers && Object.keys(externalUsers).length > 0;
-
-  const agrofusionState = mapStatusToText(userDetails.state);
-
-  if (hasExternal) {
-    const firstProjectKey = Object.keys(externalUsers!)[0];
-    const firstProjectUser = externalUsers![firstProjectKey];
-
-    formik.setValues({
-      name: firstProjectUser.name || "",
-      rol: userDetails.rol || "",
-      state: agrofusionState, 
-      firstLastName: firstProjectUser.first_last_name || "",
-      secondLastName: firstProjectUser.second_last_name || "",
-      gender: firstProjectUser.gender_id || undefined,
-    });
-  } else {
-    formik.setValues({
-      name: userDetails.name || "",
-      rol: userDetails.rol || "",
-      state: agrofusionState,
-      firstLastName: "",
-      secondLastName: "",
-      gender: undefined,
-    });
-  }
-}, [userDetails, externalUsers]);
-
-const getExternalUsers = async () => {
-  try {
-    setLoading(true);
-
-    const { users: externalUsersResponse, errors: getUserErrors } =
-      await handleGetUserByEmailEP(userDetails?.email || "", projects);
-
-    console.log("ExternalUsers:", externalUsersResponse);
-
-    if (
-      externalUsersResponse &&
-      Object.keys(externalUsersResponse).length > 0
-    ) {
-      setExternalUsers(externalUsersResponse);
-    } else {
-      setExternalUsers(null);
+  const getFormValues = (
+    userDetails: any,
+    externalUsers: any,
+    externalLoaded: any,
+  ) => {
+    if (!userDetails || !externalLoaded) {
+      return {
+        name: "",
+        first_last_name: "",
+        second_last_name: "",
+        gender_id: "",
+        rol: "",
+        state: "",
+        document_number: "",
+        birthday: "",
+        date_issuance_document: "",
+      };
     }
 
-    getUserErrors.forEach((err) => {
-      const link = projectsLinks[err.project];
+    const hasExternal = externalUsers && Object.keys(externalUsers).length > 0;
+    const agrofusionState = mapStatusToText(userDetails.state);
 
+    if (hasExternal) {
+      const firstProjectKey = Object.keys(externalUsers)[0];
+      const firstUser = externalUsers[firstProjectKey];
+
+      return {
+        name: firstUser.name || "",
+        rol: String(userDetails.rol || ""), // Asegurar que coincida con los values del Select
+        document_number: userDetails.identity_number || "",
+        state: agrofusionState,
+        birthday: firstUser.birthday?.split("T")[0] || "",
+        date_issuance_document:
+          firstUser.date_issuance_document?.split("T")[0] || "",
+        first_last_name: firstUser.first_last_name || "",
+        second_last_name: firstUser.second_last_name || "",
+        gender_id: firstUser.gender_id || "",
+      };
+    }
+
+    return {
+      name: userDetails.name || "",
+      rol: String(userDetails.rol || ""),
+      document_number: userDetails.identity_number || "",
+      birthday: "",
+      state: agrofusionState,
+      first_last_name: "",
+      second_last_name: "",
+      gender_id: "",
+      date_issuance_document: "",
+    };
+  };
+  const dynamicInitialValues = getFormValues(
+    userDetails,
+    externalUsers,
+    externalLoaded,
+  );
+  const getExternalUsers = async () => {
+    try {
+      setLoading(true);
+
+      const { users: externalUsersResponse, errors: getUserErrors } =
+        await handleGetUserByEmailEP(userDetails?.email || "", projects);
+
+      if (
+        externalUsersResponse &&
+        Object.keys(externalUsersResponse).length > 0
+      ) {
+        setExternalUsers(externalUsersResponse);
+      } else {
+        setExternalUsers(null);
+      }
+
+      getUserErrors.forEach((err) => {
+        const link = projectsLinks[err.project];
+
+        setToasts((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            messageKey: err.messageKey,
+            messageParams: err.messageParams,
+            type: err.type ?? "error",
+            ...(link ?? {}),
+          },
+        ]);
+      });
+    } catch (error) {
+      console.log(error);
+      setError("Error al eliminar usuario");
+    } finally {
+      setLoading(false);
+      setExternalLoaded(true);
+    }
+  };
+  const showSuccessToast = () => {
+    setToasts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        messageKey: "editUser.editSuccess",
+        type: "success",
+      },
+    ]);
+  };
+
+  const formik = useFormik<EditValues>({
+    initialValues: dynamicInitialValues,
+    enableReinitialize: true,
+    validationSchema: EditSchema(t, !!externalUsers),
+    onSubmit: async (values) => {
+      if (!formik.dirty) {
+        setAlert({ message: "editUser.noChanges", type: "warning" });
+        return;
+      }
+      await handleSaveProfile(values);
+    },
+  });
+
+  const handleSaveProfile = async (values: any) => {
+    if (!userId) return;
+
+    try {
+      /* ===========================
+         1️ ACTUALIZAR CORE
+      ============================ */
+      await editUserService(
+        userId,
+        firstExternalUser
+          ? values.name +
+              " " +
+              values.first_last_name +
+              " " +
+              values.second_last_name
+          : values.name,
+        values.document_number,
+        values.state,
+        "",
+      );
+      /* ===========================
+         2️ SI NO HAY EXTERNOS
+      ============================ */
+
+      if (!projects || !userDetails?.email) {
+        showSuccessToast();
+        setAlert({
+          message: "editUser.editSuccess",
+          type: "success",
+          to: `/administration/users/${userDetails?.user_id}`,
+        });
+        return;
+      }
+
+      /* ===========================
+         3️ BUSCAR USUARIOS EXTERNOS
+      ============================ */
+
+      const { users: externalUsersResponse, errors: getUserErrors } =
+        await handleGetUserByEmailEP(userDetails.email, projects);
+
+      getUserErrors.forEach((err) => {
+        const link = projectsLinks[err.project];
+        setToasts((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            messageKey: err.messageKey,
+            messageParams: err.messageParams,
+            type: err.type ?? "error",
+            ...(link ?? {}),
+          },
+        ]);
+      });
+
+      if (!externalUsersResponse) {
+        showSuccessToast();
+
+        return;
+      }
+
+      /* ===========================
+         4️ PAYLOAD EXTERNO
+      ============================ */
+
+const editResults = await Promise.all(
+  Object.entries(externalUsersResponse).map(([service, user]) => {
+    const externalPayload = {
+      name: values.name,
+      first_last_name: values.first_last_name,
+      second_last_name: values.second_last_name,
+      document_number: values.document_number,
+      type_document_id: user.type_document_id, 
+      date_issuance_document: values.date_issuance_document,
+      birthday: values.birthday,
+      gender_id: Number(values.gender_id),
+      roles: user.roles ?? [], 
+    };
+
+    return handleEditUserProfileEP(
+      externalPayload,
+      user.id,
+      projects.filter((p) => p.instance_code === service),
+    );
+  }),
+);
+
+      console.log(editResults);
+
+      /* ===========================
+         6️ TOAST ERRORES
+      ============================ */
+
+      editResults.forEach(({ errors }) => {
+        console.log(errors);
+        errors.forEach((err) => {
+          const link = projectsLinks[err.project];
+          setToasts((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              messageKey: err.messageKey,
+              messageParams: err.messageParams,
+              type: err.type ?? "error",
+              ...(link ?? {}),
+            },
+          ]);
+        });
+      });
+
+      const newStatusNumber = getStatusNumber(values.state);
+
+const changeResults = await Promise.all(
+  Object.entries(externalUsersResponse).map(([service, user]) =>
+    handleChangeUserStatusEP(
+      {
+        user_id: user.id,
+        new_status: newStatusNumber || 1,
+      },
+      projects.filter((p) => p.instance_code === service),
+    ),
+  ),
+);
+    // Mostrar errores de cambio de estado
+    changeResults.forEach(({ errors }) => {
+      errors.forEach((err) => {
+        const link = projectsLinks[err.project];
+
+        setToasts((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            messageKey: err.messageKey,
+            messageParams: err.messageParams,
+            type: err.type ?? "error",
+            ...(link ?? {}),
+          },
+        ]);
+      });
+    });
+
+      showSuccessToast();
+      setAlert({
+        message: "editUser.editSuccess",
+        type: "success",
+        to: `/administration/users/${userDetails?.user_id}`,
+      });
+    } catch (error) {
+      console.log(error);
       setToasts((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
-          messageKey: err.messageKey,
-          messageParams: err.messageParams,
-          type: err.type ?? "error",
-          ...(link ?? {}),
+          messageKey: "editUser.editFailed",
+          type: "error",
         },
       ]);
-    });
-  } catch (error) {
-    console.log(error);
-    setError("Error al eliminar usuario");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const initialValues = {
-    name: "",
-    firstLastName: "",
-    secondLastName: "",
-    gender: undefined,
-    rol: "",
-    state: "",
+    }
   };
-
-  const formik = useFormik<EditValues>({
-    initialValues: initialValues,
-    enableReinitialize: true,
-    validationSchema: EditSchema(t, !!externalUsers),
-    onSubmit: async (values) => {
-      console.log(values);
-    },
-  });
 
   /** Helper para renderizar errores de validación local (Yup) */
   const displayError = (name: keyof EditValues) => {
@@ -238,9 +467,10 @@ const getExternalUsers = async () => {
               {t("editUser.goBack")}
             </Button>
           </div>
-          <div className="p-4 py-10 mt-2 font-semibold border dark:border-gray-600 rounded-2xl">
-            <form>
-              <div className="gap-5 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+
+          <form onSubmit={formik.handleSubmit}>
+            <div className="p-4 py-10 mt-2 font-semibold border dark:border-gray-600 rounded-2xl">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                 <div className="w-full">
                   <div className="block mb-2">
                     <Label htmlFor="name">{t("editUser.name")}*</Label>
@@ -262,77 +492,140 @@ const getExternalUsers = async () => {
                 </div>
                 {externalUsers && (
                   <>
-                <div className="w-full">
-                  <div className="block mb-2">
-                    <Label htmlFor="firstLastName">
-                      {t("editUser.first")} {t("editUser.lastName")}*
-                    </Label>
-                  </div>
-                  <TextInput
-                    id="firstLastName"
-                    type="text"
-                    sizing="sm"
-                    required
-                    {...formik.getFieldProps("firstLastName")}
-                    color={
-                      formik.touched.firstLastName &&
-                      formik.errors.firstLastName
-                        ? "failure"
-                        : "gray"
-                    }
-                  />
-                  {displayError("firstLastName")}
-                </div>
-                <div className="w-full">
-                  <div className="block mb-2">
-                    <Label htmlFor="secondLastName">
-                      {t("editUser.second")} {t("editUser.lastName")}*
-                    </Label>
-                  </div>
-                  <TextInput
-                    id="secondLastName"
-                    sizing="sm"
-                    type="text"
-                    required
-                    {...formik.getFieldProps("secondLastName")}
-                    color={
-                      formik.touched.secondLastName &&
-                      formik.errors.secondLastName
-                        ? "failure"
-                        : "gray"
-                    }
-                  />
-                  {displayError("secondLastName")}
-                </div>
-                </>
+                    <div className="w-full">
+                      <div className="block mb-2">
+                        <Label htmlFor="first_last_name">
+                          {t("editUser.first")} {t("editUser.lastName")}*
+                        </Label>
+                      </div>
+                      <TextInput
+                        id="first_last_name"
+                        type="text"
+                        sizing="sm"
+                        required
+                        {...formik.getFieldProps("first_last_name")}
+                        color={
+                          formik.touched.first_last_name &&
+                          formik.errors.first_last_name
+                            ? "failure"
+                            : "gray"
+                        }
+                      />
+                      {displayError("first_last_name")}
+                    </div>
+                    <div className="w-full">
+                      <div className="block mb-2">
+                        <Label htmlFor="second_last_name">
+                          {t("editUser.second")} {t("editUser.lastName")}*
+                        </Label>
+                      </div>
+                      <TextInput
+                        id="second_last_name"
+                        sizing="sm"
+                        type="text"
+                        required
+                        {...formik.getFieldProps("second_last_name")}
+                        color={
+                          formik.touched.second_last_name &&
+                          formik.errors.second_last_name
+                            ? "failure"
+                            : "gray"
+                        }
+                      />
+                      {displayError("second_last_name")}
+                    </div>
+                  </>
                 )}
-              </div>
-              <div className="gap-5 mt-3 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
                 {externalUsers && (
-                <div className="w-full">
-                  <div className="block mb-2">
-                    <Label htmlFor="gender">{t("editUser.gender")}</Label>
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="document_number">
+                        {t("editUser.documentNumber")}
+                      </Label>
+                    </div>
+                    <TextInput
+                      id="document_number"
+                      type="text"
+                      sizing="sm"
+                      {...formik.getFieldProps("document_number")}
+                      color={
+                        formik.touched.document_number &&
+                        formik.errors.document_number
+                          ? "failure"
+                          : "gray"
+                      }
+                    />
+                    {displayError("document_number")}
                   </div>
-                  <Select
-                    id="gender"
-                    required
-                    sizing="sm"
-                    {...formik.getFieldProps("gender")}
-                    color={
-                      formik.touched.gender && formik.errors.gender
-                        ? "failure"
-                        : "gray"
-                    }
-                  >
-                    <option value="" disabled>
-                      {t("editUser.placeholderGender")}
-                    </option>
-                    <option value="1">{t("common.masculine")}</option>
-                    <option value="2">{t("common.feminine")}</option>
-                  </Select>
-                  {displayError("gender")}
-                </div>
                 )}
+                {externalUsers && (
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="gender">{t("editUser.gender")}</Label>
+                    </div>
+                    <Select
+                      id="gender"
+                      required
+                      sizing="sm"
+                      {...formik.getFieldProps("gender_id")}
+                      color={
+                        formik.touched.gender_id && formik.errors.gender_id
+                          ? "failure"
+                          : "gray"
+                      }
+                    >
+                      <option value="" disabled>
+                        {t("editUser.placeholderGender")}
+                      </option>
+                      <option value="1">{t("common.masculine")}</option>
+                      <option value="2">{t("common.feminine")}</option>
+                    </Select>
+                    {displayError("gender_id")}
+                  </div>
+                )}
+                {externalUsers && (
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="birthday">{t("editUser.birthday")}</Label>
+                    </div>
+                    <TextInput
+                      id="birthday"
+                      type="date"
+                      sizing="sm"
+                      {...formik.getFieldProps("birthday")}
+                      color={
+                        formik.touched.birthday && formik.errors.birthday
+                          ? "failure"
+                          : "gray"
+                      }
+                    />
+                    {displayError("birthday")}
+                  </div>
+                )}
+
+                {externalUsers && (
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="date_issuance_document">
+                        {t("editUser.dateIssuanceDoc")}
+                      </Label>
+                    </div>
+                    <TextInput
+                      id="date_issuance_document"
+                      type="date"
+                      sizing="sm"
+                      {...formik.getFieldProps("date_issuance_document")}
+                      color={
+                        formik.touched.date_issuance_document &&
+                        formik.errors.date_issuance_document
+                          ? "failure"
+                          : "gray"
+                      }
+                    />
+                    {displayError("date_issuance_document")}
+                  </div>
+                )}
+
                 <div className="w-full">
                   <div className="block mb-2">
                     <Label htmlFor="state">{t("editUser.state")}</Label>
@@ -379,35 +672,60 @@ const getExternalUsers = async () => {
                   {displayError("rol")}
                 </div>
               </div>
-            </form>
-          </div>
-
-          <div className="flex justify-end gap-3 mt-3">
-            <Button onClick={() => navigate(`/administration/users/${userId}`)} color="alternative">
-              {t("common.cancel")}
-            </Button>
-            <Button onClick={() => setDeletingUser(true)} color="blue">
-              {t("editUser.saveChange")}
-            </Button>
-          </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-3">
+              <Button
+                onClick={() => navigate(`/administration/users/${userId}`)}
+                color="alternative"
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button
+                type="button"
+                color="blue"
+                disabled={!formik.dirty || formik.isSubmitting}
+                onClick={() => {
+                  if (!formik.dirty) {
+                    setAlert({
+                      message: "editUser.noChanges",
+                      type: "warning",
+                    });
+                    return;
+                  }
+                  formik.handleSubmit();
+                }}
+              >
+                {t("editUser.saveChange")}
+              </Button>
+            </div>
+          </form>
         </div>
       )}
-
       <div className="fixed z-50 flex flex-col gap-3 bottom-4 right-4">
-  {toasts.map((toast) => (
-    <ToastSimple
-      key={toast.id}
-      messageKey={toast.messageKey}
-      messageParams={toast.messageParams}
-      type={toast.type}
-      to={toast.to}
-      linkText={toast.linkText}
-      onClose={() =>
-        setToasts((prev) => prev.filter((t) => t.id !== toast.id))
-      }
-    />
-  ))}
-</div>
+        {toasts.map((toast) => (
+          <ToastSimple
+            key={toast.id}
+            messageKey={toast.messageKey}
+            messageParams={toast.messageParams}
+            type={toast.type}
+            to={toast.to}
+            linkText={toast.linkText}
+            onClose={() =>
+              setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+            }
+          />
+        ))}
+      </div>
+      {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
     </AppLayoutSB>
   );
 };

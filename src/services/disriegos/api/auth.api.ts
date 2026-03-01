@@ -1,3 +1,4 @@
+import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
 import type { ExternalUser } from "../../../dto/request/externalUser-request.dto";
 import { authAxios } from "./axios";
 import { authPrivateAxios } from "./axiosPrivate";
@@ -72,4 +73,22 @@ export const authApiDisriego = {
      */
     changeUserStatus: (user_id: number, new_status: number) =>
     authPrivateAxios.post(`base/users/change-user-status/`,{user_id, new_status}),
+
+    /**
+     *  Editar usuario como administrador
+     * @param {ExternalUser} payload
+     * @param {number} id
+     * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+     */
+    editUserByAdmin: (payload: ExternalUser, id:number) =>
+    authPrivateAxios.put(`base/users/admin/edit/${id}`, payload),
+
+    /**
+     *  Cambiar la contraseña desde mi perfil
+     * @param {ChangePasswordRequest} payload
+     * @param {number} id
+     * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+     */
+    changePasswordUser: (payload: ChangePasswordRequest, id:number) =>
+    authPrivateAxios.post(`base/users/${id}/change-password`, payload),
 }

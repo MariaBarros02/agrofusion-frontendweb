@@ -105,7 +105,15 @@
         "state": "Estado",
         "placeholderState": "Selecciona un estado",
         "noRole": "Sin rol",
-        "externalUserLookupFailed": "Hubo un error al buscar el usuario"
+        "externalUserLookupFailed": "Hubo un error al buscar el usuario",
+        "externalEditFailed": "Hubo un error al actualizar el usuario.",
+        "documentNumber": "Número de documento",
+        "birthday": "Fecha de nacimiento",
+        "dateIssuanceDoc":"Fecha de expedición",
+       "editFailed": "Hubo un error al actualizar el usuario.", 
+       "noChanges": "No hay cambios por guardar",
+       "editSuccess":"El usuario fue actualizado correctamente"
+       
     },
     "project": {
         "title": "Administrar proyectos",
@@ -141,7 +149,8 @@
         "description": "Ingresa a tus cuentas en los proyectos externos asociados a AgroFusion",
         "loading": "Cargando proyectos externos ...",
         "loadingError": "¡Error al cargar proyectos externos!",
-        "integrate": "Integra con costos y activos fijos"
+        "integrate": "Integra con costos y activos fijos",
+        "noProjects": "No hay proyectos activos disponibles"
     },
     "users":{
         "title": "Gestion de usuarios",
@@ -161,7 +170,8 @@
         "role": "Rol",
         "createdAt": "Fecha de creación",
         "actions": "Acciones",
-        "viewDetail": "Ver detalle"
+        "viewDetail": "Ver detalle",
+        "users": "usuarios"
     },
     "createUser":{
         "title": "Registro de usuario",
@@ -199,6 +209,39 @@
         "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente."
 
     },
+    "profile": {
+        "title": "Mi perfil",
+        "description": "En esta sección podrás visualizar y editar tu información personal",
+        "personalInformation": "Información personal",
+        "name": "Nombre completo",
+        "documentType": "Tipo de documento",
+        "documentNumber": "Número de documento",
+        "birthday": "Fecha de nacimiento",
+        "dateIssuanceDoc": "Fecha de expedición",
+        "gender": "Género",
+        "email":"Correo electrónico",
+        "telephone": "Teléfono",
+        "address": "Dirección",
+        "changePassword": "Cambiar contraseña",
+        "edit": "Editar",
+        "editProfile": "Editar perfil",
+        "save": "Guardar",
+        "loading": "Cargando detalles del usuario...",
+        "error": "Error al cargar el perfil del usuario...",
+        "firstLastName": "Primer apellido",
+        "secondLastName": "Segundo apellido",
+        "placeholderGender": "Selecciona el género",
+        "oldPassword": "Contraseña actual",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword":"Confirmar contraseña",
+        "externalPasswordChangeFailed": "Hubo un error al cambiar la contraseña en {{service}}",
+        "externalEditFailed": "Hubo un error al actualizar tu perfil en {{service}}",
+        "editSuccess": "Tu perfil se actualizó correctamente",
+        "passwordChangeFailed": "Hubo un error al actualizar tu constraseña, intentelo nuevamente.",
+        "changePasswordSuccess": "Se actualizó tu contraseña correctamente.",
+        "noChanges": "No hay cambios por guardar"
+       
+    },
     "accountActivation": {
         "resetPassword": "Establece una nueva contraseña",
         "instructions":"Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
@@ -226,7 +269,8 @@
         "deleteUserQuestion": "¿Eliminar usuario?",
         "deleteFDescription": "Esta acción desactivará al usuario",
         "deleteSDescription": "Podrás reactivarlo más adelante.",
-        "confirmDeleted": "Confirmar eliminación"
+        "confirmDeleted": "Confirmar eliminación",
+        "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema."
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
@@ -234,14 +278,14 @@
         "passwordRequired": "La contraseña es obligatoria.",
         "confirmPasswordRequired": "Debes confirmar la contraseña.",
 
-        "passwordMinLength": "La contraseña debe tener al menos 10 caracteres.",
+        "passwordMinLength": "La contraseña debe tener al menos 12 caracteres.",
         "passwordMaxLength": "La contraseña no puede exceder los 128 caracteres.",
-        "passwordMin": "La contraseña debe tener al menos 10 caracteres.",
+        "passwordMin": "La contraseña debe tener al menos 12 caracteres.",
         "passwordLowercase": "La contraseña debe contener al menos una letra minúscula.",
         "passwordUppercase": "La contraseña debe contener al menos una letra mayúscula.",
         "passwordNumber": "La contraseña debe contener al menos un número.",
         "passwordSpecialChar": "La contraseña debe contener al menos un carácter especial.",
-
+        "nameMin": "El nombre debe contener al menos 3 carácteres",
         "completeField": "Completa este campo",
         "completedField": "Completa este campo",
         "invalidDate": "La fecha no es válida",
@@ -257,6 +301,7 @@
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
     "AUTH_USER_DELETED": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_USER_INACTIVE": "El usuario no esta activo, no puede iniciar sesión",
     "AUTH_INVALID_PASSWORD": "Correo o contraseña incorrectos. Intenta nuevamente.",
     "AUTH_USER_BLOCKED": "Tu cuenta ha sido bloqueada temporalmente por múltiples intentos fallidos. Intenta nuevamente en {{minutes}} minuto(s).",
     "AUTH_ACCOUNT_NOT_ACTIVATED": "Tu cuenta no ha sido activada. Revisa tu correo para activar el acceso.",
@@ -285,7 +330,10 @@
     
     "AUTH_PASSWORD_RESET_FAILED": "No fue posible restablecer la contraseña.",
     "AUTH_GENERIC": "Ocurrió un error inesperado. Inténtalo nuevamente.",
-    "OLD_PASSWORD_INCORRECT": "Contraseña temporal incorrecta, intente nuevamente."
+    "OLD_PASSWORD_INCORRECT": "Contraseña temporal incorrecta, intente nuevamente.",
+    "NOT_OWNER_PROFILE": "No puedes editar un perfil que no te pertenece",
+    "INCORRECT_PASSWORD": "La contraseña actual ingresada es incorrecta",
+    "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior"
     }   
 
 }

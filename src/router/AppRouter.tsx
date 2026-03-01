@@ -12,6 +12,7 @@ import CreateUser from "../pages/users/CreateUser";
 import AccountActivation from "../pages/users/AccountActivation";
 import ViewUser from "../pages/users/ViewUser";
 import EditUser from "../pages/users/EditUser";
+import Profile from "../pages/profile/Profile";
 
 /**
  * Router Principal de la Aplicación.
@@ -76,6 +77,16 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* RUTA DE PERFIL */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

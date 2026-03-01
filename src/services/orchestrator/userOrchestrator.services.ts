@@ -11,6 +11,8 @@ import {
   accountActivationService as accountActivationServiceDisriego,
   getUserByEmailService as getUserByEmailServiceDisriego,
   changeStateUserService as changeStateUserServiceDisriego,
+  editUserByAdminService as editUserByAdminServiceDisriego,
+  changePasswordService as changePasswordServiceDisriego
 } from "../disriegos/auth.service";
 import {
   createUserByAdminService as createUserByAdminServiceSigma,
@@ -19,9 +21,12 @@ import {
   accountActivationService as accountActivationServiceSigma,
   changeStateUserService as changeStateUserServiceSigma,
   getUserByEmailService as getUserByEmailServiceSigma,
+  editUserByAdminService as editUserByAdminServiceSigma,
+  changePasswordService as changePasswordServiceSigma,
 } from "../sigma/auth.service";
 import type { ExternalUser } from "../../dto/request/externalUser-request.dto";
 import { handleReqResPasswordEP, handleResPasswordEP } from "./authOrchestrator.service";
+import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 
 export interface ProjectRole {
   role_id: number;
@@ -656,6 +661,337 @@ export const handleChangeUserStatusEP = async (
   /* ================================
      REGISTRAR ERRORES EN AUDITORÍA
   ================================= */
+
+  if (auditErrors.length > 0) {
+    await registerErrorPEService(auditErrors);
+  }
+
+  return { results, errors: uiErrors };
+};
+
+export const handleEditUserEP = async (
+  payload: ExternalUser,
+  userId: number,
+  projects?: ExternalProject[]
+): Promise<{
+  results: Record<string, any>;
+  errors: GetEPError[];
+}> => {
+
+  if (!projects || projects.length === 0) {
+    return { results: {}, errors: [] };
+  }
+
+  const tasks: {
+    service: string;
+    promise: Promise<any>;
+  }[] = [];
+
+  /* ================================
+     REGISTRO DINÁMICO
+  ================================= */
+
+  if (projects.some(p => p.instance_code === "DISRIEGO")) {
+    tasks.push({
+      service: "DISRIEGO",
+      promise: safePromise(() =>
+        editUserByAdminServiceDisriego(payload, userId)
+      )
+    });
+  }
+
+  if (projects.some(p => p.instance_code === "SIGMA")) {
+    tasks.push({
+      service: "SIGMA",
+      promise: safePromise(() =>
+        editUserByAdminServiceSigma(payload, userId)
+      )
+    });
+  }
+
+  /* ================================
+     EJECUCIÓN EN PARALELO
+  ================================= */
+
+  const resultsSettled = await Promise.allSettled(
+    tasks.map(t => t.promise)
+  );
+
+  const auditErrors: RegisterErrorPEPayload[] = [];
+  const uiErrors: GetEPError[] = [];
+  const results: Record<string, any> = {};
+
+  /* ================================
+     PROCESAR RESULTADOS
+  ================================= */
+
+  resultsSettled.forEach((result, index) => {
+    const service = tasks[index].service;
+
+    if (result.status === "fulfilled") {
+      results[service] = result.value;
+    } else {
+      const error = result.reason;
+
+      const message =
+        error?.response?.data?.detail?.message ??
+        "No se pudo editar el usuario.";
+
+      /* ================================
+         AUDITORÍA
+      ================================= */
+
+      auditErrors.push({
+        context: "EDIT_USER_BY_ADMIN",
+        project: service,
+        message,
+        severity: "HIGH",
+        payload_excerpt: {
+          status: error?.response?.status
+            ? String(error.response.status)
+            : "N/A",
+          data: error?.response?.data
+            ? JSON.stringify(error.response.data)
+            : "N/A"
+        },
+        error_code: "EXT_EDIT_USER_FAILED",
+        component: "Edición usuario externo"
+      });
+
+      /* ================================
+         ERROR PARA UI
+      ================================= */
+
+      uiErrors.push({
+        project: service,
+        messageKey: "editUser.externalEditFailed",
+        messageParams: { service },
+        type: "error",
+        to: projectsLinks[service]?.to,
+        linkText: projectsLinks[service]?.linkText ?? ""
+      });
+    }
+  });
+
+  /* ================================
+     REGISTRAR ERRORES
+  ================================= */
+
+  if (auditErrors.length > 0) {
+    await registerErrorPEService(auditErrors);
+  }
+
+  return { results, errors: uiErrors };
+};
+
+
+export const handleEditUserProfileEP = async (
+  payload: ExternalUser,
+  userId: number,
+  projects?: ExternalProject[]
+): Promise<{
+  results: Record<string, any>;
+  errors: GetEPError[];
+}> => {
+
+  if (!projects || projects.length === 0) {
+    return { results: {}, errors: [] };
+  }
+
+  const tasks: {
+    service: string;
+    promise: Promise<any>;
+  }[] = [];
+
+  /* ================================
+     REGISTRO DINÁMICO
+  ================================= */
+
+  if (projects.some(p => p.instance_code === "DISRIEGO")) {
+    tasks.push({
+      service: "DISRIEGO",
+      promise: safePromise(() =>
+        editUserByAdminServiceDisriego(payload, userId)
+      )
+    });
+  }
+
+  if (projects.some(p => p.instance_code === "SIGMA")) {
+    tasks.push({
+      service: "SIGMA",
+      promise: safePromise(() =>
+        editUserByAdminServiceSigma(payload, userId)
+      )
+    });
+  }
+
+  /* ================================
+     EJECUCIÓN PARALELA
+  ================================= */
+
+  const resultsSettled = await Promise.allSettled(
+    tasks.map(t => t.promise)
+  );
+
+  const auditErrors: RegisterErrorPEPayload[] = [];
+  const uiErrors: GetEPError[] = [];
+  const results: Record<string, any> = {};
+
+  resultsSettled.forEach((result, index) => {
+    const service = tasks[index].service;
+
+    if (result.status === "fulfilled") {
+      results[service] = result.value;
+    } else {
+      const error = result.reason;
+
+      const message =
+        error?.response?.data?.detail?.message ??
+        "No se pudo editar el perfil.";
+
+      /* ================================
+         AUDITORÍA
+      ================================= */
+
+      auditErrors.push({
+        context: "EDIT_USER_PROFILE",
+        project: service,
+        message,
+        severity: "HIGH",
+        payload_excerpt: {
+          status: error?.response?.status
+            ? String(error.response.status)
+            : "N/A",
+          data: error?.response?.data
+            ? JSON.stringify(error.response.data)
+            : "N/A"
+        },
+        error_code: "EXT_EDIT_PROFILE_FAILED",
+        component: "Edición perfil usuario"
+      });
+
+      /* ================================
+         ERROR UI
+      ================================= */
+
+      uiErrors.push({
+        project: service,
+        messageKey: "profile.externalEditFailed",
+        messageParams: { service },
+        type: "error",
+        to: projectsLinks[service]?.to,
+        linkText: projectsLinks[service]?.linkText ?? ""
+      });
+    }
+  });
+
+  if (auditErrors.length > 0) {
+    await registerErrorPEService(auditErrors);
+  }
+
+  return { results, errors: uiErrors };
+};
+
+
+export const handleChangePasswordEP = async (
+  payload: ChangePasswordRequest,
+  userId: number,
+  projects?: ExternalProject[]
+): Promise<{
+  results: Record<string, any>;
+  errors: GetEPError[];
+}> => {
+
+  if (!projects || projects.length === 0) {
+    return { results: {}, errors: [] };
+  }
+
+  const tasks: {
+    service: string;
+    promise: Promise<any>;
+  }[] = [];
+
+  /* ================================
+     REGISTRO DINÁMICO
+  ================================= */
+
+  if (projects.some(p => p.instance_code === "DISRIEGO")) {
+    tasks.push({
+      service: "DISRIEGO",
+      promise: safePromise(() =>
+        changePasswordServiceDisriego(payload, userId)
+      )
+    });
+  }
+
+  if (projects.some(p => p.instance_code === "SIGMA")) {
+    tasks.push({
+      service: "SIGMA",
+      promise: safePromise(() =>
+        changePasswordServiceSigma(payload, userId)
+      )
+    });
+  }
+
+  /* ================================
+     EJECUCIÓN EN PARALELO
+  ================================= */
+
+  const resultsSettled = await Promise.allSettled(
+    tasks.map(t => t.promise)
+  );
+
+  const auditErrors: RegisterErrorPEPayload[] = [];
+  const uiErrors: GetEPError[] = [];
+  const results: Record<string, any> = {};
+
+  resultsSettled.forEach((result, index) => {
+    const service = tasks[index].service;
+
+    if (result.status === "fulfilled") {
+      results[service] = result.value;
+    } else {
+      const error = result.reason;
+
+      const message =
+        error?.response?.data?.detail?.message ??
+        "No se pudo cambiar la contraseña.";
+
+      /* ================================
+         AUDITORÍA (ALTA SEVERIDAD)
+      ================================= */
+
+      auditErrors.push({
+        context: "CHANGE_PASSWORD",
+        project: service,
+        message,
+        severity: "HIGH",
+        payload_excerpt: {
+          status: error?.response?.status
+            ? String(error.response.status)
+            : "N/A",
+          data: error?.response?.data
+            ? JSON.stringify(error.response.data)
+            : "N/A"
+        },
+        error_code: "EXT_CHANGE_PASSWORD_FAILED",
+        component: "Cambio contraseña usuario"
+      });
+
+      /* ================================
+         ERROR UI
+      ================================= */
+
+      uiErrors.push({
+        project: service,
+        messageKey: "profile.externalPasswordChangeFailed",
+        messageParams: { service },
+        type: "error",
+        to: projectsLinks[service]?.to,
+        linkText: projectsLinks[service]?.linkText ?? ""
+      });
+    }
+  });
 
   if (auditErrors.length > 0) {
     await registerErrorPEService(auditErrors);

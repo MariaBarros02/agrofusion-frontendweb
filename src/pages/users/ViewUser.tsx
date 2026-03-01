@@ -49,9 +49,25 @@ const ViewUser = () => {
   };
 
 const deleteUser = async () => {
+
+  try {
+    await deleteUserService(userId || "");
+  } catch (error) {
+    console.log(error)
+    setToasts((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          messageKey: "viewUser.errorUserAdministrator",
+          messageParams: {},
+          type:  "error",
+        },
+      ]);
+    return;
+  }
   try {
     setLoading(true);
-
+    
     const data = await getExternalProjects();
 
     const { users: externalUsersResponse, errors: getUserErrors } =
@@ -107,7 +123,7 @@ const deleteUser = async () => {
       });
     });
 
-    await deleteUserService(userId || "");
+    
 
     getUserDetails();
   } catch (error) {
@@ -203,18 +219,18 @@ const deleteUser = async () => {
           </div>
         </div>
       )}
-      {deletingUser && !error && (
+      {deletingUser && !loading && !error && (
         <div className="flex flex-col items-center justify-center py-10 bg-white border h-[calc(100vh-130px)]  dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
           <div className="flex flex-col items-center justify-center gap-4 p-16 px-0 text-center bg-white border dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
             <h2 className="text-2xl font-bold">
               {t("viewUser.deleteUserQuestion")}
             </h2>
-            <p className="text-gray-700 md:w-2/3">
+            <p className="text-gray-700 dark:text-white md:w-2/3">
               {t("viewUser.deleteFDescription")}{" "}
-              <span className="font-bold text-gray-900">
-                {userDetails?.name}
+              <span className="font-bold text-gray-900 dark:text-white">
+                {userDetails?.name}.
               </span>{" "}
-              . {t("viewUser.deleteSDescription")}
+               {t("viewUser.deleteSDescription")}
             </p>
             <div className="flex gap-3">
               <Button
@@ -236,7 +252,7 @@ const deleteUser = async () => {
           </div>
         </div>
       )}
-      <div className="fixed z-50 flex flex-col gap-3 bottom-4 right-4">
+      <div className="fixed z-50 flex flex-col gap-3 top-4 right-4">
   {toasts.map((toast) => (
     <ToastSimple
       key={toast.id}
