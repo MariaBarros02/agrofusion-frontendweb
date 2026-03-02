@@ -5,6 +5,8 @@ import type { createUserRequest } from "../../dto/request/createUser-request.dto
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
 import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
+import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
+import type { EditPermissionRequest } from "../../dto/request/editPermission-request.dto";
 
 
 /**
@@ -226,5 +228,42 @@ export const changePasswordService = async (
 )=>{
   
   const {data} = await authApi.changePassword(userId, payload);
+  return data;
+}
+
+/*
+ * Listar permisos del sistema
+ *
+ */
+export const listPermissionsService = async (
+  payload: listPermissionsRequest
+)=>{
+  const {data} = await authApi.listPemissions(payload);
+  return data;
+}
+
+/*
+ * Listar un permiso del sistema
+ *
+ */
+export const getDetailsPermissionService = async (
+  permId: string
+)=>{
+
+  const {data} = await authApi.getPemission(permId);
+  return data;
+}
+
+
+/*
+ * Listar un permiso del sistema
+ *
+ */
+export const editPermissionService = async (
+  permId: string,
+  payload:EditPermissionRequest
+)=>{
+
+  const {data} = await authApi.editPemission(permId, payload);
   return data;
 }

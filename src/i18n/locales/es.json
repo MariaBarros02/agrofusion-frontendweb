@@ -36,7 +36,12 @@
         "next": "Siguiente",
         "externalStatusChangeFailed": "Ocurrió un error al actualizar el estado del usuario.",
         "roles": "Roles",
-        "permissions": "Permisos"
+        "permissions": "Permisos",
+        "create": "Crear registro",
+        "update": "Actualizar registro",
+        "delete": "Eliminar registro",
+        "read": "Vizualizar registro(s)"
+        
     },
     "theme":{
         "dark": "Modo oscuro",
@@ -288,12 +293,49 @@
         "module": "Módulo",
         "submodule": "Submódulo",
         "state": "Estado",
-        "funtions": "Funcionalidades",
+        "functions": "Funcionalidades",
         "view": "Ver",
         "edit": "Editar",
-        "delete": "Eliminar"
-
+        "delete": "Eliminar",
+        "administration": "Administración"
     },
+    "viewPermission": {
+        "title": "Detalles del permiso",
+        "description": "Consulta y administración individual",
+        "loading": "Cargando detalles del permiso...",
+        "error": "Hubo un error al cargar los detalles del permiso.",
+        "generalInformation": "Información general",
+        "goBack": "Volver al listado",
+        "id": "Identificador",
+        "code": "Código",
+        "name": "Nombre",
+        "descriptionDetail":"Descripción",
+        "state": "Estado",
+        "type": "Tipo",
+        "module": "Módulo",
+        "submodule": "Submódulo",
+        "action": "Acción",
+        "editPermission": "Editar permiso"
+    }, 
+    "editPermission":{
+        "title": "Editar permiso",
+        "loading": "Cargando detalles del permiso...",
+        "error": "Hubo un error al cargar o editar el permiso.", 
+        "editInformation": "Información editable",
+        "save": "Guardar cambios",
+        "name": "Nombre del permiso",
+        "description": "Descripción",
+        "code": "Código del permiso",
+        "state": "Estado",
+        "type": "Tipo",
+        "moduleSub":"Módulo o submódulo asociados",
+        "noChanges":"No hay cambios por guardar",
+        "namePlaceholder": "Ej. Listar usuarios activos",
+        "descripPlaceholder": "Breve descripción del rol. (Opcional)",
+        "errorEdit": "Hubo un error al actualizar el permiso. Intentelo nuevamente",
+        "successEdit": "El permiso ha sido actualizado correctamente"
+
+    },     
     "roles": {
         "createRoles": "Crear roles",
         "title": "Gestión de roles",
@@ -323,7 +365,7 @@
         "invalidDate": "La fecha no es válida",
         "dateMustBeAfterBirthday": "La fecha debe ser posterior a la fecha de nacimiento",
         "dateNotInFuture": "La fecha no puede ser futura",
-
+        "descriptionMin": "La descripción debe contener mínimo 8 carácteres",
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
 
         "passwordsMustMatch": "Las contraseñas no coinciden.",

@@ -36,7 +36,7 @@ const TitleTarget = ({ title, description, tabs, activeTab, onTabChange }: Title
       </div>
 
       {tabs && (
-        <div className="inline-flex my-3 rounded-lg bg-gray-100 border">
+        <div className="inline-flex my-3 rounded-lg bg-gray-100 border dark:bg-gray-700">
           {tabs.map((tab) => {
             const Icon = tab.icon;
 

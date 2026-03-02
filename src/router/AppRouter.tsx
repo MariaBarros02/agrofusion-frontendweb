@@ -15,6 +15,8 @@ import ListPermissions from "../pages/permissions/ListPermissions";
 import ListRoles from "../pages/roles/ListRoles";
 import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
+import PermissionsView from "../pages/permissions/PermissionsView";
+import EditPermissions from "../pages/permissions/EditPermissions";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -110,7 +112,8 @@ export function AppRouter() {
 
         {/* PERMISSIONS */}
         <Route path="permissions" element = {<ListPermissions/>}/> 
-
+        <Route path="permissions/:permId" element = {<PermissionsView/>}/> 
+        <Route path="permissions/edit-perm/:permId" element = {<EditPermissions/>}/> 
         
         {/* ROLES */}
         <Route path="roles" element = {<ListRoles/>}/> 

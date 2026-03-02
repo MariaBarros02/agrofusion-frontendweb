@@ -69,7 +69,10 @@ export interface ListPermissionsResponse{
     /*Modulo asociado al permisos */
     module: string;
     /*Submodulo asociado al submodulo */
-    submodule: string;
+    submodule?: string ;
     /*Estadod el permiso */
     state: string; 
+    description?: string;
+    action?: string;
+
 }
