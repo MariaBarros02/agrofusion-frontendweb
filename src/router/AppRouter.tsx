@@ -11,7 +11,10 @@ import UsersList from "../pages/users/UsersList";
 import CreateUser from "../pages/users/CreateUser";
 import AccountActivation from "../pages/users/AccountActivation";
 import ViewUser from "../pages/users/ViewUser";
-
+import ListPermissions from "../pages/permissions/ListPermissions";
+import ListRoles from "../pages/roles/ListRoles";
+import Profile from '../pages/profile/Profile'
+import EditUser from "../pages/users/EditUser";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -79,6 +82,18 @@ export function AppRouter() {
           }
         />
 
+      
+        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+
 
       {/* RUTA PADRE ADMINISTRACION */}
       <Route path="administration">
@@ -87,10 +102,18 @@ export function AppRouter() {
         <Route path="users" element={<UsersList />} />
         <Route path="users/create-user" element={<CreateUser />} />
         <Route path="users/:userId" element={<ViewUser />} />
-        {/* <Route path="users/edit-user/:userId" element={<EditUser />} />
+        <Route path="users/edit-user/:userId" element={<EditUser />} />
+
+        {/* 
 
         <Route path="projects" element={<ProjectsList />} />  */}
 
+        {/* PERMISSIONS */}
+        <Route path="permissions" element = {<ListPermissions/>}/> 
+
+        
+        {/* ROLES */}
+        <Route path="roles" element = {<ListRoles/>}/> 
       </Route>
 
       </Routes>

@@ -61,7 +61,7 @@ const mapStatusToText = (status?: number | string) => {
 
 const getStatusNumber = (statusText: string) => {
   const entry = Object.entries(STATUS_VOCABULARY).find(
-    ([, value]) => value === statusText
+    ([, value]) => value === statusText,
   );
   return entry ? Number(entry[0]) : undefined;
 };
@@ -108,7 +108,10 @@ const EditUser = () => {
   const [projects, setProjects] = useState<ExternalProject[] | undefined>(
     undefined,
   );
+  const isAdmin =
+  userId === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 
+  console.log(isAdmin)
   const [alert, setAlert] = useState<AlertState>(null);
 
   const [externalLoaded, setExternalLoaded] = useState(false);
@@ -329,27 +332,27 @@ const EditUser = () => {
          4️ PAYLOAD EXTERNO
       ============================ */
 
-const editResults = await Promise.all(
-  Object.entries(externalUsersResponse).map(([service, user]) => {
-    const externalPayload = {
-      name: values.name,
-      first_last_name: values.first_last_name,
-      second_last_name: values.second_last_name,
-      document_number: values.document_number,
-      type_document_id: user.type_document_id, 
-      date_issuance_document: values.date_issuance_document,
-      birthday: values.birthday,
-      gender_id: Number(values.gender_id),
-      roles: user.roles ?? [], 
-    };
+      const editResults = await Promise.all(
+        Object.entries(externalUsersResponse).map(([service, user]) => {
+          const externalPayload = {
+            name: values.name,
+            first_last_name: values.first_last_name,
+            second_last_name: values.second_last_name,
+            document_number: values.document_number,
+            type_document_id: user.type_document_id,
+            date_issuance_document: values.date_issuance_document,
+            birthday: values.birthday,
+            gender_id: Number(values.gender_id),
+            roles: user.roles ?? [],
+          };
 
-    return handleEditUserProfileEP(
-      externalPayload,
-      user.id,
-      projects.filter((p) => p.instance_code === service),
-    );
-  }),
-);
+          return handleEditUserProfileEP(
+            externalPayload,
+            user.id,
+            projects.filter((p) => p.instance_code === service),
+          );
+        }),
+      );
 
       console.log(editResults);
 
@@ -376,34 +379,34 @@ const editResults = await Promise.all(
 
       const newStatusNumber = getStatusNumber(values.state);
 
-const changeResults = await Promise.all(
-  Object.entries(externalUsersResponse).map(([service, user]) =>
-    handleChangeUserStatusEP(
-      {
-        user_id: user.id,
-        new_status: newStatusNumber || 1,
-      },
-      projects.filter((p) => p.instance_code === service),
-    ),
-  ),
-);
-    // Mostrar errores de cambio de estado
-    changeResults.forEach(({ errors }) => {
-      errors.forEach((err) => {
-        const link = projectsLinks[err.project];
+      const changeResults = await Promise.all(
+        Object.entries(externalUsersResponse).map(([service, user]) =>
+          handleChangeUserStatusEP(
+            {
+              user_id: user.id,
+              new_status: newStatusNumber || 1,
+            },
+            projects.filter((p) => p.instance_code === service),
+          ),
+        ),
+      );
+      // Mostrar errores de cambio de estado
+      changeResults.forEach(({ errors }) => {
+        errors.forEach((err) => {
+          const link = projectsLinks[err.project];
 
-        setToasts((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
-          },
-        ]);
+          setToasts((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              messageKey: err.messageKey,
+              messageParams: err.messageParams,
+              type: err.type ?? "error",
+              ...(link ?? {}),
+            },
+          ]);
+        });
       });
-    });
 
       showSuccessToast();
       setAlert({
@@ -625,52 +628,55 @@ const changeResults = await Promise.all(
                     {displayError("date_issuance_document")}
                   </div>
                 )}
-
-                <div className="w-full">
-                  <div className="block mb-2">
-                    <Label htmlFor="state">{t("editUser.state")}</Label>
+                {!isAdmin && (
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="state">{t("editUser.state")}</Label>
+                    </div>
+                    <Select
+                      id="state"
+                      required
+                      sizing="sm"
+                      {...formik.getFieldProps("state")}
+                      color={
+                        formik.touched.state && formik.errors.state
+                          ? "failure"
+                          : "gray"
+                      }
+                    >
+                      <option value="" disabled>
+                        {t("editUser.placeholderState")}
+                      </option>
+                      <option value="ACTIVE">{t("common.active")}</option>
+                      <option value="INACTIVE">{t("common.inactive")}</option>
+                      <option value="DELETED">{t("common.deleted")}</option>
+                    </Select>
+                    {displayError("state")}
                   </div>
-                  <Select
-                    id="state"
-                    required
-                    sizing="sm"
-                    {...formik.getFieldProps("state")}
-                    color={
-                      formik.touched.state && formik.errors.state
-                        ? "failure"
-                        : "gray"
-                    }
-                  >
-                    <option value="" disabled>
-                      {t("editUser.placeholderState")}
-                    </option>
-                    <option value="ACTIVE">{t("common.active")}</option>
-                    <option value="INACTIVE">{t("common.inactive")}</option>
-                    <option value="DELETED">{t("common.deleted")}</option>
-                  </Select>
-                  {displayError("state")}
-                </div>
-                <div className="w-full">
-                  <div className="block mb-2">
-                    <Label htmlFor="rol">{t("editUser.role")}</Label>
+                )}
+                {!isAdmin && (
+                  <div className="w-full">
+                    <div className="block mb-2">
+                      <Label htmlFor="rol">{t("editUser.role")}</Label>
+                    </div>
+                    <Select
+                      id="rol"
+                      required
+                      sizing="sm"
+                      {...formik.getFieldProps("rol")}
+                      color={
+                        formik.touched.rol && formik.errors.rol
+                          ? "failure"
+                          : "gray"
+                      }
+                    >
+                      <option value="SIN ROL">{t("editUser.noRole")}</option>
+                      <option value="1">{t("common.active")}</option>
+                      <option value="2">{t("common.inactive")}</option>
+                    </Select>
+                    {displayError("rol")}
                   </div>
-                  <Select
-                    id="rol"
-                    required
-                    sizing="sm"
-                    {...formik.getFieldProps("rol")}
-                    color={
-                      formik.touched.rol && formik.errors.rol
-                        ? "failure"
-                        : "gray"
-                    }
-                  >
-                    <option value="SIN ROL">{t("editUser.noRole")}</option>
-                    <option value="1">{t("common.active")}</option>
-                    <option value="2">{t("common.inactive")}</option>
-                  </Select>
-                  {displayError("rol")}
-                </div>
+                )}
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-3">

@@ -34,7 +34,9 @@
         "showing": "Mostrando",
         "previous": "Anterior",
         "next": "Siguiente",
-        "externalStatusChangeFailed": "Ocurrió un error al actualizar el estado del usuario."
+        "externalStatusChangeFailed": "Ocurrió un error al actualizar el estado del usuario.",
+        "roles": "Roles",
+        "permissions": "Permisos"
     },
     "theme":{
         "dark": "Modo oscuro",
@@ -271,6 +273,36 @@
         "deleteSDescription": "Podrás reactivarlo más adelante.",
         "confirmDeleted": "Confirmar eliminación",
         "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema."
+    },
+    "permissions": {
+        "title": "Gestión de permisos",
+        "description": "Consulta y administra los permisos de Agrofusion",
+        "searchPlaceholder" : "Buscar por nombre o código...",
+        "permissions": "permisos",
+        "loading": "Cargando permisos del sistema...",
+        "error": "Hubo un error al cargar los permisos del sistema",
+        "noPermissions": "No se encontraron permisos registrados",
+        "code": "Código",
+        "name": "Nombre",
+        "type": "Tipo",
+        "module": "Módulo",
+        "submodule": "Submódulo",
+        "state": "Estado",
+        "funtions": "Funcionalidades",
+        "view": "Ver",
+        "edit": "Editar",
+        "delete": "Eliminar"
+
+    },
+    "roles": {
+        "createRoles": "Crear roles",
+        "title": "Gestión de roles",
+        "description": "Consulta y administra los roles de Agrofusion",
+        "searchPlaceholder": "Buscar por nombre o código...",
+        "roles": "roles",
+        "loading": "Cargando roles del sistema...",
+        "error": "Hubo un error al cargar los roles del sistema",
+        "noRoles": "No se encontraron roles registrados"
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",

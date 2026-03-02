@@ -1,0 +1,191 @@
+import { useTranslation } from "react-i18next";
+import AppLayoutSB from "../../components/layout/AppLayoutSB";
+import TitleTarget from "../../components/layout/TitleTarget";
+import { Label, TextInput, Select, Button } from "flowbite-react";
+import { HiSearch } from "react-icons/hi";
+import { useState } from "react";
+import { FiEdit2, FiFilter, FiFlag, FiInfo, FiTrash2 } from "react-icons/fi";
+import { BiCube } from "react-icons/bi";
+import DataTable, { type Column } from "../../components/DataTable";
+import type {
+  ListPermissionsResponse,
+  PaginatedPermissionsResponse,
+} from "../../dto/response/listPermissions-response.dto";
+import { useNavigate } from "react-router-dom";
+
+const ListPermissions = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [state, setState] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [paginatedPerm, setPaginatedPerm] =
+    useState<PaginatedPermissionsResponse | null>(null);
+  const getPermissions = (page: number) => {
+    console.log(page);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    getPermissions(newPage);
+  };
+
+  const handleDelete = (permission: ListPermissionsResponse) => {
+    const confirmDelete = window.confirm(
+      `¿Seguro que deseas eliminar ${permission.name}?`,
+    );
+
+    if (confirmDelete) {
+      console.log("Eliminar", permission);
+      // llamar API delete aquí
+    }
+  };
+
+  const columns: Column<ListPermissionsResponse>[] = [
+    { key: "code", label: t("permissions.code"), type: "text" },
+    { key: "name", label: t("permissions.name"), type: "text" },
+    { key: "module", label: t("permissions.module"), type: "text" },
+    { key: "submodule", label: t("permissions.submodule"), type: "text" },
+    { key: "type", label: t("permissions.type"), type: "text" },
+    { key: "state", label: t("common.state"), type: "status" },
+
+    {
+      key: "actions",
+      label: "permissions.functions",
+      type: "actions",
+      actions: [
+        {
+          label: "permissions.view",
+          onClick: (perm) => navigate(`/administration/permissions/${perm.permissions_id}`),
+        },
+        {
+          label: "permissions.edit",
+          icon: <FiEdit2 />,
+          onClick: (perm) =>
+            navigate(`/administration/permissions/edit/${perm.permissions_id}`),
+        },
+        {
+          label: "permissions.delete",
+          icon: <FiTrash2 />,
+          className: "text-red-600 border-red-200 hover:bg-red-50",
+          onClick: (perm) => handleDelete(perm),
+        },
+      ],
+    },
+  ];
+
+  return (
+    <AppLayoutSB>
+      <TitleTarget
+        title="permissions.title"
+        description="permissions.description"
+        activeTab="permissions"
+        tabs={[
+          {
+            id: "roles",
+            label: "common.roles",
+            icon: BiCube,
+            to: "/administration/roles",
+          },
+          {
+            id: "permissions",
+            label: "common.permissions",
+            icon: FiInfo,
+            to: "/administration/permissions",
+          },
+        ]}
+      />
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex gap-2">
+          <div className="w-72">
+            <Label className="text-xs">{t("common.search")}</Label>
+            <TextInput
+              icon={HiSearch}
+              sizing="sm"
+              placeholder={t("permissions.searchPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="w-52">
+            <Label className="text-xs">{t("common.state")}</Label>
+            <Select
+              icon={FiFlag}
+              sizing="sm"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+            >
+              <option value="">
+                {t("common.active")} / {t("common.inactive")}
+              </option>
+              <option value="ACTIVE">{t("common.active")}</option>
+              <option value="INACTIVE">{t("common.inactive")}</option>
+              <option value="DELETED">{t("common.deleted")}</option>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex items-end ml-4 gap-2 mt-2 md:w-1/2 md:mt-0">
+          <Button
+            size="xs"
+            onClick={() => getPermissions(1)}
+            color="alternative"
+          >
+            <FiFilter size={18} /> {t("common.filterActive")}
+          </Button>
+
+          <Button
+            color="blue"
+            size="xs"
+            onClick={() => {
+              setSearch("");
+              setState("");
+            }}
+          >
+            {t("common.filterReset")}
+          </Button>
+          {/* <Button
+            color="blue"
+            size="xs"
+            onClick={() => navigate("/administrator/roles")}
+          >
+            {t("roles.createRoles")}
+          </Button> */}
+        </div>
+      </div>
+      {/* tabla */}
+      {loading && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("permissions.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {error && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("permissions.error")}</p>{" "}
+        </div>
+      )}{" "}
+      {!loading && !error && paginatedPerm?.items.length === 0 && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold text-black dark:text-gray-200">
+            {" "}
+            {t("permissions.noPermissions")}{" "}
+          </p>{" "}
+        </div>
+      )}
+      {!loading && paginatedPerm && paginatedPerm.items.length !== 0  && (
+              <DataTable
+                data={paginatedPerm}
+                columns={columns}
+                onPageChange={handlePageChange}
+                paginationText={t("permissions.permissions")} 
+              />
+      )}
+    </AppLayoutSB>
+  );
+};
+
+export default ListPermissions;

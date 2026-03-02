@@ -22,6 +22,7 @@ interface ActionConfig<T> {
   label: string;
   icon?: React.ReactNode;
   onClick: (row: T) => void;
+  className?: string;
 }
 
 interface SingleActionColumn<T> extends BaseColumn<T> {
@@ -233,7 +234,7 @@ export default function DataTable<T extends Record<string, any>>({
                       return (
                         <td key={String(col.key)} className="px-3 py-3">
                           <button
-                            className="flex items-center gap-2 px-3 py-1 font-semibold dark:bg-gray-800 bg-gray-100 border rounded-2xl hover:bg-gray-50"
+                            className={`flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50 ${actionCol.action.className ?? ""}`}
                             onClick={() => actionCol.action.onClick(row)}
                           >
                             {actionCol.action.icon}
