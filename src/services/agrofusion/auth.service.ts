@@ -16,6 +16,26 @@ export const getExternalProjects = async () => {
   return data
 }
 
+/**
+ * Obtiene el listado de todos los proyectos externos (RF-GES-01).
+ * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+ */
+export const listProjectsService = async () => {
+  const { data } = await authApi.getExternalProjectsList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un proyecto externo (ACTIVE/INACTIVE).
+ */
+export const updateProjectStatusService = async (
+  projectId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateProjectStatus(projectId, status);
+  return data;
+};
+
 
 /**
  * Inicia el proceso de autenticación estándar.

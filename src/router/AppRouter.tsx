@@ -15,6 +15,8 @@ import ListPermissions from "../pages/permissions/ListPermissions";
 import ListRoles from "../pages/roles/ListRoles";
 import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
+import ProjectsList from "../pages/administration/ProjectsList";
+
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -104,9 +106,8 @@ export function AppRouter() {
         <Route path="users/:userId" element={<ViewUser />} />
         <Route path="users/edit-user/:userId" element={<EditUser />} />
 
-        {/* 
-
-        <Route path="projects" element={<ProjectsList />} />  */}
+        {/* PROJECTS */}
+        <Route path="projects" element={<ProjectsList />} />
 
         {/* PERMISSIONS */}
         <Route path="permissions" element = {<ListPermissions/>}/> 

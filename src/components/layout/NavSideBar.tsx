@@ -173,7 +173,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               {adminOpen && (
                 <div className="mt-1 space-y-1 ">
                   <SidebarItem
-                    href="/admininistration/projects"
+                    href="/administration/projects"
                     icon={LuFolderKanban}
                     className={`${subItem} ${
                       isActive("/administration/projects") ? activeItem : ""

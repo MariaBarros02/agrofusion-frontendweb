@@ -7,6 +7,7 @@ import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/resp
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
+import type { ProjectListResponse } from "../../../dto/response/projectList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
 import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
@@ -21,6 +22,22 @@ export const authApi = {
    */
   getExternalProjects: () =>
     authAgrofusionAxios.get<ExternalProject[]>("/external-projects"),
+
+  /**
+   * Obtiene el listado de todos los proyectos externos (RF-GES-01).
+   * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+   */
+  getExternalProjectsList: () =>
+    authAgrofusionAxios.get<ProjectListResponse[]>("/external-projects/list"),
+
+  /**
+   * Actualiza el estado de un proyecto externo (ACTIVE/INACTIVE).
+   */
+  updateProjectStatus: (projectId: string, status: string) =>
+    authAgrofusionAxios.patch<{ message: string; status: string }>(
+      `/external-projects/${projectId}/status`,
+      { status }
+    ),
   /**
    * Realiza el inicio de sesión primario del usuario.
    * @param {LoginDto} data - Credenciales del usuario (email y password).

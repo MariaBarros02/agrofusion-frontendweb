@@ -30,6 +30,7 @@
     "nuip": "NUIP",
     "blocked": "Blocked",
     "delete": "Deleted",
+    "deleted": "Deleted",
     "pending": "Pending",
     "showing": "Showing",
     "previous": "Previous",
@@ -85,8 +86,31 @@
     "errorSSOLogin": "Could not log in to {{project}}. Please try manually."
   },
   "project": {
-    "title": "Manage projects",
-    "description": "Manage and view external projects associated with AgroFusion"
+    "title": "Project management",
+    "description": "View and manage system projects",
+    "list": {
+      "code": "Code",
+      "projectName": "Project name",
+      "createdAt": "Creation date",
+      "responsible": "Responsible",
+      "searchPlaceholder": "Search by name or code",
+      "loading": "Loading projects...",
+      "loadError": "Error loading projects",
+      "deactivateTitle": "Deactivate project",
+      "activateTitle": "Activate project",
+      "deactivateQuestion": "Do you want to deactivate this project?",
+      "activateQuestion": "Do you want to activate this project?",
+      "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive and block its submodules.",
+      "activateDescription": "This action will mark the project as Active and enable it in the system.",
+      "deactivateCheckbox": "I confirm that I wish to deactivate this project.",
+      "activateCheckbox": "I confirm that I wish to activate this project.",
+      "deactivateButton": "Deactivate project",
+      "activateButton": "Activate project",
+      "statusUpdateSuccess": "Project status updated successfully",
+      "statusUpdateError": "Error updating project status",
+      "noProjects": "No projects registered",
+      "paginationText": "projects"
+    }
   },
   "resetPassword": {
     "resetPassword": "Set a new password",
