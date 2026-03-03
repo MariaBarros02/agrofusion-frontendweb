@@ -120,11 +120,6 @@ export default function DataTable<T extends Record<string, any>>({
     null,
   );
 
-  const [selectedStatusRow, setSelectedStatusRow] = useState<{
-    row: T;
-    status: StatusValue;
-  } | null>(null);
-
   return (
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
@@ -210,7 +205,6 @@ export default function DataTable<T extends Record<string, any>>({
                                     className="block w-full px-3 py-2 text-left rounded-lg hover:bg-gray-100"
                                     onClick={() => {
                                       statusCol.onChange(row, status);
-                                      setSelectedStatusRow({ row, status });
                                       setOpenStatusRowIndex(null);
                                     }}
                                   >
@@ -266,38 +260,9 @@ export default function DataTable<T extends Record<string, any>>({
                       );
                     }
 
-                    return <td key={String(col.key)} />;
+                    return <td key={String((col as BaseColumn<T>).key)} />;
                   })}
                 </tr>
-
-                {/* CUSTOM EXPANDABLE DIV */}
-                {selectedStatusRow && selectedStatusRow.row === row && (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="px-6 py-4 bg-blue-50"
-                    >
-                      {/*  AQUÍ DEFINES TU CONTENIDO */}
-                      <div className="p-4 bg-white shadow-sm rounded-xl">
-                        <h4 className="mb-2 font-semibold">
-                          Acción para estado: {selectedStatusRow.status}
-                        </h4>
-
-                        <p className="text-sm text-gray-600">
-                          Aquí puedes renderizar un formulario, confirmación,
-                          motivo de cambio, componente dinámico, etc.
-                        </p>
-
-                        <button
-                          className="px-4 py-2 mt-3 border rounded-lg hover:bg-gray-100"
-                          onClick={() => setSelectedStatusRow(null)}
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
               </React.Fragment>
             ))}
           </tbody>

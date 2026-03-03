@@ -123,8 +123,31 @@
        
     },
     "project": {
-        "title": "Administrar proyectos",
-        "description": "Administra y vizualiza los proyectos externos asociados a Agrofusion"
+        "title": "Gestion de proyectos",
+        "description": "Consulta y administra los proyectos del sistema",
+        "list": {
+            "code": "Código",
+            "projectName": "Nombre del proyecto",
+            "createdAt": "Fecha de creación",
+            "responsible": "Responsable",
+            "searchPlaceholder": "Buscar por nombre o código",
+            "loading": "Cargando proyectos...",
+            "loadError": "Error al cargar proyectos",
+            "deactivateTitle": "Desactivar proyecto",
+            "activateTitle": "Activar proyecto",
+            "deactivateQuestion": "¿Quieres desactivar este proyecto?",
+            "activateQuestion": "¿Quieres activar este proyecto?",
+            "deactivateDescription": "Esta acción no borrará los datos físicos, pero lo marcará como Inactivo y bloqueará sus submódulos.",
+            "activateDescription": "Esta acción marcará el proyecto como Activo y lo habilitará en el sistema.",
+            "deactivateCheckbox": "Confirmo que deseo desactivar este proyecto.",
+            "activateCheckbox": "Confirmo que deseo activar este proyecto.",
+            "deactivateButton": "Desactivar proyecto",
+            "activateButton": "Activar proyecto",
+            "statusUpdateSuccess": "Estado del proyecto actualizado correctamente",
+            "statusUpdateError": "Error al actualizar el estado del proyecto",
+            "noProjects": "No hay proyectos registrados",
+            "paginationText": "proyectos"
+        }
     },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
