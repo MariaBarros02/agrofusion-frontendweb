@@ -123,9 +123,9 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-200 dark:bg-gray-800">
-            <tr>
+        <table className="w-full text-sm rounded-2xl">
+          <thead className="bg-gray-200 rounded-2xl  dark:bg-gray-800">
+            <tr className="rounded-2xl">
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
@@ -249,7 +249,7 @@ export default function DataTable<T extends Record<string, any>>({
                           {actionsCol.actions.map((action, i) => (
                             <button
                               key={i}
-                              className="flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50"
+                            className={`flex items-center gap-2 px-3 py-1 border rounded-lg ${action.className ?? ""}`}
                               onClick={() => action.onClick(row)}
                             >
                               {action.icon}

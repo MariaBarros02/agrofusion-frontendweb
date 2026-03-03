@@ -1,8 +1,11 @@
 import type { AccountActivateRequest } from "../../../dto/request/accountActivate-request.dto";
 import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
 import type { createUserRequest } from "../../../dto/request/createUser-request.dto";
+import type { EditPermissionRequest } from "../../../dto/request/editPermission-request.dto";
+import type { listPermissionsRequest } from "../../../dto/request/listPermissions-request.dto";
 import type { listUsersRequest } from "../../../dto/request/listUsers-request.dto";
 import type { LoginDto, MfaDto } from "../../../dto/request/login-request.dto";
+import type { ListPermissionsResponse, PaginatedPermissionsResponse } from "../../../dto/response/listPermissions-response.dto";
 import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/response/listUsers-response.dto";
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
@@ -186,5 +189,30 @@ export const authApi = {
  */
   changePassword: (user_id:string, payload:ChangePasswordRequest) =>
     authAgrofusionAxios.put("users/change-password", payload, {params: { user_id: user_id} }),
+
+  /**
+ * Solicita la lista de permisos
+ * @param {listPermissionsRequest} payload - payload para listar permisos
+  * @returns {PaginatedPermissionsResponse} Respuesta con datos de pemisos y paginación.
+ */
+  listPemissions: (payload:listPermissionsRequest) =>
+    authAgrofusionAxios.get<PaginatedPermissionsResponse>("permissions?", {params: payload}),
+
+  /**
+ * Solicita los detalles de un permiso
+ * @param {string} permId - Id del permiso
+  * @returns {ListPermissionsResponse} Respuesta con datos de pemisos y paginación.
+ */
+  getPemission: (perm_id: string) =>
+    authAgrofusionAxios.get<ListPermissionsResponse>("permissions/get-permission", {params: {perm_id}}),
+
+    /**
+ * Actualiza los detalles de un permiso
+ * @param {string} permId - Id del permiso
+ * @param {EditPermissionRequest} payload - Atributos para actualizar
+  * @returns {any} Respuesta con datos de pemisos y paginación.
+ */
+  editPemission: (perm_id: string, payload:EditPermissionRequest) =>
+    authAgrofusionAxios.put("permissions/edit-permission", payload, {params: {perm_id}}),
 };
 

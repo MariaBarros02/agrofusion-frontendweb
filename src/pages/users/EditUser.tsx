@@ -27,6 +27,7 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
+import { FiSave } from "react-icons/fi";
 interface EditValues {
   name: string;
   first_last_name: string;
@@ -111,7 +112,6 @@ const EditUser = () => {
   const isAdmin =
   userId === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 
-  console.log(isAdmin)
   const [alert, setAlert] = useState<AlertState>(null);
 
   const [externalLoaded, setExternalLoaded] = useState(false);
@@ -701,6 +701,7 @@ const EditUser = () => {
                   formik.handleSubmit();
                 }}
               >
+                 <FiSave size={22} className="mr-1" />
                 {t("editUser.saveChange")}
               </Button>
             </div>
