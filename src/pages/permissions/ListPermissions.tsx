@@ -3,8 +3,8 @@ import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { Label, TextInput, Select, Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { useState } from "react";
-import { FiEdit2, FiFilter, FiFlag, FiInfo, FiTrash2 } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiEdit2, FiFilter, FiFlag, FiInfo } from "react-icons/fi";
 import { BiCube } from "react-icons/bi";
 import DataTable, { type Column } from "../../components/DataTable";
 import type {
@@ -12,6 +12,8 @@ import type {
   PaginatedPermissionsResponse,
 } from "../../dto/response/listPermissions-response.dto";
 import { useNavigate } from "react-router-dom";
+import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
+import { listPermissionsService } from "../../services/agrofusion/auth.service";
 
 const ListPermissions = () => {
   const { t } = useTranslation();
@@ -19,30 +21,45 @@ const ListPermissions = () => {
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [size] = useState(5);
+  const [page,setPage] = useState(1);
+  
   const [paginatedPerm, setPaginatedPerm] =
     useState<PaginatedPermissionsResponse | null>(null);
-  const getPermissions = (page: number) => {
-    console.log(page);
+  //  función principal paginada real
+  const getPermissions = async (pageParam = page) => {
+    try {
+      setLoading(true);
+
+      const payload: listPermissionsRequest = {
+        page_index: pageParam,
+        page_size: size,
+        search: search || undefined,
+        state: state || undefined,
+      };
+
+      const response = await listPermissionsService(payload);
+      setPaginatedPerm(response);
+      setPage(pageParam);
+    } catch (err) {
+      console.log(err);
+      setError("Error loading users");
+    } finally {
+      setLoading(false);
+    }
   };
 
+    useEffect(() => {
+      getPermissions(1);
+    }, [search, state]);
   const handlePageChange = (newPage: number) => {
     getPermissions(newPage);
   };
 
-  const handleDelete = (permission: ListPermissionsResponse) => {
-    const confirmDelete = window.confirm(
-      `¿Seguro que deseas eliminar ${permission.name}?`,
-    );
-
-    if (confirmDelete) {
-      console.log("Eliminar", permission);
-      // llamar API delete aquí
-    }
-  };
 
   const columns: Column<ListPermissionsResponse>[] = [
-    { key: "code", label: t("permissions.code"), type: "text" },
+    { key: "permission_id", label: t("permissions.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
     { key: "name", label: t("permissions.name"), type: "text" },
     { key: "module", label: t("permissions.module"), type: "text" },
     { key: "submodule", label: t("permissions.submodule"), type: "text" },
@@ -51,25 +68,20 @@ const ListPermissions = () => {
 
     {
       key: "actions",
-      label: "permissions.functions",
+      label: t("permissions.functions"),
       type: "actions",
       actions: [
         {
-          label: "permissions.view",
-          onClick: (perm) => navigate(`/administration/permissions/${perm.permissions_id}`),
+          label: t("permissions.view"),
+          onClick: (perm) => navigate(`/administration/permissions/${perm.permission_id}`),
         },
         {
-          label: "permissions.edit",
+          label: t("permissions.edit"),
           icon: <FiEdit2 />,
+          className: "bg-blue-600 text-white hover:bg-blue-500",
           onClick: (perm) =>
-            navigate(`/administration/permissions/edit/${perm.permissions_id}`),
-        },
-        {
-          label: "permissions.delete",
-          icon: <FiTrash2 />,
-          className: "text-red-600 border-red-200 hover:bg-red-50",
-          onClick: (perm) => handleDelete(perm),
-        },
+            navigate(`/administration/permissions/edit-perm/${perm.permission_id}`),
+        }
       ],
     },
   ];
@@ -121,7 +133,6 @@ const ListPermissions = () => {
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
-              <option value="DELETED">{t("common.deleted")}</option>
             </Select>
           </div>
         </div>
