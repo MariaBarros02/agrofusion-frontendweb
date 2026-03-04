@@ -18,6 +18,7 @@ import type { listRolesRequest } from "../../../dto/request/listRoles-request.dt
 import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/response/listRoles-response.dto";
 import type { EditRoleRequest } from "../../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../../dto/request/createRole-request-dto";
+import type { ListBasicRole } from "../../../dto/response/listBasicRoles-response.dto";
 
 /**
  * Servicio encargado de las operaciones de autenticación y gestión de usuarios.
@@ -266,5 +267,12 @@ export const authApi = {
  */
   createRole: (payload:CreateRoleRequest) =>
     authAgrofusionAxios.post("roles/create-role", payload),
+
+  /**
+ * Lista basica de erroes
+  * @returns {ListBasicRole[]} Respuesta de lista basica de errores.
+ */
+  getBasicListRoles: () =>
+    authAgrofusionAxios.get<ListBasicRole[]>("roles/get-list-basic-roles"),
 };
 

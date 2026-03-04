@@ -269,7 +269,8 @@
         "editSuccess": "Tu perfil se actualizó correctamente",
         "passwordChangeFailed": "Hubo un error al actualizar tu constraseña, intentelo nuevamente.",
         "changePasswordSuccess": "Se actualizó tu contraseña correctamente.",
-        "noChanges": "No hay cambios por guardar"
+        "noChanges": "No hay cambios por guardar",
+        "role": "Rol"
        
     },
     "accountActivation": {

@@ -364,3 +364,15 @@ export const createRoleService = async (
   return data;
 }
 
+/*
+ * Lista basica de roles
+ *
+ */
+export const getBasicListRolesService = async (
+ 
+)=>{
+
+  const {data} = await authApi.getBasicListRoles();
+  return data;
+}
+

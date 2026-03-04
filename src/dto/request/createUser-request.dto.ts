@@ -41,6 +41,14 @@ export interface createUserRequest {
      */
     identity_number: string;
 
+    
+    /**
+     * Número de identificación del rol asignado.
+     * 
+     */
+    role_id: string;
+
+
     /**
      * Tokens externos asociados al usuario.
      * 
