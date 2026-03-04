@@ -354,7 +354,7 @@
         "moduleSub":"Módulo o submódulo asociados",
         "noChanges":"No hay cambios por guardar",
         "namePlaceholder": "Ej. Listar usuarios activos",
-        "descripPlaceholder": "Breve descripción del rol. (Opcional)",
+        "descripPlaceholder": "Breve descripción del permiso. (Opcional)",
         "errorEdit": "Hubo un error al actualizar el permiso. Intentelo nuevamente",
         "successEdit": "El permiso ha sido actualizado correctamente"
 
@@ -367,7 +367,84 @@
         "roles": "roles",
         "loading": "Cargando roles del sistema...",
         "error": "Hubo un error al cargar los roles del sistema",
-        "noRoles": "No se encontraron roles registrados"
+        "noRoles": "No se encontraron roles registrados",
+        "code": "Código",
+        "name": "Nombre del rol",
+        "countUsers": "Cantidad de usuarios asociados",
+        "functions": "Funcionalidades",
+        "view":"Ver",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "deleteTitle": "Eliminar rol",
+        "deleteQuestion":"¿Estás seguro de eliminar el rol " ,
+        "deleteDescription": "Esta acción no eliminará de manera física, pero lo marcará com Eliminado y bloqueará su asignación a nuevos usuarios.",
+        "checkboxLabel": "Confirmo que deseo eliminar este rol.",
+        "deleteButton": "Eliminar rol",
+        "deleteError": "Hubo un error al eliminar el rol"
+    },
+
+    "viewRole": {
+        "title": "Detalles del rol",
+        "description": "Consulta y administración individual",
+        "loading": "Cargando detalles del rol...",
+        "error": "Hubo un error al cargar los detalles del rol.",
+        "generalInformation": "Información general",
+        "goBack": "Volver al listado",
+        "id": "Identificador",
+        "code": "Código",
+        "name": "Nombre",
+        "descriptionDetail":"Descripción",
+        "state": "Estado",
+        "type": "Tipo",
+        "module": "Módulo",
+        "submodule": "Submódulo",
+        "action": "Acción",
+        "editPermission": "Editar permiso",
+        "countUsers": "Cantidad de usuarios asociados",
+        "editRole": "Editar rol",
+        "permissions": "Permisos asociados al rol"
+    }, 
+    "editRole": {
+        "title": "Editar rol",
+        "name": "Nombre del rol",
+        "loading": "Cargando detalles del rol...",
+        "error": "Hubo un error al cargar los detalles del rol",
+        "description": "Descripción",
+        "code": "Código",
+        "state": "Estado",
+        "restore": "Restaurar",
+        "permissionsAssigned": "Permisos asociados al rol",
+        "permissionsAvailable": "Permisos disponibles",
+        "save": "Guardar cambios", 
+        "successEdit": "El rol ha sido actualizado correctamente",
+        "warningEdit": "Debe existir al menos un permiso asociado",
+        "errorEdit": "Hubo un error al actualizar el rol. Intentelo nuevamente",
+        "namePlaceholder": "Ej. Contador, administrador, etc.",
+        "descripPlaceholder": "Breve descripción del rol. (Opcional)",
+        
+        "cannotDeactivateWithUsers": "No puedes inactivar un rol que tiene usuarios asociados actualmente"
+    },
+    "createRole": {
+        "title": "Crear rol",
+        "descriptionTitle": "Crea y administra roles en el sistema",
+        "name": "Nombre del rol",
+        "loading": "Cargando formulario para crear el rol...",
+        "error": "Hubo un error al crear el rol",
+        "description": "Descripción",
+        "code": "Código",
+        "state": "Estado",
+        "codePlaceholder": "Código único para el rol",
+        "restore": "Restaurar",
+        "permissionsAssigned": "Permisos asociados al rol",
+        "permissionsAvailable": "Permisos disponibles",
+        "save": "Guardar rol", 
+        "successEdit": "El rol ha sido creado correctamente",
+        "warningEdit": "Debe existir al menos un permiso asociado",
+        "errorEdit": "Hubo un error al actualizar el rol. Intentelo nuevamente",
+        "namePlaceholder": "Ej. Contador, administrador, etc.",
+        "descripPlaceholder": "Breve descripción del rol. (Opcional)",
+        
+        "cannotDeactivateWithUsers": "No puedes inactivar un rol que tiene usuarios asociados actualmente"
     },
     "validation": {
         "emailRequired": "El correo electrónico es obligatorio.",
@@ -430,7 +507,9 @@
     "OLD_PASSWORD_INCORRECT": "Contraseña temporal incorrecta, intente nuevamente.",
     "NOT_OWNER_PROFILE": "No puedes editar un perfil que no te pertenece",
     "INCORRECT_PASSWORD": "La contraseña actual ingresada es incorrecta",
-    "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior"
+    "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior",
+
+    "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con el código {{code}}"
     }   
 
 }

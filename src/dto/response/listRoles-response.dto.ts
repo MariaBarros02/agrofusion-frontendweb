@@ -6,15 +6,17 @@
  * y la metadata necesaria para construir controles de paginación
  * en el frontend.
  * 
- * @interface PaginatedPermissionsResponse
+ * @interface PaginatedRolesResponse
  */
 
-export interface PaginatedPermissionsResponse{
+import type { PermissionBasicResponse } from "./listPermissions-response.dto";
+
+export interface PaginatedRolesResponse{
 
     /**
      * Lista de usuarios correspondientes a la página solicitada.
      */
-    items: ListPermissionsResponse[];
+    items: ListRolesResponse[];
     /**
      * Número total de registros disponibles en la consulta
      * (sin aplicar paginación).
@@ -44,40 +46,15 @@ export interface PaginatedPermissionsResponse{
  * Este modelo se usa típicamente en tablas, grids o vistas paginadas
  * donde no se requiere el detalle completo del permiso.
  * 
- * @interface ListPermissionsResponse
+ * @interface ListRolesResponse
  */
 
-export interface ListPermissionsResponse{
-
-        /**
-     * Identificador único del permiso.
-     */
-    permission_id: string;
-    /**
-     * Codigo único del permiso.
-     */
-    code: string;
-    /**
-     * Nombre del permiso.
-     */
+export interface ListRolesResponse{
+    role_id: string;
+    code:string;
     name: string;
-
-    /**
-     * Tipo del permiso.
-     */
-    type: string;
-    /*Modulo asociado al permisos */
-    module: string;
-    /*Submodulo asociado al submodulo */
-    submodule?: string ;
-    /*Estadod el permiso */
-    state: string; 
+    state: string;
+    count_users: number;
     description?: string;
-    action?: string;
-
-}
-
-export interface PermissionBasicResponse {
-    permission_id: string;
-    permission_name: string;
+    permissions?: PermissionBasicResponse[]
 }

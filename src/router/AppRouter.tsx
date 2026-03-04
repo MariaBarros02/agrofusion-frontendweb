@@ -19,6 +19,10 @@ import ProjectsList from "../pages/administration/ProjectsList";
 
 import PermissionsView from "../pages/permissions/PermissionsView";
 import EditPermissions from "../pages/permissions/EditPermissions";
+import ViewRole from "../pages/roles/ViewRole";
+import RoutesWrapper from "./RoutesWrapper";
+import EditRole from "../pages/roles/EditRole";
+import CreateRole from "../pages/roles/CreateRole";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -99,26 +103,36 @@ export function AppRouter() {
 
 
 
-      {/* RUTA PADRE ADMINISTRACION */}
-      <Route path="administration">
-        
-        {/* USERS */}
-        <Route path="users" element={<UsersList />} />
-        <Route path="users/create-user" element={<CreateUser />} />
-        <Route path="users/:userId" element={<ViewUser />} />
-        <Route path="users/edit-user/:userId" element={<EditUser />} />
+        {/* ================= PROTECTED ROUTES ================= */}
 
-        {/* PROJECTS */}
-        <Route path="projects" element={<ProjectsList />} />
+        <Route
+          element={
+            <ProtectedRoute>
+              <RoutesWrapper />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
 
-        {/* PERMISSIONS */}
-        <Route path="permissions" element = {<ListPermissions/>}/> 
-        <Route path="permissions/:permId" element = {<PermissionsView/>}/> 
-        <Route path="permissions/edit-perm/:permId" element = {<EditPermissions/>}/> 
-        
-        {/* ROLES */}
-        <Route path="roles" element = {<ListRoles/>}/> 
-      </Route>
+          {/* ADMINISTRATION */}
+          <Route path="/administration/users" element={<UsersList />} />
+          <Route path="/administration/users/create-user" element={<CreateUser />} />
+          <Route path="/administration/users/:userId" element={<ViewUser />} />
+          <Route path="/administration/users/edit-user/:userId" element={<EditUser />} />
+
+          <Route path="/administration/projects" element={<ProjectsList />} />
+
+          <Route path="/administration/permissions" element={<ListPermissions />} />
+          <Route path="/administration/permissions/:permId" element={<PermissionsView />} />
+          <Route path="/administration/permissions/edit-perm/:permId" element={<EditPermissions />} />
+
+          <Route path="/administration/roles" element={<ListRoles />} />
+          <Route path="/administration/role/:roleId" element={<ViewRole />} />
+          <Route path="/administration/roles/edit-role/:roleId" element={<EditRole/>}/>
+          <Route path="/administration/roles/create-role" element={<CreateRole/>}/>
+        </Route>
 
       </Routes>
     </BrowserRouter>

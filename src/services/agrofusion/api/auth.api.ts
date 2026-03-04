@@ -5,7 +5,7 @@ import type { EditPermissionRequest } from "../../../dto/request/editPermission-
 import type { listPermissionsRequest } from "../../../dto/request/listPermissions-request.dto";
 import type { listUsersRequest } from "../../../dto/request/listUsers-request.dto";
 import type { LoginDto, MfaDto } from "../../../dto/request/login-request.dto";
-import type { ListPermissionsResponse, PaginatedPermissionsResponse } from "../../../dto/response/listPermissions-response.dto";
+import type { ListPermissionsResponse, PaginatedPermissionsResponse, PermissionBasicResponse } from "../../../dto/response/listPermissions-response.dto";
 import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/response/listUsers-response.dto";
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
@@ -14,6 +14,10 @@ import type { ProjectListResponse } from "../../../dto/response/projectList-resp
 import type { User } from "../../../dto/shared/users.dto";
 import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
+import type { listRolesRequest } from "../../../dto/request/listRoles-request.dto";
+import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/response/listRoles-response.dto";
+import type { EditRoleRequest } from "../../../dto/request/editRole-request.dto";
+import type { CreateRoleRequest } from "../../../dto/request/createRole-request-dto";
 
 /**
  * Servicio encargado de las operaciones de autenticación y gestión de usuarios.
@@ -214,5 +218,53 @@ export const authApi = {
  */
   editPemission: (perm_id: string, payload:EditPermissionRequest) =>
     authAgrofusionAxios.put("permissions/edit-permission", payload, {params: {perm_id}}),
+
+  /**
+ * Solicita la lista de roles
+ * @param {listRolesRequest} payload - payload para listar roles
+  * @returns {PaginatedRolesResponse} Respuesta con datos de roles y paginación.
+ */
+  listRoles: (payload:listRolesRequest) =>
+    authAgrofusionAxios.get<PaginatedRolesResponse>("roles?", {params: payload}),
+
+  /**
+ * Solicita la lista de permisos
+  * @returns {PermissionBasicResponse[]} Respuesta con datos de pemisos 
+ */
+  listPemissionsBasic: () =>
+    authAgrofusionAxios.get<PermissionBasicResponse[]>("permissions/list-basic-permissions"),
+  /**
+ * Eliminar un rol
+ * @param {string} roleId - payload para listar roles
+  * @returns {any} Respuesta.
+ */
+  deleteRole: (role_id:string) =>
+    authAgrofusionAxios.delete("roles/delete-role", {params: {role_id}}),
+
+  /**
+ * Solicita los detalles de un role
+ * @param {string} roleId - Id del role
+  * @returns {ListRolesResponse} Respuesta con datos de roles.
+ */
+  getRole: (role_id: string) =>
+    authAgrofusionAxios.get<ListRolesResponse>("roles/get-role", {params: {role_id}}),
+
+
+  /**
+ * Actualiza los detalles de un rol
+ * @param {string} roleId - Id del rol
+ * @param {EditRoleRequest} payload - Atributos para actualizar
+  * @returns {any} Respuesta con datos de rol.
+ */
+  editRole: (role_id: string, payload:EditRoleRequest) =>
+    authAgrofusionAxios.put("roles/edit-role", payload, {params: {role_id}}),
+
+  /**
+ * Crear un rol
+ * @param {CreateRoleRequest} payload - Atributos para crear un rol
+  * @returns {any} Respuesta del operación de crear rol.
+ */
+  createRole: (payload:CreateRoleRequest) =>
+    authAgrofusionAxios.post("roles/create-role", payload),
 };
 
