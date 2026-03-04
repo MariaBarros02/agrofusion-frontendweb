@@ -36,10 +36,17 @@ export default function ProfileView({
               {t("profile.edit")}
             </Button>)}
           </div>
-          <div className="mt-5">
+          <div className="grid items-center justify-between grid-cols-2 gap-3 mt-5">
+                      <div className="mt-5">
             <p className="text-lg font-bold">{t("profile.name")}</p>
             <p>{userDetails?.name}</p>
           </div>
+                    <div className="mt-5">
+            <p className="text-lg font-bold">{t("profile.role")}</p>
+            <p>{userDetails?.rol}</p>
+          </div>
+          </div>
+
           <div className="grid items-center justify-between grid-cols-2 gap-3 mt-5">
             {hasExternal && (
               <div>

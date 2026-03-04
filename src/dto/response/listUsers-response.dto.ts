@@ -77,6 +77,12 @@ export interface ListUserResponse {
      * Ejemplos: ADMIN, USER, MANAGER.
      */
     rol: string;
+    /**
+     * Rol o perfil del usuario dentro del sistema.
+     * 
+     * Id
+     */
+    role_id:string;
 
     /**
      * Fecha y hora de creación del usuario en formato ISO 8601.

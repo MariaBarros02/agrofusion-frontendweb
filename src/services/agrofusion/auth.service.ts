@@ -7,6 +7,9 @@ import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
 import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
 import type { EditPermissionRequest } from "../../dto/request/editPermission-request.dto";
+import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
+import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
+import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
 
 
 /**
@@ -287,3 +290,89 @@ export const editPermissionService = async (
   const {data} = await authApi.editPemission(permId, payload);
   return data;
 }
+
+/*
+ * Listar roles del sistema
+ *
+ */
+export const listRolesService = async (
+  payload: listRolesRequest
+)=>{
+  const {data} = await authApi.listRoles(payload);
+  return data;
+}
+
+/*
+ * Eliminar un rol del sistema
+ *
+ */
+export const deleteRoleService = async (
+  roleId: string
+)=>{
+  const {data} = await authApi.deleteRole(roleId);
+  return data;
+}
+
+
+/*
+ * Listar un role del sistema
+ *
+ */
+export const getDetailsRoleService = async (
+  roleId: string
+)=>{
+
+  const {data} = await authApi.getRole(roleId);
+  return data;
+}
+
+/*
+ * Listar un role del sistema
+ *
+ */
+export const editRoleService = async (
+  roleId: string,
+  payload: EditRoleRequest
+)=>{
+
+  const {data} = await authApi.editRole(roleId, payload);
+  return data;
+}
+
+/*
+ * Listar un permisos (basic) del sistema
+ *
+ */
+export const getPermissionsBasicService = async (
+
+)=>{
+
+  const {data} = await authApi.listPemissionsBasic();
+  return data;
+}
+
+
+/*
+ * Crear un rol
+ *
+ */
+export const createRoleService = async (
+  payload: CreateRoleRequest
+)=>{
+
+  const {data} = await authApi.createRole(payload);
+  return data;
+}
+
+/*
+ * Lista basica de roles
+ *
+ */
+export const getBasicListRolesService = async (
+ 
+)=>{
+
+  const {data} = await authApi.getBasicListRoles();
+  return data;
+}
+
