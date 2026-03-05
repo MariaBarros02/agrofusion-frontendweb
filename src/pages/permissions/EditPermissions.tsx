@@ -63,7 +63,7 @@ const EditPermissions = () => {
 
       state: yup.string().required(t("validation.completeField")),
 
-      description: yup.string().min(8, t("validation.descriptionMin")),
+     
     });
 
   const formik = useFormik<EditValues>({
@@ -171,7 +171,7 @@ const EditPermissions = () => {
             />
             {displayError("description")}
           </div>
-          <div className="flex gap-5 items-end mt-2">
+          <div className="flex items-end gap-5 mt-2">
             <div className="w-full">
               <div className="block mb-2">
                 <Label htmlFor="name">{t("editPermission.code")}</Label>
@@ -188,7 +188,7 @@ const EditPermissions = () => {
             </div>
             <div className="w-full mb-2">
               <Label htmlFor="state">{t("editPermission.state")}</Label>
-              <div className="flex items-center mt-2 gap-3">
+              <div className="flex items-center gap-3 mt-2">
                 <ToggleSwitch
                   checked={formik.values.state === "ACTIVE"}
                   label={

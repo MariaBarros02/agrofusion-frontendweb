@@ -5,9 +5,9 @@
  * de permisos, permitiendo aplicar filtros opcionales por texto de búsqueda y
  * estado.
  * a
- * @interface listPermissionsRequest
+ * @interface listRolesRequest
  */
-export interface listPermissionsRequest {
+export interface listRolesRequest {
 
     /**
      * Índice de la página a consultar (empieza en 1).

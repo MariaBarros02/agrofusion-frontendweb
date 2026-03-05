@@ -1,0 +1,152 @@
+import { useState, useEffect } from "react";
+import AppLayoutSB from "../../components/layout/AppLayoutSB";
+import TitleTarget from "../../components/layout/TitleTarget";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import type { ListRolesResponse } from "../../dto/response/listRoles-response.dto";
+import { Button, Badge } from "flowbite-react";
+import { getDetailsRoleService } from "../../services/agrofusion/auth.service";
+import { Pencil } from "lucide-react";
+
+const badgeColors = [
+  "info",
+  "gray",
+  "failure",
+  "success",
+  "warning",
+  "indigo",
+  "purple",
+  "pink",
+] as const;
+const RoleView = () => {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { roleId } = useParams<{ roleId: string }>();
+  const [roleDetails, setRoleDetails] = useState<ListRolesResponse | null>(
+    null,
+  );
+  const navigate = useNavigate();
+
+  const getRoleDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await getDetailsRoleService(roleId || "");
+      setRoleDetails(response);
+    } catch (error) {
+      console.log(error);
+      setError("Error al cargar detalles de usuario");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (roleId) {
+      getRoleDetails();
+    }
+  }, [roleId]);
+
+  return (
+    <AppLayoutSB>
+      <TitleTarget title="viewRole.title" description="viewRole.description" />
+      {loading && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("viewRole.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {error && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("viewRole.error")}</p>{" "}
+        </div>
+      )}{" "}
+      {!loading && !error && roleDetails && (
+        <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+          <div className="flex justify-between mt-3">
+            <h1 className="text-xl font-bold">
+              {t("viewRole.generalInformation")}
+            </h1>
+            <Button
+              onClick={() => navigate("/administration/roles")}
+              color="alternative"
+            >
+              {t("viewRole.goBack")}
+            </Button>
+          </div>
+          <div className="p-4 py-5 mt-2 font-semibold border dark:border-gray-600 rounded-2xl">
+            <div className="justify-between text-sm md:grid-cols-2 md:grid">
+              <div>
+                <p className="font-bold text-gray-500">{t("viewRole.id")}</p>
+                <p>{roleDetails?.role_id}</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-500">{t("viewRole.code")}</p>
+                <p>{roleDetails?.code}</p>
+              </div>
+            </div>
+            <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid ">
+              <div>
+                <p className="font-bold text-gray-500">{t("viewRole.name")}</p>
+                <p>{roleDetails?.name}</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-500 ">
+                  {t("viewRole.descriptionDetail")}
+                </p>
+                <p>{roleDetails?.description}</p>
+              </div>
+            </div>
+            <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid">
+              <div>
+                <p className="font-bold text-gray-500">{t("viewRole.state")}</p>
+                <p>{t(`common.${roleDetails?.state.toLowerCase()}`)}</p>
+              </div>
+              <div>
+                <p className="font-bold text-gray-500">
+                  {t("viewRole.countUsers")}
+                </p>
+                <p>{roleDetails?.count_users}</p>
+              </div>
+            </div>
+            <div className="mt-5">
+              <p className="mb-2 font-bold text-gray-500">
+                {t("viewRole.permissions")}
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {roleDetails?.permissions?.map((permission, index) => (
+                  <Badge
+                    key={permission.permission_id}
+                    color={badgeColors[index % badgeColors.length]}
+                  >
+                    {permission.permission_name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          {
+            roleId !== "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1" && (
+              <div className="flex justify-end gap-3 mt-3">
+            <Button
+              onClick={() =>
+                navigate(`/administration/roles/edit-role/${roleId}`)
+              }
+              color="blue"
+            >
+              <Pencil size={18} className="mr-2" />
+              {t("viewRole.editRole")}
+            </Button>
+          </div>
+            )
+          }
+          
+        </div>
+      )}
+    </AppLayoutSB>
+  );
+};
+
+export default RoleView;

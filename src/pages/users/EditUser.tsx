@@ -13,6 +13,7 @@ import { Button, Label, Select, TextInput } from "flowbite-react";
 import type { ListUserResponse } from "../../dto/response/listUsers-response.dto";
 import {
   editUserService,
+  getBasicListRolesService,
   getExternalProjects,
   getUserDetailsService,
 } from "../../services/agrofusion/auth.service";
@@ -28,6 +29,7 @@ import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 import { FiSave } from "react-icons/fi";
+import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
 interface EditValues {
   name: string;
   first_last_name: string;
@@ -43,6 +45,7 @@ const STATUS_VOCABULARY: Record<number, string> = {
   1: "ACTIVE",
   2: "INACTIVE",
   3: "DELETED",
+  4: "PENDING"
 };
 
 const mapStatusToText = (status?: number | string) => {
@@ -53,7 +56,7 @@ const mapStatusToText = (status?: number | string) => {
   }
 
   // Si ya viene como string válido
-  if (["ACTIVE", "INACTIVE", "DELETED"].includes(status)) {
+  if (["ACTIVE", "INACTIVE", "DELETED", "PENDING"].includes(status)) {
     return status;
   }
 
@@ -111,6 +114,8 @@ const EditUser = () => {
   );
   const isAdmin =
   userId === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+  const [basicRoles, setBasicRoles] = useState<ListBasicRole[]>([]);
+  
 
   const [alert, setAlert] = useState<AlertState>(null);
 
@@ -158,8 +163,8 @@ const EditUser = () => {
         name: "",
         first_last_name: "",
         second_last_name: "",
-        gender_id: "",
-        rol: "",
+        gender_id: undefined,
+        rol: undefined,
         state: "",
         document_number: "",
         birthday: "",
@@ -176,7 +181,7 @@ const EditUser = () => {
 
       return {
         name: firstUser.name || "",
-        rol: String(userDetails.rol || ""), // Asegurar que coincida con los values del Select
+        rol: String(userDetails.rol_id || ""), // Asegurar que coincida con los values del Select
         document_number: userDetails.identity_number || "",
         state: agrofusionState,
         birthday: firstUser.birthday?.split("T")[0] || "",
@@ -263,6 +268,7 @@ const EditUser = () => {
         setAlert({ message: "editUser.noChanges", type: "warning" });
         return;
       }
+      console.log(values)
       await handleSaveProfile(values);
     },
   });
@@ -285,7 +291,7 @@ const EditUser = () => {
           : values.name,
         values.document_number,
         values.state,
-        "",
+        values.rol,
       );
       /* ===========================
          2️ SI NO HAY EXTERNOS
@@ -440,6 +446,19 @@ const EditUser = () => {
 
     return null;
   };
+
+    const getBasicRoles = async () => {
+      try {
+        const response = await getBasicListRolesService();
+        setBasicRoles(response);
+      } catch (error) {
+        console.error("Error loading basic roles", error);
+      }
+    };
+  
+    useEffect(() => {
+      getBasicRoles();
+    }, []);
 
   return (
     <AppLayoutSB>
@@ -628,7 +647,7 @@ const EditUser = () => {
                     {displayError("date_issuance_document")}
                   </div>
                 )}
-                {!isAdmin && (
+                {!isAdmin  && (
                   <div className="w-full">
                     <div className="block mb-2">
                       <Label htmlFor="state">{t("editUser.state")}</Label>
@@ -650,6 +669,11 @@ const EditUser = () => {
                       <option value="ACTIVE">{t("common.active")}</option>
                       <option value="INACTIVE">{t("common.inactive")}</option>
                       <option value="DELETED">{t("common.deleted")}</option>
+                      {
+                        userDetails?.state === "PENDING" && (
+                           <option value="PENDING">{t("common.pending")}</option>
+                        )
+                      }
                     </Select>
                     {displayError("state")}
                   </div>
@@ -670,9 +694,11 @@ const EditUser = () => {
                           : "gray"
                       }
                     >
-                      <option value="SIN ROL">{t("editUser.noRole")}</option>
-                      <option value="1">{t("common.active")}</option>
-                      <option value="2">{t("common.inactive")}</option>
+                        {basicRoles.map((role) => (
+                        <option key={role.role_id} value={role.role_id}>
+                          {role.name}
+                        </option>
+                      ))}
                     </Select>
                     {displayError("rol")}
                   </div>

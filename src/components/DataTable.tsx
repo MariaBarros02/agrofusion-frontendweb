@@ -16,6 +16,7 @@ interface BaseColumn<T> {
   key: keyof T | string;
   label: string;
   type: ColumnType;
+  align?: "left" | "center" | "right";
 }
 
 interface ActionConfig<T> {
@@ -23,6 +24,7 @@ interface ActionConfig<T> {
   icon?: React.ReactNode;
   onClick: (row: T) => void;
   className?: string;
+  disabled?: (row: T) => boolean;
 }
 
 interface SingleActionColumn<T> extends BaseColumn<T> {
@@ -124,12 +126,18 @@ export default function DataTable<T extends Record<string, any>>({
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
         <table className="w-full text-sm rounded-2xl">
-          <thead className="bg-gray-200 rounded-2xl  dark:bg-gray-800">
+          <thead className="bg-gray-200 rounded-2xl dark:bg-gray-800">
             <tr className="rounded-2xl">
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
-                  className="px-4 py-3 font-semibold text-left"
+                  className={`px-4 py-3 font-semibold ${
+                    col.align === "center"
+                      ? "text-center"
+                      : col.align === "right"
+                        ? "text-right"
+                        : "text-left"
+                  }`}
                 >
                   {col.label}
                 </th>
@@ -148,7 +156,16 @@ export default function DataTable<T extends Record<string, any>>({
                     if (col.type === "text") {
                       const textCol = col as TextColumn<T>;
                       return (
-                        <td key={String(col.key)} className="px-4 py-3">
+                        <td
+                          key={String(col.key)}
+                          className={`px-4 py-3 ${
+                            col.align === "center"
+                              ? "text-center"
+                              : col.align === "right"
+                                ? "text-right"
+                                : "text-left"
+                          }`}
+                        >
                           {textCol.format ? textCol.format(value, row) : value}
                         </td>
                       );
@@ -246,16 +263,26 @@ export default function DataTable<T extends Record<string, any>>({
                           key={String(col.key)}
                           className="flex gap-2 px-3 py-3"
                         >
-                          {actionsCol.actions.map((action, i) => (
-                            <button
-                              key={i}
-                            className={`flex items-center gap-2 px-3 py-1 border rounded-lg ${action.className ?? ""}`}
-                              onClick={() => action.onClick(row)}
-                            >
-                              {action.icon}
-                              {action.label}
-                            </button>
-                          ))}
+                          {actionsCol.actions.map((action, i) => {
+                            const isDisabled = action.disabled?.(row);
+
+                            return (
+                              <button
+                                key={i}
+                                disabled={isDisabled}
+                                className={`flex items-center gap-2 px-3 py-1 border rounded-lg
+        ${action.className ?? ""}
+        ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
+      `}
+                                onClick={() => {
+                                  if (!isDisabled) action.onClick(row);
+                                }}
+                              >
+                                {action.icon}
+                                {action.label}
+                              </button>
+                            );
+                          })}
                         </td>
                       );
                     }
@@ -275,9 +302,9 @@ export default function DataTable<T extends Record<string, any>>({
           <button
             disabled={data.page === 1}
             onClick={() => onPageChange(data.page - 1)}
-            className="px-3 py-1 flex border items-center rounded disabled:opacity-40"
+            className="flex items-center px-3 py-1 border rounded disabled:opacity-40"
           >
-            <IoIosArrowBack/>
+            <IoIosArrowBack />
             {t("common.previous")}
           </button>
 
@@ -300,10 +327,10 @@ export default function DataTable<T extends Record<string, any>>({
           <button
             disabled={data.page === data.total_pages}
             onClick={() => onPageChange(data.page + 1)}
-            className="px-3 py-1 border flex items-center rounded disabled:opacity-40"
+            className="flex items-center px-3 py-1 border rounded disabled:opacity-40"
           >
             {t("common.next")}
-            <IoIosArrowForward/>
+            <IoIosArrowForward />
           </button>
         </div>
 

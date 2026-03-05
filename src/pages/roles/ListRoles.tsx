@@ -3,24 +3,142 @@ import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { Label, TextInput, Select, Button } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { useState } from "react";
-import { FiFilter, FiFlag, FiInfo } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiEdit2, FiFilter, FiFlag, FiInfo, FiTrash2 } from "react-icons/fi";
 import { BiCube } from "react-icons/bi";
+import DataTable, { type Column } from "../../components/DataTable";
 import { useNavigate } from "react-router-dom";
-
+import {
+  deleteRoleService,
+  listRolesService,
+} from "../../services/agrofusion/auth.service";
+import type {
+  ListRolesResponse,
+  PaginatedRolesResponse,
+} from "../../dto/response/listRoles-response.dto";
+import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
+import AlertConfirmation from "../../components/layout/AlertConfirmation";
+import ToastSimple, {
+  type ToastState,
+} from "../../components/layout/ToastSimple";
 const ListRoles = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [size] = useState(5);
+  const [page, setPage] = useState(1);
 
-  const navigate = useNavigate();
-  const getRoles = (page: number) => {
-    console.log(page);
+  const [toast, setToast] = useState<ToastState>(null);
+  const [paginatedRole, setPaginatedPerm] =
+    useState<PaginatedRolesResponse | null>(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [confirmDeleteChecked, setConfirmDeleteChecked] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<ListRolesResponse | null>(
+    null,
+  );
+  //  función principal paginada real
+  const getRoles = async (pageParam = page) => {
+    try {
+      setLoading(true);
+
+      const payload: listRolesRequest = {
+        page_index: pageParam,
+        page_size: size,
+        search: search || undefined,
+        state: state || undefined,
+      };
+
+      const response = await listRolesService(payload);
+      setPaginatedPerm(response);
+      setPage(pageParam);
+    } catch (err) {
+      console.log(err);
+      setError("Error loading users");
+    } finally {
+      setLoading(false);
+    }
   };
 
- const handlePageChange = (newPage: number) => {
+  useEffect(() => {
+    getRoles(1);
+  }, [search, state]);
+  const handlePageChange = (newPage: number) => {
     getRoles(newPage);
   };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedRole) return;
+
+    try {
+      await deleteRoleService(selectedRole.role_id);
+
+      setShowDeleteModal(false);
+      setSelectedRole(null);
+      await getRoles(1);
+    } catch (error) {
+      console.error(error);
+
+      setToast({
+        message: "roles.deleteError",
+        type: "error",
+      });
+    }
+  };
+
+  const columns: Column<ListRolesResponse>[] = [
+    {
+      key: "role_id",
+      label: t("roles.code"),
+      type: "text",
+      format: (value: string) => value?.slice(0, 7),
+    },
+    { key: "name", label: t("roles.name"), type: "text" },
+    { key: "state", label: t("common.state"), type: "status" },
+    {
+      key: "count_users",
+      label: t("roles.countUsers"),
+      type: "text",
+      align: "center",
+    },
+
+    {
+      key: "actions",
+      label: t("roles.functions"),
+      type: "actions",
+      actions: [
+        {
+          label: t("roles.view"),
+          onClick: (role) => navigate(`/administration/role/${role.role_id}`),
+        },
+        {
+          label: t("roles.edit"),
+          icon: <FiEdit2 />,
+          className: "bg-blue-600 text-white hover:bg-blue-500",
+          disabled: (role) => role.code === "SUPERADMINISTRADOR",
+          onClick: (role) =>
+            navigate(`/administration/roles/edit-role/${role.role_id}`),
+        },
+        {
+          label: t("roles.delete"),
+          icon: <FiTrash2 />,
+          className: "bg-red-600 text-white hover:bg-red-500",
+          disabled: (role) =>
+            role.code?.toUpperCase() === "SUPERADMINISTRADOR" ||
+            role.count_users >= 1 ||
+            role.state === "DELETED",
+          onClick: (role) => {
+            setSelectedRole(role);
+            setConfirmDeleteChecked(false);
+            setShowDeleteModal(true);
+          },
+        },
+      ],
+    },
+  ];
 
   return (
     <AppLayoutSB>
@@ -70,16 +188,13 @@ const ListRoles = () => {
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
               <option value="DELETED">{t("common.deleted")}</option>
+
             </Select>
           </div>
         </div>
 
-        <div className="flex items-end ml-4 gap-2 mt-2 md:w-1/2 md:mt-0">
-          <Button
-            size="xs"
-            onClick={() => getRoles(1)}
-            color="alternative"
-          >
+        <div className="flex items-end justify-end gap-2 mt-2 ml-4 md:w-1/2 md:mt-0">
+          <Button size="xs" onClick={() => getRoles(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
 
@@ -96,12 +211,70 @@ const ListRoles = () => {
           <Button
             color="blue"
             size="xs"
-            onClick={() => navigate("/administrator/roles")}
+            onClick={() => navigate("/administration/roles/create-role")}
           >
             {t("roles.createRoles")}
           </Button>
         </div>
       </div>
+      {/* tabla */}
+      {loading && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("roles.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {error && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("roles.error")}</p>{" "}
+        </div>
+      )}{" "}
+      {!loading && !error && paginatedRole?.items.length === 0 && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold text-black dark:text-gray-200">
+            {" "}
+            {t("roles.noRoles")}{" "}
+          </p>{" "}
+        </div>
+      )}
+      {!loading && paginatedRole && paginatedRole.items.length !== 0 && (
+        <DataTable
+          data={paginatedRole}
+          columns={columns}
+          onPageChange={handlePageChange}
+          paginationText={t("roles.roles")}
+        />
+      )}
+      <AlertConfirmation
+        show={showDeleteModal}
+        type="error"
+        title={t("roles.deleteTitle")}
+        message={`${t("roles.deleteQuestion")} "${selectedRole?.name}"?`}
+        description={t("roles.deleteDescription")}
+        confirmText={t("roles.deleteButton")}
+        cancelText={t("common.cancel")}
+        checkboxLabel={t("roles.checkboxLabel")}
+        checkboxChecked={confirmDeleteChecked}
+        onCheckboxChange={setConfirmDeleteChecked}
+        confirmDisabled={!confirmDeleteChecked}
+        onConfirm={handleConfirmDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedRole(null);
+          setConfirmDeleteChecked(false);
+        }}
+      />
+      {toast && (
+        <div className="fixed z-50 top-5 right-5">
+          <ToastSimple
+            messageKey={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        </div>
+      )}
     </AppLayoutSB>
   );
 };
