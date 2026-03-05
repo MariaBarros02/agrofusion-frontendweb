@@ -11,6 +11,7 @@ import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
 import type { ProjectListResponse } from "../../../dto/response/projectList-response.dto";
+import type { ModuleListResponse } from "../../../dto/response/moduleList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
 import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
@@ -39,6 +40,21 @@ export const authApi = {
   updateProjectStatus: (projectId: string, status: string) =>
     authAgrofusionAxios.patch<{ message: string; status: string }>(
       `/external-projects/${projectId}/status`,
+      { status }
+    ),
+
+  /**
+   * Obtiene el listado de todos los módulos.
+   */
+  getModulesList: () =>
+    authAgrofusionAxios.get<ModuleListResponse[]>("/modules/list"),
+
+  /**
+   * Actualiza el estado de un módulo (ACTIVE/INACTIVE).
+   */
+  updateModuleStatus: (moduleId: string, status: string) =>
+    authAgrofusionAxios.patch<{ message: string; status: string }>(
+      `/modules/${moduleId}/status`,
       { status }
     ),
   /**

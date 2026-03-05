@@ -17,49 +17,73 @@ import {
 import { HiSearch } from "react-icons/hi";
 import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
 import {
-  listProjectsService,
-  updateProjectStatusService,
+  listModulesService,
+  updateModuleStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { ProjectListResponse } from "../../dto/response/projectList-response.dto";
+import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 
-interface PaginatedProjectsResponse {
-  items: ProjectListResponse[];
+interface PaginatedModulesResponse {
+  items: ModuleListResponse[];
   total: number;
   page: number;
   size: number;
   total_pages: number;
 }
 
-const ProjectsList = () => {
+const ModulesList = () => {
   const { t } = useTranslation();
 
-  const [projects, setProjects] = useState<ProjectListResponse[]>([]);
+  const [modules, setModules] = useState<ModuleListResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [size] = useState(6);
 
-  // Filtros (mismo diseño que gestión de usuarios)
+  // Filtros (mismo diseño que gestión de proyectos)
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [pendingStatusChange, setPendingStatusChange] = useState<{
-    project: ProjectListResponse;
+    module: ModuleListResponse;
     newStatus: string;
   } | null>(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
 
-  const columns: Column<ProjectListResponse>[] = [
+  // Proyectos únicos para el filtro
+  const projectOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const options: { id: string; code: string; name: string }[] = [];
+    for (const m of modules) {
+      if (m.af_project_id && m.project_code && !seen.has(m.af_project_id)) {
+        seen.add(m.af_project_id);
+        options.push({
+          id: m.af_project_id,
+          code: m.project_code ?? "",
+          name: m.project_name ?? m.project_code ?? "",
+        });
+      }
+    }
+    return options.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [modules]);
+
+  const columns: Column<ModuleListResponse>[] = [
     {
-      key: "instance_code",
-      label: t("project.list.code"),
+      key: "code",
+      label: t("module.list.code"),
+      type: "text",
+      format: (value: string) => value ?? "-",
+    },
+    {
+      key: "name",
+      label: t("module.list.moduleName"),
       type: "text",
       format: (value: string) => value ?? "-",
     },
     {
       key: "project_name",
-      label: t("project.list.projectName"),
+      label: t("module.list.associatedProject"),
       type: "text",
       format: (value: string) => value ?? "-",
     },
@@ -68,45 +92,48 @@ const ProjectsList = () => {
       label: t("common.state"),
       type: "statusEditable",
       allowedStatuses: ["ACTIVE", "INACTIVE"],
-      onChange: (project, newStatus) => {
-        setPendingStatusChange({ project, newStatus });
+      onChange: (module, newStatus) => {
+        setPendingStatusChange({ module, newStatus });
       },
     },
     {
       key: "created_at",
-      label: t("project.list.createdAt"),
+      label: t("module.list.createdAt"),
       type: "text",
       format: (value: string) => (value ? value.split("T")[0] : "-"),
     },
     {
       key: "responsible",
-      label: t("project.list.responsible"),
+      label: t("module.list.responsible"),
       type: "text",
       format: (value: string) => value ?? "-",
     },
   ];
 
-  // Filtrar por búsqueda (nombre o código) y estado
-  const filteredProjects = useMemo(() => {
-    let result = [...projects];
+  // Filtrar por búsqueda (nombre o código), estado y proyecto asociado
+  const filteredModules = useMemo(() => {
+    let result = [...modules];
     const searchLower = search.trim().toLowerCase();
     if (searchLower) {
       result = result.filter(
-        (p) =>
-          (p.project_name?.toLowerCase().includes(searchLower)) ||
-          (p.instance_code?.toLowerCase().includes(searchLower))
+        (m) =>
+          (m.name?.toLowerCase().includes(searchLower)) ||
+          (m.code?.toLowerCase().includes(searchLower))
       );
     }
     if (state) {
-      result = result.filter((p) => (p.status ?? "").toUpperCase() === state);
+      result = result.filter((m) => (m.status ?? "").toUpperCase() === state);
+    }
+    if (projectFilter) {
+      result = result.filter((m) => m.af_project_id === projectFilter);
     }
     return result;
-  }, [projects, search, state]);
+  }, [modules, search, state, projectFilter]);
 
-  const paginatedData: PaginatedProjectsResponse = useMemo(() => {
+  const paginatedData: PaginatedModulesResponse = useMemo(() => {
     const start = (page - 1) * size;
-    const items = filteredProjects.slice(start, start + size);
-    const total = filteredProjects.length;
+    const items = filteredModules.slice(start, start + size);
+    const total = filteredModules.length;
     const total_pages = Math.max(1, Math.ceil(total / size));
     return {
       items,
@@ -115,31 +142,31 @@ const ProjectsList = () => {
       size,
       total_pages,
     };
-  }, [filteredProjects, page, size]);
+  }, [filteredModules, page, size]);
 
-  const getProjects = async () => {
+  const getModules = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listProjectsService();
-      setProjects(data);
+      const data = await listModulesService();
+      setModules(data);
       setPage(1);
     } catch (err) {
       console.error(err);
-      setError(t("project.list.loadError"));
+      setError(t("module.list.loadError"));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getProjects();
+    getModules();
   }, []);
 
   // Al cambiar filtros, volver a página 1
   useEffect(() => {
     setPage(1);
-  }, [search, state]);
+  }, [search, state, projectFilter]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -148,10 +175,9 @@ const ProjectsList = () => {
   const handleResetFilters = () => {
     setSearch("");
     setState("");
+    setProjectFilter("");
     setPage(1);
   };
-
-  const hasActiveFilters = search || state;
 
   const handleCloseModal = () => {
     setPendingStatusChange(null);
@@ -160,21 +186,21 @@ const ProjectsList = () => {
 
   const handleConfirmStatusChange = async () => {
     if (!pendingStatusChange || !confirmChecked) return;
-    const { project, newStatus } = pendingStatusChange;
+    const { module, newStatus } = pendingStatusChange;
     try {
-      await updateProjectStatusService(project.external_project_id, newStatus);
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.external_project_id === project.external_project_id
-            ? { ...p, status: newStatus }
-            : p
+      await updateModuleStatusService(module.af_module_id, newStatus);
+      setModules((prev) =>
+        prev.map((m) =>
+          m.af_module_id === module.af_module_id
+            ? { ...m, status: newStatus }
+            : m
         )
       );
       setToasts((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
-          messageKey: "project.list.statusUpdateSuccess",
+          messageKey: "module.list.statusUpdateSuccess",
           type: "success",
         },
       ]);
@@ -184,7 +210,7 @@ const ProjectsList = () => {
         ...prev,
         {
           id: crypto.randomUUID(),
-          messageKey: "project.list.statusUpdateError",
+          messageKey: "module.list.statusUpdateError",
           type: "error",
         },
       ]);
@@ -193,9 +219,11 @@ const ProjectsList = () => {
     }
   };
 
+  const hasActiveFilters = search || state || projectFilter;
+
   return (
     <AppLayoutSB>
-      <TitleTarget title="project.title" description="project.description" />
+      <TitleTarget title="module.title" description="module.description" />
 
       {/* Filtros en una sola línea */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
@@ -205,7 +233,7 @@ const ProjectsList = () => {
             <TextInput
               icon={HiSearch}
               sizing="sm"
-              placeholder={t("project.list.searchPlaceholder")}
+              placeholder={t("module.list.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -227,9 +255,25 @@ const ProjectsList = () => {
             </Select>
           </div>
 
+          <div className="flex-shrink-0 w-52">
+            <Label className="text-xs">{t("module.list.associatedProject")}</Label>
+            <Select
+              sizing="sm"
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+            >
+              <option value="">{t("module.list.allProjects")}</option>
+              {projectOptions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name || p.code}
+                </option>
+              ))}
+            </Select>
+          </div>
+
           <Button
             size="xs"
-            onClick={() => getProjects()}
+            onClick={() => getModules()}
             color={hasActiveFilters ? "blue" : "alternative"}
             className="flex-shrink-0"
           >
@@ -245,7 +289,7 @@ const ProjectsList = () => {
       {/* Tabla */}
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold">{t("project.list.loading")}</p>
+          <p className="text-3xl font-bold">{t("module.list.loading")}</p>
         </div>
       )}
 
@@ -255,20 +299,20 @@ const ProjectsList = () => {
         </div>
       )}
 
-      {!loading && !error && filteredProjects.length === 0 && (
+      {!loading && !error && filteredModules.length === 0 && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {t("project.list.noProjects")}
+            {t("module.list.noModules")}
           </p>
         </div>
       )}
 
-      {!loading && !error && filteredProjects.length > 0 && (
+      {!loading && !error && filteredModules.length > 0 && (
         <DataTable
           data={paginatedData}
           columns={columns}
           onPageChange={handlePageChange}
-          paginationText={t("project.list.paginationText")}
+          paginationText={t("module.list.paginationText")}
         />
       )}
 
@@ -285,8 +329,8 @@ const ProjectsList = () => {
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {pendingStatusChange?.newStatus === "INACTIVE"
-                ? t("project.list.deactivateTitle")
-                : t("project.list.activateTitle")}
+                ? t("module.list.deactivateTitle")
+                : t("module.list.activateTitle")}
             </h3>
           </div>
         </ModalHeader>
@@ -295,13 +339,13 @@ const ProjectsList = () => {
             <>
               <p className="mb-2 font-bold text-gray-900 dark:text-white">
                 {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateQuestion")
-                  : t("project.list.activateQuestion")}
+                  ? t("module.list.deactivateQuestion")
+                  : t("module.list.activateQuestion")}
               </p>
               <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                 {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateDescription")
-                  : t("project.list.activateDescription")}
+                  ? t("module.list.deactivateDescription")
+                  : t("module.list.activateDescription")}
               </p>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -314,8 +358,8 @@ const ProjectsList = () => {
                   className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
                 >
                   {pendingStatusChange.newStatus === "INACTIVE"
-                    ? t("project.list.deactivateCheckbox")
-                    : t("project.list.activateCheckbox")}
+                    ? t("module.list.deactivateCheckbox")
+                    : t("module.list.activateCheckbox")}
                 </Label>
               </div>
             </>
@@ -331,8 +375,8 @@ const ProjectsList = () => {
             disabled={!confirmChecked}
           >
             {pendingStatusChange?.newStatus === "INACTIVE"
-              ? t("project.list.deactivateButton")
-              : t("project.list.activateButton")}
+              ? t("module.list.deactivateButton")
+              : t("module.list.activateButton")}
           </Button>
         </ModalFooter>
       </Modal>
@@ -357,4 +401,4 @@ const ProjectsList = () => {
   );
 };
 
-export default ProjectsList;
+export default ModulesList;

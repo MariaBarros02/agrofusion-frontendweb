@@ -7,6 +7,7 @@ import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
 import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
 import type { EditPermissionRequest } from "../../dto/request/editPermission-request.dto";
+import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
 
 
 /**
@@ -35,6 +36,25 @@ export const updateProjectStatusService = async (
   status: string
 ) => {
   const { data } = await authApi.updateProjectStatus(projectId, status);
+  return data;
+};
+
+/**
+ * Obtiene el listado de todos los módulos.
+ */
+export const listModulesService = async (): Promise<ModuleListResponse[]> => {
+  const { data } = await authApi.getModulesList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un módulo (ACTIVE/INACTIVE).
+ */
+export const updateModuleStatusService = async (
+  moduleId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateModuleStatus(moduleId, status);
   return data;
 };
 

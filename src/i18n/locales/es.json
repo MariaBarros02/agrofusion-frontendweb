@@ -149,6 +149,35 @@
             "paginationText": "proyectos"
         }
     },
+    "module": {
+        "title": "Gestión de módulos",
+        "description": "Consulta y administra los módulos del sistema",
+        "list": {
+            "code": "Código",
+            "moduleName": "Nombre del módulo",
+            "associatedProject": "Proyecto asociado",
+            "allProjects": "Todos los proyectos",
+            "createdAt": "Fecha de creación",
+            "responsible": "Responsable",
+            "searchPlaceholder": "Buscar por nombre o código",
+            "loading": "Cargando módulos...",
+            "loadError": "Error al cargar módulos",
+            "deactivateTitle": "Desactivar módulo",
+            "activateTitle": "Activar módulo",
+            "deactivateQuestion": "¿Quieres desactivar este módulo?",
+            "activateQuestion": "¿Quieres activar este módulo?",
+            "deactivateDescription": "Esta acción no borrará los datos físicos, pero lo marcará como Inactivo y bloqueará sus submódulos.",
+            "activateDescription": "Esta acción marcará el módulo como Activo y lo habilitará en el sistema.",
+            "deactivateCheckbox": "Confirmo que deseo desactivar este módulo.",
+            "activateCheckbox": "Confirmo que deseo activar este módulo.",
+            "deactivateButton": "Desactivar módulo",
+            "activateButton": "Activar módulo",
+            "statusUpdateSuccess": "Estado del módulo actualizado correctamente",
+            "statusUpdateError": "Error al actualizar el estado del módulo",
+            "noModules": "No hay módulos registrados",
+            "paginationText": "módulos"
+        }
+    },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
         "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
@@ -430,7 +459,8 @@
     "OLD_PASSWORD_INCORRECT": "Contraseña temporal incorrecta, intente nuevamente.",
     "NOT_OWNER_PROFILE": "No puedes editar un perfil que no te pertenece",
     "INCORRECT_PASSWORD": "La contraseña actual ingresada es incorrecta",
-    "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior"
+    "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior",
+    "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema."
     }   
 
 }

@@ -112,6 +112,35 @@
       "paginationText": "projects"
     }
   },
+  "module": {
+    "title": "Module management",
+    "description": "View and manage system modules",
+    "list": {
+      "code": "Code",
+      "moduleName": "Module name",
+      "associatedProject": "Associated project",
+      "allProjects": "All projects",
+      "createdAt": "Creation date",
+      "responsible": "Responsible",
+      "searchPlaceholder": "Search by name or code",
+      "loading": "Loading modules...",
+      "loadError": "Error loading modules",
+      "deactivateTitle": "Deactivate module",
+      "activateTitle": "Activate module",
+      "deactivateQuestion": "Do you want to deactivate this module?",
+      "activateQuestion": "Do you want to activate this module?",
+      "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive and block its submodules.",
+      "activateDescription": "This action will mark the module as Active and enable it in the system.",
+      "deactivateCheckbox": "I confirm that I wish to deactivate this module.",
+      "activateCheckbox": "I confirm that I wish to activate this module.",
+      "deactivateButton": "Deactivate module",
+      "activateButton": "Activate module",
+      "statusUpdateSuccess": "Module status updated successfully",
+      "statusUpdateError": "Error updating module status",
+      "noModules": "No modules registered",
+      "paginationText": "modules"
+    }
+  },
   "resetPassword": {
     "resetPassword": "Set a new password",
     "instructions": "This change will update the password for your accounts across all active AgroFusion projects. Remember it for your next login.",

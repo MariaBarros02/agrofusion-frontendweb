@@ -16,6 +16,7 @@ import ListRoles from "../pages/roles/ListRoles";
 import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
+import ModulesList from "../pages/administration/ModulesList";
 
 import PermissionsView from "../pages/permissions/PermissionsView";
 import EditPermissions from "../pages/permissions/EditPermissions";
@@ -110,6 +111,9 @@ export function AppRouter() {
 
         {/* PROJECTS */}
         <Route path="projects" element={<ProjectsList />} />
+
+        {/* MODULES */}
+        <Route path="modules" element={<ModulesList />} />
 
         {/* PERMISSIONS */}
         <Route path="permissions" element = {<ListPermissions/>}/> 
