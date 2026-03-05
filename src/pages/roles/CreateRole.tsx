@@ -118,9 +118,7 @@ const CreateRole = () => {
         const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
 
         setAlert({
-          message: t(`errors.${errorCode}`, {
-      code: values.code,
-    }),
+          message: t(`errors.${errorCode}`),
           type: "error",
         });
       }

@@ -152,10 +152,11 @@ const EditRoles = () => {
           type: "success",
           to: "/administration/roles",
         });
-      } catch (error) {
-        console.log(error);
+      } catch (error:any) {
+        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+
         setAlert({
-          message: "editRole.errorEdit",
+          message: t(`errors.${errorCode}`),
           type: "error",
         });
       }
