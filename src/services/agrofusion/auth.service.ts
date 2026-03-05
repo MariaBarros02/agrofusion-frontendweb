@@ -8,6 +8,7 @@ import type { ChangePasswordRequest } from "../../dto/request/changePassword-req
 import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
 import type { EditPermissionRequest } from "../../dto/request/editPermission-request.dto";
 import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
+import type { SubmoduleListResponse } from "../../dto/response/submoduleList-response.dto";
 import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
 import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
@@ -58,6 +59,25 @@ export const updateModuleStatusService = async (
   status: string
 ) => {
   const { data } = await authApi.updateModuleStatus(moduleId, status);
+  return data;
+};
+
+/**
+ * Obtiene el listado de todos los submódulos.
+ */
+export const listSubmodulesService = async (): Promise<SubmoduleListResponse[]> => {
+  const { data } = await authApi.getSubmodulesList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un submódulo (ACTIVE/INACTIVE).
+ */
+export const updateSubmoduleStatusService = async (
+  submoduleId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateSubmoduleStatus(submoduleId, status);
   return data;
 };
 

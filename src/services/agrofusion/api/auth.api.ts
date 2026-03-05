@@ -12,6 +12,7 @@ import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
 import type { ProjectListResponse } from "../../../dto/response/projectList-response.dto";
 import type { ModuleListResponse } from "../../../dto/response/moduleList-response.dto";
+import type { SubmoduleListResponse } from "../../../dto/response/submoduleList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
 import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
@@ -60,6 +61,21 @@ export const authApi = {
   updateModuleStatus: (moduleId: string, status: string) =>
     authAgrofusionAxios.patch<{ message: string; status: string }>(
       `/modules/${moduleId}/status`,
+      { status }
+    ),
+
+  /**
+   * Obtiene el listado de todos los submódulos.
+   */
+  getSubmodulesList: () =>
+    authAgrofusionAxios.get<SubmoduleListResponse[]>("/submodules/list"),
+
+  /**
+   * Actualiza el estado de un submódulo (ACTIVE/INACTIVE).
+   */
+  updateSubmoduleStatus: (submoduleId: string, status: string) =>
+    authAgrofusionAxios.patch<{ message: string; status: string }>(
+      `/submodules/${submoduleId}/status`,
       { status }
     ),
   /**
