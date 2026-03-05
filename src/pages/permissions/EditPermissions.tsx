@@ -87,13 +87,14 @@ const EditPermissions = () => {
             type: "success",
             to: '/administration/permissions'
         })
-      } catch (error) {
-        console.log(error)
+      } catch (error: any) {
+        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+
         setAlert({
-            message: "editPermission.errorEdit",
-            type: "error",
-            
-        })
+          message: t(`errors.${errorCode}`),
+          type: "error",
+        });
+      
       }
       
     },
