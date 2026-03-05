@@ -219,7 +219,7 @@ export const handleGetTypeDocumentsEP = async (
       /** Error para UI */
       uiErrors.push({
         project: service,
-        messageKey: "createUser.errorLoadingTypeDocuments",
+        messageKey: "createUser.errorLoadingTypeDocs",
         messageParams: { service },
         type: "warning",
         to: "",

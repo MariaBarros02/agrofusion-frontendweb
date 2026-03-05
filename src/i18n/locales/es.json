@@ -509,8 +509,9 @@
     "NOT_OWNER_PROFILE": "No puedes editar un perfil que no te pertenece",
     "INCORRECT_PASSWORD": "La contraseña actual ingresada es incorrecta",
     "INVALID_PASSWORD": "No puedes reutilizar un contraseña anterior",
-
-    "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con el código {{code}}"
+    "ROLE_NAME_ALREADY_EXISTS": "Ya existe un rol con este nombre",
+    "PERMISSION_NAME_ALREADY_EXISTS": "Ya existe un permiso con este nombre",
+    "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo"
     }   
 
 }
