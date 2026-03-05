@@ -178,6 +178,37 @@
             "paginationText": "módulos"
         }
     },
+    "submodule": {
+        "title": "Gestión de submódulos",
+        "description": "Consulta y administra los submódulos del sistema",
+        "list": {
+            "code": "Código",
+            "submoduleName": "Nombre del submódulo",
+            "description": "Descripción",
+            "parentModule": "Módulo padre",
+            "associatedModule": "Módulo asociado",
+            "allModules": "Todos los módulos",
+            "createdAt": "Fecha de creación",
+            "responsible": "Responsable",
+            "searchPlaceholder": "Buscar por nombre o código",
+            "loading": "Cargando submódulos...",
+            "loadError": "Error al cargar submódulos",
+            "deactivateTitle": "Desactivar submódulo",
+            "activateTitle": "Activar submódulo",
+            "deactivateQuestion": "¿Quieres desactivar este submódulo?",
+            "activateQuestion": "¿Quieres activar este submódulo?",
+            "deactivateDescription": "Esta acción no borrará los datos físicos, pero lo marcará como Inactivo.",
+            "activateDescription": "Esta acción marcará el submódulo como Activo y lo habilitará en el sistema.",
+            "deactivateCheckbox": "Confirmo que deseo desactivar este submódulo.",
+            "activateCheckbox": "Confirmo que deseo activar este submódulo.",
+            "deactivateButton": "Desactivar submódulo",
+            "activateButton": "Activar submódulo",
+            "statusUpdateSuccess": "Estado del submódulo actualizado correctamente",
+            "statusUpdateError": "Error al actualizar el estado del submódulo",
+            "noSubmodules": "No hay submódulos registrados",
+            "paginationText": "submódulos"
+        }
+    },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
         "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
@@ -541,6 +572,7 @@
     "ROLE_NAME_ALREADY_EXISTS": "Ya existe un rol con este nombre",
     "PERMISSION_NAME_ALREADY_EXISTS": "Ya existe un permiso con este nombre",
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
-    "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema."
+    "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
+    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
     }   
 }

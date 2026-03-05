@@ -172,11 +172,42 @@
             "activateButton": "Activate module",
             "statusUpdateSuccess": "Module status updated successfully",
             "statusUpdateError": "Error updating module status",
-            "noModules": "No modules registered",
-            "paginationText": "modules"
-        }
-    },
-    "resetPassword": {
+      "noModules": "No modules registered",
+      "paginationText": "modules"
+    }
+  },
+  "submodule": {
+    "title": "Submodule management",
+    "description": "View and manage system submodules",
+    "list": {
+      "code": "Code",
+      "submoduleName": "Submodule name",
+      "description": "Description",
+      "parentModule": "Parent module",
+      "associatedModule": "Associated module",
+      "allModules": "All modules",
+      "createdAt": "Creation date",
+      "responsible": "Responsible",
+      "searchPlaceholder": "Search by name or code",
+      "loading": "Loading submodules...",
+      "loadError": "Error loading submodules",
+      "deactivateTitle": "Deactivate submodule",
+      "activateTitle": "Activate submodule",
+      "deactivateQuestion": "Do you want to deactivate this submodule?",
+      "activateQuestion": "Do you want to activate this submodule?",
+      "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive.",
+      "activateDescription": "This action will mark the submodule as Active and enable it in the system.",
+      "deactivateCheckbox": "I confirm that I wish to deactivate this submodule.",
+      "activateCheckbox": "I confirm that I wish to activate this submodule.",
+      "deactivateButton": "Deactivate submodule",
+      "activateButton": "Activate submodule",
+      "statusUpdateSuccess": "Submodule status updated successfully",
+      "statusUpdateError": "Error updating submodule status",
+      "noSubmodules": "No submodules registered",
+      "paginationText": "submodules"
+    }
+  },
+  "resetPassword": {
         "resetPassword": "Set a new password.",
         "instructions": "This change will update the password for your accounts in all active AgroFusion projects. Remember it for your next login.",
         "newPassword": "New password",
