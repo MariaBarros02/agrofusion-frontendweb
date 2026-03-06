@@ -97,4 +97,7 @@ export interface ListUserResponse {
      * 
      */
     identity_number? : string;
+
+
+    mfa_active?: boolean;
 }
