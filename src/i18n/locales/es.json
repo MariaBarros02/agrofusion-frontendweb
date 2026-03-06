@@ -330,7 +330,11 @@
         "passwordChangeFailed": "Hubo un error al actualizar tu constraseña, intentelo nuevamente.",
         "changePasswordSuccess": "Se actualizó tu contraseña correctamente.",
         "noChanges": "No hay cambios por guardar",
-        "role": "Rol"
+        "role": "Rol",
+        "factorDoubleAuth": "Factor de doble autenticación",
+        "updating":  "Actualizando...",
+        "mfaUpdateSuccess": "Se ha actualizado el estado de doble factor de autenticación del usuario correctamente",
+        "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario"
        
     },
     "accountActivation": {
