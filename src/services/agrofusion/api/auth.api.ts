@@ -306,5 +306,15 @@ export const authApi = {
  */
   getBasicListRoles: () =>
     authAgrofusionAxios.get<ListBasicRole[]>("roles/get-list-basic-roles"),
+
+  
+  /**
+ * Cambia el estado de la doble
+  * @returns any Respuesta de lista basica de errores.
+ */
+  changeF2AUser: (user_id: string, mfa_active: boolean) =>
+    authAgrofusionAxios.post("users/change-fa2-user", null, {params: {user_id, mfa_active} }),
+
+
 };
 

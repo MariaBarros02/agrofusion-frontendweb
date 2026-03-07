@@ -416,3 +416,15 @@ export const getBasicListRolesService = async (
   return data;
 }
 
+/*
+ * Cambiar el f2a de usuario
+ */
+export const changeFDoubleAService = async (
+ userId: string,
+ mfaActive: boolean
+)=>{
+
+  const {data} = await authApi.changeF2AUser(userId, mfaActive);
+  return data;
+}
+

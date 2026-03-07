@@ -11,6 +11,7 @@ import { useAuthStore } from "../../store/auth.store";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import {
+  changeFDoubleAService,
   changePasswordService,
   editProfileService,
   getExternalProjects,
@@ -60,6 +61,7 @@ const Profile = () => {
   );
   
 const [alert, setAlert] = useState<AlertState>(null);
+  const [isUpdatingMFA, setIsUpdatingMFA] = useState(false);
 
   const [externalUsers, setExternalUsers] = useState<Record<
     string,
@@ -323,6 +325,32 @@ useEffect(() => {
     }
   };
 
+
+  
+  const handleToggleMFA = async (newValue: boolean) => {
+    if (!userId || !userDetails) return;
+    
+    setIsUpdatingMFA(true);
+    try {
+      console.log(userId)
+      await changeFDoubleAService(userId, newValue);
+      
+      setUserDetails(prev => prev ? { ...prev, mfa_active: newValue } : null);
+      
+      setAlert({
+        type: "success",
+        message: "profile.mfaUpdateSuccess"
+      });
+    } catch (error) {
+      console.log(error);
+      setAlert({
+        type: "error",
+        message: "profile.mfaUpdateError"
+      });
+    } finally {
+      setIsUpdatingMFA(false);
+    }
+  };
 const handleChangePassword = async (values: {
   old_password: string;
   new_password: string;
@@ -523,12 +551,16 @@ setModalChangePass(false);
               t={t}
               userDetails={userDetails}
               firstExternalUser={firstExternalUser}
+              mfaActive={userDetails?.mfa_active ?? false}
               hasExternal={hasExternal}
               formatDate={formatDate}
               formatGender={formatGender}
               formatDocumentType={formatDocumentType}
               onEdit={() => setModalEdit(true)}
               onChangePassword={() => setModalChangePass(true)}
+              onToggleMFA={handleToggleMFA}
+              isUpdatingMFA={isUpdatingMFA}
+
             />
 
             <ModalEditProfile
