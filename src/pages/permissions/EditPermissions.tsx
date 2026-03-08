@@ -92,7 +92,7 @@ const EditPermissions = () => {
 
         setAlert({
           message: t(`errors.${errorCode}`),
-          type: "error",
+          type: errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning": "error",
         });
       
       }

@@ -551,7 +551,7 @@
     "AUTH_PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
     "AUTH_PASSWORD_TOO_SHORT": "La contraseña es demasiado corta. Debe tener al menos {{min}} caracteres.",
     "AUTH_PASSWORD_TOO_LONG": "La contraseña es demasiado larga. No puede superar los {{max}} caracteres.",
-
+    "AUTH_INSUFFICIENT_PERMISSIONS": "No tienes permisos suficientes para realizar esta acción.",
     "AUTH_PASSWORD_REQUIRE_UPPERCASE": "La contraseña debe contener al menos una letra mayúscula.",
     "AUTH_PASSWORD_REQUIRE_LOWERCASE": "La contraseña debe contener al menos una letra minúscula.",
     "AUTH_PASSWORD_REQUIRE_NUMBER": "La contraseña debe contener al menos un número.",
