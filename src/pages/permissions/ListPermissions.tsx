@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from "react-i18next";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
@@ -24,7 +25,8 @@ const ListPermissions = () => {
   const [error, setError] = useState("");
   const [size] = useState(5);
   const [page,setPage] = useState(1);
-  
+  const [notListPerm, setNotListPerm] = useState(null);
+
   const [paginatedPerm, setPaginatedPerm] =
     useState<PaginatedPermissionsResponse | null>(null);
   //  función principal paginada real
@@ -42,8 +44,13 @@ const ListPermissions = () => {
       const response = await listPermissionsService(payload);
       setPaginatedPerm(response);
       setPage(pageParam);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail?.code
+      
+      if (errorMessage) {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError("Error loading users");
     } finally {
       setLoading(false);
@@ -137,7 +144,7 @@ const ListPermissions = () => {
           </div>
         </div>
 
-        <div className="flex items-end ml-4 gap-2 mt-2 md:w-1/2 md:mt-0">
+        <div className="flex items-end gap-2 mt-2 ml-4 md:w-1/2 md:mt-0">
           <Button
             size="xs"
             onClick={() => getPermissions(1)}
@@ -170,6 +177,12 @@ const ListPermissions = () => {
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
           <p className="text-3xl font-bold">{t("permissions.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {notListPerm && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>{" "}
         </div>
       )}{" "}
       {error && (
