@@ -154,10 +154,9 @@ const EditRoles = () => {
         });
       } catch (error:any) {
         const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
-
         setAlert({
           message: t(`errors.${errorCode}`),
-          type: "error",
+          type: errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning": "error",
         });
       }
     },

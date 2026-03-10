@@ -38,7 +38,7 @@ const SubmodulesList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
 
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");

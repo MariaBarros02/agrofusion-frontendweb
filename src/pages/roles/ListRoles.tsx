@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from "react-i18next";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
@@ -18,9 +19,9 @@ import type {
 } from "../../dto/response/listRoles-response.dto";
 import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
 import AlertConfirmation from "../../components/layout/AlertConfirmation";
-import ToastSimple, {
-  type ToastState,
-} from "../../components/layout/ToastSimple";
+
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 const ListRoles = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -30,8 +31,7 @@ const ListRoles = () => {
   const [error, setError] = useState("");
   const [size] = useState(5);
   const [page, setPage] = useState(1);
-
-  const [toast, setToast] = useState<ToastState>(null);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [paginatedRole, setPaginatedPerm] =
     useState<PaginatedRolesResponse | null>(null);
 
@@ -40,6 +40,7 @@ const ListRoles = () => {
   const [selectedRole, setSelectedRole] = useState<ListRolesResponse | null>(
     null,
   );
+  const [notListPerm, setNotListPerm] = useState(null);
   //  función principal paginada real
   const getRoles = async (pageParam = page) => {
     try {
@@ -55,8 +56,14 @@ const ListRoles = () => {
       const response = await listRolesService(payload);
       setPaginatedPerm(response);
       setPage(pageParam);
-    } catch (err) {
-      console.log(err);
+    } catch (err:any) {
+      const errorMessage = err.response?.data?.detail?.code
+      
+      if (errorMessage) {
+        setNotListPerm(errorMessage);
+        return;
+      }
+    
       setError("Error loading users");
     } finally {
       setLoading(false);
@@ -79,12 +86,13 @@ const ListRoles = () => {
       setShowDeleteModal(false);
       setSelectedRole(null);
       await getRoles(1);
-    } catch (error) {
-      console.error(error);
-
-      setToast({
-        message: "roles.deleteError",
-        type: "error",
+    } catch (err: any) {
+      setShowDeleteModal(false);
+      const errorMessage = err.response?.data?.detail?.code
+      
+      setAlert({
+        message: errorMessage? t(`errors.${errorMessage}`) : t("roles.deleteError"),
+        type: "warning",
       });
     }
   };
@@ -224,6 +232,13 @@ const ListRoles = () => {
           <p className="text-3xl font-bold">{t("roles.loading")}</p>{" "}
         </div>
       )}{" "}
+      {notListPerm && (
+        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>{" "}
+        </div>
+      )}{" "}
+
       {error && (
         <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
           {" "}
@@ -266,14 +281,13 @@ const ListRoles = () => {
           setConfirmDeleteChecked(false);
         }}
       />
-      {toast && (
-        <div className="fixed z-50 top-5 right-5">
-          <ToastSimple
-            messageKey={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
+      {alert && (
+        
+          <AlertSimple
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert(null)}
           />
-        </div>
       )}
     </AppLayoutSB>
   );
