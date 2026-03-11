@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Card } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import { logoutService } from "../services/agrofusion/auth.service";
-import { handleSSOLoginEP } from "../services/auth/authOrchestrator.service";
+import { handleSSOLoginEP } from "../services/orchestrator/authOrchestrator.service";
 import i18n from "i18next";
 import ThemeToggle from "../components/ThemeToggle";
 import type { ToastData } from "../components/layout/ToastSimple";

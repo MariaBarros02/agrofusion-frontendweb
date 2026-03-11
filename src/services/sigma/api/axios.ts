@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { applyAuthInterceptor } from '../axios.config';
-import { env } from '../../config/env';
+import { env } from '../../../config/env';
 
 /**
  * Instancia de Axios configurada para el microservicio SIGMA.
@@ -13,8 +12,3 @@ export const authAxios = axios.create({
     timeout: 10000,
 });
 
-/**
- * Vincula interceptores de autenticación para adjuntar tokens 
- * y manejar errores de autorización (401/403) de forma centralizada.
- */
-applyAuthInterceptor(authAxios);

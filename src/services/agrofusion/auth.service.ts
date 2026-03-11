@@ -1,5 +1,17 @@
-import { authApi } from "../../api/agrofusion/auth.api";
-import type { ResetTokenMap } from "../auth/authOrchestrator.service";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { authApi } from "./api/auth.api";
+import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
+import type { createUserRequest } from "../../dto/request/createUser-request.dto";
+import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
+import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
+import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
+import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
+import type { EditPermissionRequest } from "../../dto/request/editPermission-request.dto";
+import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
+import type { SubmoduleListResponse } from "../../dto/response/submoduleList-response.dto";
+import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
+import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
+import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
 
 
 /**
@@ -10,6 +22,64 @@ export const getExternalProjects = async () => {
   const {data} = await authApi.getExternalProjects();
   return data
 }
+
+/**
+ * Obtiene el listado de todos los proyectos externos (RF-GES-01).
+ * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+ */
+export const listProjectsService = async () => {
+  const { data } = await authApi.getExternalProjectsList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un proyecto externo (ACTIVE/INACTIVE).
+ */
+export const updateProjectStatusService = async (
+  projectId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateProjectStatus(projectId, status);
+  return data;
+};
+
+/**
+ * Obtiene el listado de todos los módulos.
+ */
+export const listModulesService = async (): Promise<ModuleListResponse[]> => {
+  const { data } = await authApi.getModulesList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un módulo (ACTIVE/INACTIVE).
+ */
+export const updateModuleStatusService = async (
+  moduleId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateModuleStatus(moduleId, status);
+  return data;
+};
+
+/**
+ * Obtiene el listado de todos los submódulos.
+ */
+export const listSubmodulesService = async (): Promise<SubmoduleListResponse[]> => {
+  const { data } = await authApi.getSubmodulesList();
+  return data;
+};
+
+/**
+ * Actualiza el estado de un submódulo (ACTIVE/INACTIVE).
+ */
+export const updateSubmoduleStatusService = async (
+  submoduleId: string,
+  status: string
+) => {
+  const { data } = await authApi.updateSubmoduleStatus(submoduleId, status);
+  return data;
+};
 
 
 /**
@@ -82,6 +152,279 @@ export const resetPasswordService = async (
   confirmPassword: string
 ) => {
   const { data } = await authApi.resetPassword({ token, newPassword, confirmPassword });
+  return data;
+}
+
+/**
+ * Consultar si existe un usuario por su correo electrónico o numero de identificación.
+ * @param email Correo electrónico del usuario.
+ * @param numIdent Número de identificación.
+ * @returns Datos del usuario o respuesta si el usuario no existe.
+ */
+
+export const userExistsService = async (
+  email: string,
+  numIdent: string
+): Promise<boolean> => {
+  try {
+  const { data } = await authApi.userExists({ email, numDoc: numIdent });
+  
+
+    // Si responde OK → existe
+    return Boolean(data);
+  } catch (error: any) {
+    // 404 = no existe → seguimos
+    if (error.response?.status === 404) {
+      return false;
+    }
+
+    // cualquier otro error sí es real
+    throw error;
+  }
+};
+
+/**
+ * Crear usuario.
+ * @param user Datos del usuario a crear.
+ */
+export const createUserService = async (
+  user: createUserRequest
+) => {
+  const { data } = await authApi.createUser(user);
+  return data;
+} 
+
+/*
+ *Activar cuenta y cambiar contraseña anterior
+ *
+ */
+export const accountActivateService = async (
+  payload: AccountActivateRequest
+)=>{
+  const {data} = await authApi.accountActivation(payload);
+  return data;
+}
+
+/*
+ * Listar usuarios del sistema
+ *
+ */
+export const listUsersService = async (
+  payload: listUsersRequest
+)=>{
+  const {data} = await authApi.listUsers(payload);
+  return data;
+}
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
+export const getUserDetailsService = async (
+  userId: string
+)=>{
+  const {data} = await authApi.getDetailsUser(userId);
+  return data;
+}
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
+export const getProfileService = async (
+  userId: string
+)=>{
+  const {data} = await authApi.getProfile(userId);
+  return data;
+}
+
+/*
+ * Listar detalles de usuario por id
+ *
+ */
+export const deleteUserService = async (
+  userId: string
+)=>{
+  
+  const {data} = await authApi.deleteSoftUser(userId);
+  return data;
+}
+
+/*
+ * Actualizar perfil del usuario
+ *
+ */
+export const editProfileService = async (
+  userId: string,
+  name: string,
+  identityNumber: string
+)=>{
+  
+  const {data} = await authApi.editProfile(userId, name, identityNumber);
+  return data;
+}
+
+/*
+ * Actualizar perfil del usuario
+ *
+ */
+export const editUserService = async (
+  userId: string,
+  name: string,
+  identityNumber: string,
+  state: string,
+  rol?:string
+)=>{
+  
+  const {data} = await authApi.editUser(userId, name, identityNumber, state, rol);
+  return data;
+}
+
+
+/*
+ * Cambiar contraseña desde mi perfil
+ *
+ */
+export const changePasswordService = async (
+  userId: string,
+  payload: ChangePasswordRequest
+)=>{
+  
+  const {data} = await authApi.changePassword(userId, payload);
+  return data;
+}
+
+/*
+ * Listar permisos del sistema
+ *
+ */
+export const listPermissionsService = async (
+  payload: listPermissionsRequest
+)=>{
+  const {data} = await authApi.listPemissions(payload);
+  return data;
+}
+
+/*
+ * Listar un permiso del sistema
+ *
+ */
+export const getDetailsPermissionService = async (
+  permId: string
+)=>{
+
+  const {data} = await authApi.getPemission(permId);
+  return data;
+}
+
+
+/*
+ * Listar un permiso del sistema
+ *
+ */
+export const editPermissionService = async (
+  permId: string,
+  payload:EditPermissionRequest
+)=>{
+
+  const {data} = await authApi.editPemission(permId, payload);
+  return data;
+}
+
+/*
+ * Listar roles del sistema
+ *
+ */
+export const listRolesService = async (
+  payload: listRolesRequest
+)=>{
+  const {data} = await authApi.listRoles(payload);
+  return data;
+}
+
+/*
+ * Eliminar un rol del sistema
+ *
+ */
+export const deleteRoleService = async (
+  roleId: string
+)=>{
+  const {data} = await authApi.deleteRole(roleId);
+  return data;
+}
+
+
+/*
+ * Listar un role del sistema
+ *
+ */
+export const getDetailsRoleService = async (
+  roleId: string
+)=>{
+
+  const {data} = await authApi.getRole(roleId);
+  return data;
+}
+
+/*
+ * Listar un role del sistema
+ *
+ */
+export const editRoleService = async (
+  roleId: string,
+  payload: EditRoleRequest
+)=>{
+
+  const {data} = await authApi.editRole(roleId, payload);
+  return data;
+}
+
+/*
+ * Listar un permisos (basic) del sistema
+ *
+ */
+export const getPermissionsBasicService = async (
+
+)=>{
+
+  const {data} = await authApi.listPemissionsBasic();
+  return data;
+}
+
+
+/*
+ * Crear un rol
+ *
+ */
+export const createRoleService = async (
+  payload: CreateRoleRequest
+)=>{
+
+  const {data} = await authApi.createRole(payload);
+  return data;
+}
+
+/*
+ * Lista basica de roles
+ *
+ */
+export const getBasicListRolesService = async (
+ 
+)=>{
+
+  const {data} = await authApi.getBasicListRoles();
+  return data;
+}
+
+/*
+ * Cambiar el f2a de usuario
+ */
+export const changeFDoubleAService = async (
+ userId: string,
+ mfaActive: boolean
+)=>{
+
+  const {data} = await authApi.changeF2AUser(userId, mfaActive);
   return data;
 }
 

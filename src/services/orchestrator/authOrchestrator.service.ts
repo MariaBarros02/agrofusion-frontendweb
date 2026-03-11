@@ -180,7 +180,7 @@ export const handleReqResPasswordEP = async (
         "No se pudo solicitar el cambio de contraseña.";
 
       auditErrors.push({
-        context: "RESET_PASSWORD",
+        context: "REQUEST_RESET_PASSWORD",
         project: service,
         message,
         severity: "HIGH",
@@ -253,7 +253,7 @@ export const handleResPasswordEP = async (
         context: "RESET_PASSWORD",
         project: service,
         message:
-          error?.response?.data?.detail?.message ?? "resetPassword.errorExtPro",
+          error?.response?.data?.detail?.message ?? "Error al cambiar contraseña",
         severity: "HIGH",
         payload_excerpt: {
           status: error?.response?.status

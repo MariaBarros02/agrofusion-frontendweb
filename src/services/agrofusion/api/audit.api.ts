@@ -1,5 +1,5 @@
 import { auditAgrofusionAxios } from "./axios";
-import type { RegisterErrorPEPayload } from "../../services/agrofusion/audit.service";
+import type { RegisterErrorPEPayload } from "../audit.service";
 /**
  * Servicio encargado del registro de logs y auditoría del sistema.
  */

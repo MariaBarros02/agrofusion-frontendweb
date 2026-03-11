@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AxiosError, AxiosInstance } from "axios";
-
+import axios from 'axios';
 import { useAuthStore } from "../store/auth.store";
 
 /** * Estado global para evitar múltiples peticiones simultáneas de refresco de token.
@@ -67,12 +67,11 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
        * MANEJO DE ERROR 401 (Unauthorized)
        * Indica que el token ha expirado o no es válido.
        */
-      if (error.response.status === 401) {
+      if (error.response.status === 401 && !originalRequest.url.includes('/auth/login')) {
         
         if (!store.refreshToken) {
           store.logout();
           localStorage.removeItem("auth-storage");
-          window.location.href = "/login";
           return Promise.reject(error);
         }
 
@@ -89,16 +88,17 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
           originalRequest._retry = true;
           isRefreshing = true;
 
+          const refreshInstance = axios.create({ baseURL: originalRequest.baseURL });
           try {
             /** * Intento de renovar el Access Token usando el Refresh Token 
              */
-            const res = await api.post("/auth/refresh", {
+            const res = await refreshInstance.post("/auth/refresh", {
               refresh_token: store.refreshToken,
             });
 
             const { access_token, refresh_token } = res.data;
 
-            store.login(access_token, refresh_token);
+            store.login(access_token, refresh_token, store.email || '' );
             onRefreshed(access_token);
 
             originalRequest.headers.Authorization =

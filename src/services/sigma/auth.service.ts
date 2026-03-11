@@ -1,4 +1,6 @@
-import { authApiSigma } from "../../api/sigma/auth.api";
+import { authApiSigma } from "./api/auth.api";
+import type { ExternalUser } from "../../dto/request/externalUser-request.dto";
+import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
 
 /**
  * Solicita un token de recuperación de contraseña específicamente para Sigma.
@@ -25,3 +27,102 @@ export const resetPasswordService = async (
   const { data } = await authApiSigma.resetPassword({ token, newPassword, confirmPassword });
   return data;
 }
+
+/**
+ * Obtiene los roles del proyecto
+ */
+export const getRolesService = async () => {
+  const response = await authApiSigma.getRoles();
+  const roles = response.data.data;
+  return roles;
+}
+
+/**
+ * Obtiene los tipos de documentos del proyecto
+ */
+export const getTypeDocumentsService = async () => {
+  const response = await authApiSigma.getTypeDocuments();
+  const typeDocuments = response.data.data;
+  return typeDocuments;
+}
+
+/**
+ * Solicita autenticación de un servicio externo para endpoints protegidos.
+ * @param {Object} data - Información de autenticación del servicio.
+ * @param {string} data.client_id - Identificador único del cliente.
+ * @param {string} data.client_secret - Secreto del cliente para autenticación.
+ * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+ */
+export const serviceTokenService = async (
+  clientId: string,
+  clientSecret: string,
+  email: string
+) => {
+  const { data } = await authApiSigma.serviceToken({ client_id: clientId, client_secret: clientSecret, email });
+  return data;
+}
+
+
+/**
+     * Como administrador crea un usuario en el sistema.
+     * @param {ExternalUser} data - Información de autenticación del servicio.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+export const createUserByAdminService = async (user: ExternalUser) => {
+  const {data} = await  authApiSigma.createUserByAdmin(user);
+  return data;
+}
+
+/**
+     * Activar una cuenta de usuario.
+     * @param {string} token - Información de autenticación del servicio.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+export const accountActivationService = async (token:string) => {
+  const {data} = await  authApiSigma.accountActivation(token);
+  return data;
+}
+
+
+ /**
+     * Obtener un usuario por su correo.
+     * @param {string} email - Correo del usuario a buscar
+     * @returns {Promise<any>} Resultado de consulta.
+     */
+export const getUserByEmailService = async (email:string) => {
+  const {data} = await  authApiSigma.getUserByEmail(email);
+  return data;
+}
+
+ /**
+     * Cambiar el estado de un usuario.
+     * @param {number} user_id
+     * @param {number} new_status
+     * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
+     */
+export const changeStateUserService = async (user_id: number, new_status: number) => {
+  const {data} = await  authApiSigma.changeUserStatus(user_id, new_status);
+  return data;
+}
+
+ /**
+     * Editar un usuario como administrador.
+     * @param {number} id
+     * @param {ExternalUser} payload
+     */
+export const editUserByAdminService = async (payload: ExternalUser, id: number) => {
+  const {data} = await  authApiSigma.editUserByAdmin(payload, id);
+  return data;
+}
+
+
+ /**
+     * Editar un usuario como administrador.
+     * @param {number} id
+     * @param {ChangePasswordRequest} payload
+     */
+export const changePasswordService = async (payload: ChangePasswordRequest, id: number) => {
+  const {data} = await  authApiSigma.changePasswordUser(payload, id);
+  return data;
+}
+

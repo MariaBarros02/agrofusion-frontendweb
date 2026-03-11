@@ -5,7 +5,7 @@ import {
   handleSSOLoginEP, 
   handleReqResPasswordEP, 
   handleResPasswordEP 
-} from '../../services/auth/authOrchestrator.service';
+} from '../../services/orchestrator/authOrchestrator.service';
 
 // Importamos los mocks que configuramos previamente
 import { ssoLoginService } from '../../services/agrofusion/auth.service';

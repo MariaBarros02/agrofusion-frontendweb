@@ -39,7 +39,6 @@ const LoginSchema = (
       .required(t("validation.emailRequired")),
     password: yup
       .string()
-      .min(8, t("validation.passwordMin", { min: 10 }))
       .required(t("validation.passwordRequired")),
   });
 
@@ -84,6 +83,7 @@ const Login = () => {
     enableReinitialize: true,
     validationSchema: LoginSchema(t),
     onSubmit: async (values) => {
+      
       try {
         setGlobalError(null);
         setPasswordError(null);
@@ -96,9 +96,10 @@ const Login = () => {
         // Flujo B: Acceso directo
         loginStore.login(
           response.access_token ?? "",
-          response.refresh_token ?? ""
+          response.refresh_token ?? "",
+          values.email,
         );
-        navigate("/");
+        navigate("/dashboard");
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -260,13 +261,7 @@ const Login = () => {
                     {t("login.forgottenPassword")} {" "}
                     <span className="font-medium text-blue-600 hover:underline">{t("login.recuperateIt")}</span>
                   </Link>
-                  <Link
-                    className="text-sm font-semibold text-stone-900 dark:text-white"
-                    to="/"
-                  >
-                    {t("login.activeAccount")}{" "}
-                    <span className="font-medium text-blue-600 hover:underline">{t("login.activeHere")}</span>
-                  </Link>
+                 
                 </div>
 
                 <Button

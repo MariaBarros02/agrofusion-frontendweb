@@ -2,7 +2,7 @@
 import  { useState } from "react";
 import ToastSimple from "../components/layout/ToastSimple";
 import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/auth/authOrchestrator.service";
+import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
 import Header from "../components/layout/Header";
 import { Label, TextInput, Card, Button } from "flowbite-react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import type { AlertState } from "../components/layout/AlertSimple";
 import AlertSimple from "../components/layout/AlertSimple";
-import { handleResPasswordEP } from "../services/auth/authOrchestrator.service";
+import { handleResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente para el establecimiento de una nueva contraseña.
@@ -39,18 +39,11 @@ const ResetPassword = () => {
   const gettSigmaFromUrl = () => new URLSearchParams(window.location.search).get("tSigma") || "";
   
   const [globalError, setGlobalError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPas, setShowConfirmPas] = useState(false);
-  //Funcion para cambiar el estado de visibilidad
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-  const toggleConfirmPasVis = () => {
-    setShowConfirmPas(!showConfirmPas);
-  };
-  const inputType = showPassword ? "text" : "password";
+  
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const InputIcon = FaLock;
-  const ToggleIcon = showPassword ? FiEyeOff : FiEye;
 
   /**
    * Gestión del formulario con Formik y esquema de validación Yup.
@@ -66,7 +59,7 @@ const ResetPassword = () => {
     validationSchema: Yup.object({
       newPassword: Yup.string()
         .required("validation.passwordRequired")
-        .min(10, "validation.passwordMinLength")
+        .min(12, "validation.passwordMinLength")
         .max(128, "validation.passwordMaxLength")
         .matches(/[a-z]/, "validation.passwordLowercase")
         .matches(/\d/, "validation.passwordNumber")
@@ -183,7 +176,7 @@ const ResetPassword = () => {
                     <div className="relative">
                       <TextInput
                         id="newPassword"
-                        type={inputType}
+                        type={showNewPassword ? "text" : "password"}
                         icon={InputIcon}
                         placeholder="••••••••"
                         required
@@ -199,11 +192,11 @@ const ResetPassword = () => {
                       {/* Botón de Toggle (Ojo) */}
                       <Button
                         type="button"
-                        onClick={togglePasswordVisibility}
+                        onClick={() => setShowNewPassword(v => !v)}
                         color="gray"
                         className="absolute inset-y-0 right-0 flex items-center justify-center w-10 h-full p-0 text-gray-500 bg-transparent border-0 hover:bg-transparent focus:ring-0 dark:text-gray-400 dark:hover:bg-transparent dark:bg-transparent"
                       >
-                        <ToggleIcon className="w-4 h-4" />
+                        {showNewPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
                       {formik.touched.newPassword &&
                         formik.errors.newPassword && (
@@ -224,7 +217,7 @@ const ResetPassword = () => {
                     <div className="relative">
                       <TextInput
                         id="confirmPassword"
-                        type={inputType}
+                        type={showConfirmPassword ? "text" : "password"}
                         icon={InputIcon}
                         placeholder="••••••••"
                         required
@@ -240,11 +233,11 @@ const ResetPassword = () => {
                       {/* Botón de Toggle (Ojo) */}
                       <Button
                         type="button"
-                        onClick={toggleConfirmPasVis}
+                        onClick={() => setShowConfirmPassword(v => !v)}
                         color="gray"
                         className="absolute inset-y-0 right-0 flex items-center justify-center w-10 h-full p-0 text-gray-500 bg-transparent border-0 hover:bg-transparent focus:ring-0 dark:text-gray-400 dark:hover:bg-transparent dark:bg-transparent"
                       >
-                        <ToggleIcon className="w-4 h-4" />
+                        {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
 
                       {formik.touched.confirmPassword &&

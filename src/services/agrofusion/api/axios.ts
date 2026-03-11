@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { applyAuthInterceptor } from '../axios.config';
-import { env } from '../../config/env';
+import { applyAuthInterceptor } from '../../../api/axios.config';
+import { env } from '../../../config/env';
 
 
 /**

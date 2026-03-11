@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { auditApi } from "../../../api/agrofusion/audit.api";
-import { auditAgrofusionAxios } from "../../../api/agrofusion/axios";
+import { auditApi } from "../../../services/agrofusion/api/audit.api";
+import { auditAgrofusionAxios } from "../../../services/agrofusion/api/axios";
 
 jest.mock("../../../api/agrofusion/axios", () => ({
   auditAgrofusionAxios: {

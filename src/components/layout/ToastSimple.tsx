@@ -71,6 +71,7 @@ const ToastSimple = ({
 }: ToastSimpleProps) => {
   const style = toastStyles[type];
   const {t} = useTranslation();
+
   return (
     <Toast>
       <div

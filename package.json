@@ -19,6 +19,8 @@
     "formik": "^2.4.9",
     "i18next": "^25.7.3",
     "i18next-browser-languagedetector": "^8.2.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.574.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.0",
@@ -49,12 +51,14 @@
     "jest-environment-jsdom": "^30.2.0",
     "jest-transformer-svg": "^2.1.0",
     "postcss": "^8.5.6",
+    "tailwind-scrollbar": "^2.0.1",
     "tailwindcss": "^3.4.19",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.15",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

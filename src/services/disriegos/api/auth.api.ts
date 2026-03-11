@@ -1,0 +1,94 @@
+import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
+import type { ExternalUser } from "../../../dto/request/externalUser-request.dto";
+import { authAxios } from "./axios";
+import { authPrivateAxios } from "./axiosPrivate";
+
+/**
+ * API Service para la gestión de autenticación de Disriego.
+ * Proporciona métodos para el control de acceso y recuperación de cuentas.
+ */
+export const authApiDisriego = {
+    /**
+     * Solicita el restablecimiento de contraseña enviando un correo al usuario.
+     * @param {Object} data - Datos de la solicitud.
+     * @param {string} data.email - Correo electrónico de la cuenta a recuperar.
+     * @returns {Promise<any>} Respuesta del servidor sobre el envío del correo.
+     */
+    reqResetPassword: (data: { email: string }) => authAxios.post("/base/auth/request-reset-password", data),
+    /**
+     * Establece una nueva contraseña de usuario mediante un token de validación.
+     * @param {Object} data - Información de actualización de contraseña.
+     * @param {string} data.token - Identificador único de recuperación enviado por email.
+     * @param {string} data.newPassword - La nueva clave elegida por el usuario.
+     * @param {string} data.confirmPassword - Confirmación de la nueva clave.
+     * @returns {Promise<any>} Resultado de la operación de cambio de contraseña.
+     */
+    resetPassword: (data: { token: string; newPassword: string, confirmPassword: string }) => authAxios.post(`/base/auth/reset-password/${data.token}`, {new_password: data.newPassword, confirm_password: data.confirmPassword,}),
+    /**
+     * Solicita los roles del sistema.
+     * @returns {Promise<any>} Respuesta del servidor sobre los roles.
+     */
+    getRoles: () => authAxios.get("/base/roles/"),
+
+    /**
+     * Solicita los tipos de documentos del sistema.
+     * @returns {Promise<any>} Respuesta del servidor sobre los tipos de documentos.
+     */
+    getTypeDocuments: () => authAxios.get("/base/users/type-documents"),
+    /**
+     * Solicita autenticación de un servicio externo para endpoints protegidos.
+     * @param {Object} data - Información de autenticación del servicio.
+     * @param {string} data.client_id - Identificador único del cliente.
+     * @param {string} data.client_secret - Secreto del cliente para autenticación.
+     * @param {string} data.email - Correo electrónico del usuario.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+    serviceToken: (data: { client_id: string, client_secret: string, email: string }) => authAxios.post(`/base/auth/service-token`, data),
+    /**
+     * Como administrador crea un usuario en el sistema.
+     * @param {ExternalUser} data - Información de autenticación del servicio.
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+    createUserByAdmin: (data: ExternalUser) => authPrivateAxios.post(`/base/users/admin/create-agrofusion`, data),
+
+       /**
+     * Como usuario activar mi cuenta
+     * @param {string} activation_token- Token de activación de cuenta
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+    accountActivation: (activation_token: string) => authAxios.get(`base/users/activate-account/${activation_token}`),
+    /**
+     *  Buscar usuario por email
+     * @param {string} email- Email del usuario que se quiere buscar
+     * @returns {Promise<any>} Resultado de la operación de autenticación del servicio.
+     */
+    getUserByEmail: (email: string) =>
+    authPrivateAxios.get(`base/users/get-user-by-email/${email}`),
+    
+    /**
+     *  Cambiar el estado de un usuario
+     * @param {number} user_id
+     * @param {number} new_status
+     * @returns {Promise<any>} Resultado de la operación de cambiar el estado del usuario.
+     */
+    changeUserStatus: (user_id: number, new_status: number) =>
+    authPrivateAxios.post(`base/users/change-user-status/`,{user_id, new_status}),
+
+    /**
+     *  Editar usuario como administrador
+     * @param {ExternalUser} payload
+     * @param {number} id
+     * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+     */
+    editUserByAdmin: (payload: ExternalUser, id:number) =>
+    authPrivateAxios.put(`base/users/admin/edit/${id}`, payload),
+
+    /**
+     *  Cambiar la contraseña desde mi perfil
+     * @param {ChangePasswordRequest} payload
+     * @param {number} id
+     * @returns {Promise<any>} Resultado de la operación de actualizar usuario.
+     */
+    changePasswordUser: (payload: ChangePasswordRequest, id:number) =>
+    authPrivateAxios.post(`base/users/${id}/change-password`, payload),
+}
