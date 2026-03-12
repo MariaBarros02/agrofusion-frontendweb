@@ -18,6 +18,8 @@ import type {
 } from "../../dto/response/listUsers-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 const UsersList = () => {
   const { t } = useTranslation();
@@ -157,6 +159,16 @@ const UsersList = () => {
   useEffect(() => {
     getBasicRoles();
   }, []);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="users.title" description="users.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

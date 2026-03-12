@@ -27,6 +27,8 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple from "../../components/layout/ToastSimple";
 import ModalChangePassword from "./ModalChangePassword";
 import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 const documentTypes = {
   DISRIEGO: {
@@ -528,6 +530,16 @@ setModalChangePass(false);
 
 
   }, [userDetails, externalUsers]);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("PROFILE")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="profile.title" description="profile.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <>

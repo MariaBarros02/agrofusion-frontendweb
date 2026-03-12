@@ -28,6 +28,8 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import { FiSave } from "react-icons/fi";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
 interface EditValues {
@@ -459,6 +461,16 @@ const EditUser = () => {
     useEffect(() => {
       getBasicRoles();
     }, []);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editUser.title" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

@@ -23,6 +23,8 @@ import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
 import { getPermissionsBasicService } from "../../services/agrofusion/auth.service";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import type { PermissionBasicResponse } from "../../dto/response/listPermissions-response.dto";
 interface EditValues {
   name: string;
@@ -210,6 +212,17 @@ useEffect(() => {
     setRolePermissions(roleDetails.permissions || []);
   }
 }, [roleDetails]);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editRole.title" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
   return (
     <AppLayoutSB>
       <TitleTarget title="editRole.title" />

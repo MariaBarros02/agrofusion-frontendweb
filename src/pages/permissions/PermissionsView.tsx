@@ -6,6 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { ListPermissionsResponse } from "../../dto/response/listPermissions-response.dto";
 import { Button } from "flowbite-react";
 import { getDetailsPermissionService } from "../../services/agrofusion/auth.service";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 const PermissionsView = () => {
   const { t } = useTranslation();
@@ -34,6 +36,19 @@ const PermissionsView = () => {
       getPermDetails();
     }
   }, [permId]);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="viewPermission.title"
+          description="viewPermission.description"
+        />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>
