@@ -584,7 +584,6 @@
     "moduleInactive": {
         "title": "Módulo inactivo",
         "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
-    }
     },
     "submoduleInactive": {
         "title": "Submódulo inactivo",
