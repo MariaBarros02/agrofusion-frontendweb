@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
-import { fetchActiveModulesService } from "../services/agrofusion/auth.service";
-import { fetchActiveSubmodulesService } from "../services/agrofusion/auth.service";
+import { fetchActiveModulesService, fetchActiveSubmodulesService } from "../services/agrofusion/auth.service";
 import type { JSX } from "react";
 
 /**
@@ -16,9 +15,8 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
 
   useEffect(() => {
     if (isAuth) {
-      fetchActiveModulesService().catch(() => {
-        // Si falla (ej. 401), el interceptor ya maneja logout/redirect
-      });
+      fetchActiveModulesService().catch(() => {});
+      fetchActiveSubmodulesService().catch(() => {});
     }
   }, [isAuth]);
 

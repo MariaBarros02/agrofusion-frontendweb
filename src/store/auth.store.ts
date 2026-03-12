@@ -2,9 +2,6 @@
 import { jwtDecode } from 'jwt-decode';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useModuleAccessStore } from './moduleAccess.store';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { useSubmoduleAccessStore } from './submoduleAccess.store';
 
 
@@ -62,9 +59,8 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: true,
                     email: email,
                     id: decoded.sub
-                })},
-            logout: () => {
-                useModuleAccessStore.getState().clearModuleAccess();
+                });
+            },
             logout: () => {
                 useSubmoduleAccessStore.getState().clearSubmoduleAccess();
                 set({
@@ -75,7 +71,6 @@ export const useAuthStore = create<AuthState>()(
                     id: null,
                 });
             },
-                
         }),
         {
             name: 'auth-storage',

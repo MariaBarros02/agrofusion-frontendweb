@@ -584,6 +584,10 @@
     "moduleInactive": {
         "title": "Módulo inactivo",
         "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
+    },
+    "submoduleInactive": {
+        "title": "Submódulo inactivo",
+        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
     }
     },
     "submoduleInactive": {
