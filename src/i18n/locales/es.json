@@ -589,9 +589,4 @@
         "title": "Submódulo inactivo",
         "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
     }
-    },
-    "submoduleInactive": {
-        "title": "Submódulo inactivo",
-        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
-    }
 }

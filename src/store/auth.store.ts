@@ -2,6 +2,7 @@
 import { jwtDecode } from 'jwt-decode';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useModuleAccessStore } from './moduleAccess.store';
 import { useSubmoduleAccessStore } from './submoduleAccess.store';
 
 
@@ -62,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
                 });
             },
             logout: () => {
+                useModuleAccessStore.getState().clearModuleAccess();
                 useSubmoduleAccessStore.getState().clearSubmoduleAccess();
                 set({
                     accessToken: null,
