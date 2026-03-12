@@ -1,5 +1,6 @@
 {
     "common":{
+        "loading": "Cargando...",
         "rightsReserved": "Todos los derechos reservados",
         "accept": "Aceptar",
         "goToDisriego": "Ir a Disriego",
@@ -579,6 +580,11 @@
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
     "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
+    },
+    "moduleInactive": {
+        "title": "Módulo inactivo",
+        "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
+    }
     },
     "submoduleInactive": {
         "title": "Submódulo inactivo",

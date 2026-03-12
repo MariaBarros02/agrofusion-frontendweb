@@ -7,6 +7,8 @@ import type { ListRolesResponse } from "../../dto/response/listRoles-response.dt
 import { Button, Badge } from "flowbite-react";
 import { getDetailsRoleService } from "../../services/agrofusion/auth.service";
 import { Pencil } from "lucide-react";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
@@ -48,6 +50,16 @@ const RoleView = () => {
       getRoleDetails();
     }
   }, [roleId]);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="viewRole.title" description="viewRole.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);

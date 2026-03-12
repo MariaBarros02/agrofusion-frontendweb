@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import AppLayoutSB from "../components/layout/AppLayoutSB";
 import TitleTarget from "../components/layout/TitleTarget";
+import ModuleInactive from "./ModuleInactive";
+import { useModuleAccessStore } from "../store/moduleAccess.store";
 import { getExternalProjects } from "../services/agrofusion/auth.service";
 import type { ExternalProject } from "../dto/shared/external-project.dto";
 import { useTranslation } from "react-i18next";
@@ -111,6 +113,16 @@ const Dashboard = () => {
       return false;
     }
   };
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("DASHBOARD")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="dashboard.title" description="dashboard.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

@@ -1,6 +1,8 @@
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState, useMemo } from "react";
@@ -194,6 +196,16 @@ const ProjectsList = () => {
       handleCloseModal();
     }
   };
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="project.title" description="project.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);

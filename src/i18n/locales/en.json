@@ -1,5 +1,6 @@
 {
     "common": {
+        "loading": "Loading...",
         "rightsReserved": "All rights reserved",
         "accept": "Accept",
         "goToDisriego": "Go to Disriego",
@@ -55,7 +56,7 @@
         "modeDescription": "Dark mode working without libraries"
     },
     "nav": {
-        "dashboard": "Go to home",
+        "dashboard": "Dashboard",
         "profile": "Profile",
         "admin": "Administration",
         "check": "Receipt",
@@ -555,6 +556,10 @@
         "INCORRECT_PASSWORD": "The current password entered is incorrect",
         "INVALID_PASSWORD": "You cannot reuse a previous password",
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists"
+    },
+    "moduleInactive": {
+        "title": "Module inactive",
+        "message": "This module is inactive. You must contact the system administrator to request its activation."
     },
     "submoduleInactive": {
         "title": "Submodule inactive",
