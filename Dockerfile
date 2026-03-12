@@ -5,15 +5,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+
+#  Usa el nuevo comando de build
+RUN npm run build:prod
 
 # ETAPA 2: Servir con Nginx en puerto 3000
 FROM nginx:alpine
 
-# Copiamos los archivos construidos
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Configuración personalizada de Nginx para SPA con subcarpeta
 RUN echo 'server { \
     listen 3000; \
     server_name localhost; \
@@ -31,7 +31,5 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-# EXPONEMOS EL PUERTO 3000
 EXPOSE 3000
-
 CMD ["nginx", "-g", "daemon off;"]
