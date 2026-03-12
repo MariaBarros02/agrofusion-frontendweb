@@ -34,7 +34,7 @@ import CreateRole from "../pages/roles/CreateRole";
  */
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/agrofusion">
       <Routes>
         {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
