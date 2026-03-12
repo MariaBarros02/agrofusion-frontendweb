@@ -1,22 +1,37 @@
-# 1. Usamos la imagen oficial de Node.js versión 20 (como pide el README)
-# Usamos la versión "alpine" porque es mucho más liviana y rápida de descargar
-FROM node:20-alpine
+# ETAPA 1: Construcción
+FROM node:20-alpine AS builder
 
-# 2. Creamos la carpeta de trabajo dentro del contenedor
 WORKDIR /app
-
-# 3. Copiamos los archivos de configuración de dependencias primero
 COPY package*.json ./
-
-# 4. Instalamos las dependencias de Node.js
-RUN npm install
-
-# 5. Copiamos el resto del código del frontend
+RUN npm ci
 COPY . .
+RUN npm run build
 
-# 6. Exponemos el puerto 3000 (El puerto por defecto de Vite)
+# ETAPA 2: Servir con Nginx en puerto 3000
+FROM nginx:alpine
+
+# Copiamos los archivos construidos
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Configuración personalizada de Nginx para SPA con subcarpeta
+RUN echo 'server { \
+    listen 3000; \
+    server_name localhost; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    \
+    location /agrofusion { \
+        alias /usr/share/nginx/html; \
+        try_files $uri $uri/ /agrofusion/index.html; \
+    } \
+    \
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2)$ { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
+# EXPONEMOS EL PUERTO 3000
 EXPOSE 3000
 
-# 7. El comando para arrancar el servidor de desarrollo
-# NOTA CLAVE: Le agregamos "--", "--host", "0.0.0.0" para obligar a Vite a mostrar la página web hacia afuera del contenedor.
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["nginx", "-g", "daemon off;"]
