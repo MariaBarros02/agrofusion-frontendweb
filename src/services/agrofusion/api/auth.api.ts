@@ -79,6 +79,15 @@ export const authApi = {
       { status }
     ),
   /**
+   * Obtiene módulos activos y rol del usuario (para control de acceso a rutas).
+   */
+  getActiveModules: () =>
+    authAgrofusionAxios.get<{
+      active_modules: string[];
+      role_code: string | null;
+    }>("auth/active-modules"),
+
+  /**
    * Realiza el inicio de sesión primario del usuario.
    * @param {LoginDto} data - Credenciales del usuario (email y password).
    * @returns {Promise<LoginResponse>} Respuesta con datos de sesión o estado de MFA.

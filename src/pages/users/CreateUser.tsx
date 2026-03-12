@@ -27,6 +27,9 @@ import type { createUserRequest } from "../../dto/request/createUser-request.dto
 import { useNavigate } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+
 interface ProjectRole {
   role_id: number;
   role_name: string;
@@ -573,6 +576,17 @@ const CreateUser = () => {
     return `${mixedBase}${separator}${numbers}`;
   };
   const isButtonDisabled = formik.isSubmitting;
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="users.title" description="users.description" />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />

@@ -15,6 +15,8 @@ import type {
 import { useNavigate } from "react-router-dom";
 import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
 import { listPermissionsService } from "../../services/agrofusion/auth.service";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 const ListPermissions = () => {
   const { t } = useTranslation();
@@ -92,6 +94,24 @@ const ListPermissions = () => {
       ],
     },
   ];
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  if (!canAccessModule("ADMINISTRATION")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="permissions.title"
+          description="permissions.description"
+          activeTab="permissions"
+          tabs={[
+            { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+            { id: "permissions", label: "common.permissions", icon: BiCube, to: "/administration/permissions" },
+          ]}
+        />
+        <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>
