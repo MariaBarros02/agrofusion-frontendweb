@@ -20,14 +20,15 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    location /agrofusion { \
-        alias /usr/share/nginx/html; \
-        try_files $uri $uri/ /agrofusion/index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
     } \
     \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2)$ { \
+    # Para archivos estáticos (JS, CSS, imágenes) \
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2|json)$ { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        try_files $uri =404; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
