@@ -24,6 +24,7 @@ import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
 import { useNavigate } from "react-router-dom";
+import logoAgrofusionRemovebg2 from "/logoAgrofusion-removebg2.png"
 
 interface NavSideBarProps {
   isOpen: boolean;
@@ -110,7 +111,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           {/* LOGO */}
           <SidebarLogo
             href="/dashboard"
-            img="/logoAgrofusion-removebg2.png"
+            img={logoAgrofusionRemovebg2}
             imgAlt="AgroFusion logo"
           >
             <div className=" !rounded-xl flex items-center justify-between w-full">
