@@ -23,6 +23,8 @@ import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
 import { getPermissionsBasicService } from "../../services/agrofusion/auth.service";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { PermissionBasicResponse } from "../../dto/response/listPermissions-response.dto";
 interface EditValues {
   name: string;
@@ -210,6 +212,18 @@ useEffect(() => {
     setRolePermissions(roleDetails.permissions || []);
   }
 }, [roleDetails]);
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editRole.title" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
+
   return (
     <AppLayoutSB>
       <TitleTarget title="editRole.title" />

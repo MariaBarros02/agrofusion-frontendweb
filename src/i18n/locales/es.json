@@ -56,6 +56,7 @@
         "modeDescription": "Modo oscuro funcionando sin librerías"
     },
     "nav": {
+        "dashboard": "Ir al inicio",
         "profile": "Perfil",
         "admin": "Administración",
         "check": "Comprobante",
@@ -578,5 +579,9 @@
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
     "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
-    }   
+    },
+    "submoduleInactive": {
+        "title": "Submódulo inactivo",
+        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
+    }
 }

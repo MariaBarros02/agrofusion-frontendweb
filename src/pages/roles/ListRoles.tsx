@@ -22,6 +22,9 @@ import AlertConfirmation from "../../components/layout/AlertConfirmation";
 
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+
 const ListRoles = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -147,6 +150,25 @@ const ListRoles = () => {
       ],
     },
   ];
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="roles.title"
+          description="roles.description"
+          activeTab="roles"
+          tabs={[
+            { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+            { id: "permissions", label: "common.permissions", icon: FiInfo, to: "/administration/permissions" },
+          ]}
+        />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

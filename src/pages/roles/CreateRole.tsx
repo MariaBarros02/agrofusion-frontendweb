@@ -19,6 +19,8 @@ import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
 import { getPermissionsBasicService } from "../../services/agrofusion/auth.service";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { PermissionBasicResponse } from "../../dto/response/listPermissions-response.dto";
 interface CreateValues {
   name: string;
@@ -148,6 +150,20 @@ const CreateRole = () => {
         (assigned) => assigned.permission_id === available.permission_id,
       ),
   );
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="createRole.title"
+          description="createRole.descriptionTitle"
+        />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

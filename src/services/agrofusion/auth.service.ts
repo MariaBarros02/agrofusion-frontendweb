@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authApi } from "./api/auth.api";
 import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
@@ -81,6 +82,17 @@ export const updateSubmoduleStatusService = async (
   return data;
 };
 
+/**
+ * Obtiene los submódulos activos y actualiza el store de acceso por submódulo.
+ * Debe llamarse cuando el usuario ya está autenticado (p. ej. en ProtectedRoute o layout).
+ */
+export const fetchActiveSubmodulesService = async () => {
+  const { data } = await authApi.getActiveSubmodules();
+  useSubmoduleAccessStore.getState().setActiveSubmodules({
+    active_submodules: data.active_submodules ?? [],
+    role_code: data.role_code ?? null,
+  });
+};
 
 /**
  * Inicia el proceso de autenticación estándar.

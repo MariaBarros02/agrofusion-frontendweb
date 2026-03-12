@@ -20,6 +20,8 @@ import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiFlag, FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 interface EditValues {
   name: string;
   description: string;
@@ -116,6 +118,18 @@ const EditPermissions = () => {
 
     return null;
   };
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("PERMISSIONS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editPermission.title" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
+
   return (
     <AppLayoutSB>
       <TitleTarget title="editPermission.title" />

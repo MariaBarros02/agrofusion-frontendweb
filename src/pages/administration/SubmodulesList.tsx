@@ -1,6 +1,8 @@
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -222,6 +224,16 @@ const SubmodulesList = () => {
   };
 
   const hasActiveFilters = search || state || moduleFilter;
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("SUBMODULES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="submodule.title" description="submodule.description" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

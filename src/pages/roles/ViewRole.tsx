@@ -7,6 +7,8 @@ import type { ListRolesResponse } from "../../dto/response/listRoles-response.dt
 import { Button, Badge } from "flowbite-react";
 import { getDetailsRoleService } from "../../services/agrofusion/auth.service";
 import { Pencil } from "lucide-react";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const badgeColors = [
   "info",
@@ -46,6 +48,17 @@ const RoleView = () => {
       getRoleDetails();
     }
   }, [roleId]);
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="viewRole.title" description="viewRole.description" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

@@ -28,6 +28,8 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { FiSave } from "react-icons/fi";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
 interface EditValues {
@@ -459,6 +461,17 @@ const EditUser = () => {
     useEffect(() => {
       getBasicRoles();
     }, []);
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("USERS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editUser.title" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>

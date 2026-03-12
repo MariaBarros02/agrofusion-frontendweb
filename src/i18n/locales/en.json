@@ -55,6 +55,7 @@
         "modeDescription": "Dark mode working without libraries"
     },
     "nav": {
+        "dashboard": "Go to home",
         "profile": "Profile",
         "admin": "Administration",
         "check": "Receipt",
@@ -554,5 +555,9 @@
         "INCORRECT_PASSWORD": "The current password entered is incorrect",
         "INVALID_PASSWORD": "You cannot reuse a previous password",
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists"
+    },
+    "submoduleInactive": {
+        "title": "Submodule inactive",
+        "message": "This submodule is deactivated. If you need access, contact the system administrator."
     }
 }

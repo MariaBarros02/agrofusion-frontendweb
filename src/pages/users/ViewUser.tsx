@@ -18,7 +18,8 @@ import {
 } from "../../services/orchestrator/userOrchestrator.services";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
 import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
-
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const ViewUser = () => {
   const { t } = useTranslation();
@@ -139,6 +140,17 @@ const deleteUser = async () => {
       getUserDetails();
     }
   }, [userId]);
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("USERS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="viewUser.title" description="viewUser.description" />
+        <SubmoduleInactive />
+      </AppLayoutSB>
+    );
+  }
 
   return (
     <AppLayoutSB>
