@@ -24,8 +24,9 @@ export const useModuleAccessStore = create<ModuleAccessState>((set, get) => ({
     set({ activeModules: [], roleCode: null, loaded: false }),
 
   canAccessModule: (moduleCode: string) => {
-    const { roleCode, activeModules } = get();
-    if (roleCode === SUPERADMIN_CODE) return true;
+    const { roleCode, activeModules, loaded } = get();
+    if (!loaded) return true;
+    if (roleCode?.toUpperCase() === SUPERADMIN_CODE) return true;
     return activeModules.includes(moduleCode);
   },
 }));
