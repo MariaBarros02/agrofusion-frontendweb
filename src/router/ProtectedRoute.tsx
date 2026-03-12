@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuthStore } from "../store/auth.store";
 import { fetchActiveModulesService, fetchActiveSubmodulesService } from "../services/agrofusion/auth.service";
 import type { JSX } from "react";
@@ -23,4 +24,16 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
+  const isAuth = useAuthStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuth) {
+      fetchActiveSubmodulesService().catch(() => {});
+    }
+  }, [isAuth]);
+
+  if (!isAuth) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
 }
