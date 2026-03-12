@@ -19,6 +19,7 @@ export default defineConfig({
         orientation: 'portrait-primary',
         scope: '/',
         start_url: '/',
+        
         icons: [
           {
             src: '/manifest-192x192.png',
@@ -57,12 +58,17 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
   ],
-  base: "/agrofusion",
+  base: "/",
   server: {
     allowedHosts: ['inmero.co'] 
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false
   }
 })
