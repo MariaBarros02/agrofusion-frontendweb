@@ -62,7 +62,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: "/agrofusion",
+  base: "/agrofusion/",
   server: {
     allowedHosts: ['inmero.co', 'www.inmero.co'] 
   },
