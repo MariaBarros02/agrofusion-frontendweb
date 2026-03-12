@@ -57,7 +57,7 @@
         "modeDescription": "Modo oscuro funcionando sin librerías"
     },
     "nav": {
-        "dashboard": "Dashboard",
+        "dashboard": "Ir al inicio",
         "profile": "Perfil",
         "admin": "Administración",
         "check": "Comprobante",
@@ -584,5 +584,10 @@
     "moduleInactive": {
         "title": "Módulo inactivo",
         "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
+    }
+    },
+    "submoduleInactive": {
+        "title": "Submódulo inactivo",
+        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
     }
 }

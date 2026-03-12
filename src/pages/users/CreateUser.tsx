@@ -30,6 +30,9 @@ import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.d
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+
 interface ProjectRole {
   role_id: number;
   role_name: string;
@@ -583,6 +586,18 @@ const CreateUser = () => {
       <AppLayoutSB>
         <TitleTarget title="users.title" description="users.description" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("USERS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="users.title" description="users.description" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

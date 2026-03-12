@@ -20,6 +20,8 @@ import DataTable, { type Column } from "../../components/DataTable";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const UsersList = () => {
   const { t } = useTranslation();
@@ -166,6 +168,17 @@ const UsersList = () => {
       <AppLayoutSB>
         <TitleTarget title="users.title" description="users.description" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("USERS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="users.title" description="users.description" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

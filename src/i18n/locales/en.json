@@ -560,5 +560,9 @@
     "moduleInactive": {
         "title": "Module inactive",
         "message": "This module is inactive. You must contact the system administrator to request its activation."
+    },
+    "submoduleInactive": {
+        "title": "Submodule inactive",
+        "message": "This submodule is deactivated. If you need access, contact the system administrator."
     }
 }

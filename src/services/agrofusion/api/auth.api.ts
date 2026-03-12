@@ -114,6 +114,12 @@ export const authApi = {
   verifyMfa: (data: MfaDto) =>
     authAgrofusionAxios.post<LoginResponse>("auth/verify-otp", data),
   /**
+   * Obtiene los códigos de submódulos activos y el código del rol del usuario.
+   * Usado para restringir contenido por submódulo inactivo (SUPERADMINISTRADOR tiene acceso a todos).
+   */
+  getActiveSubmodules: () =>
+    authAgrofusionAxios.get<{ active_submodules: string[]; role_code: string | null }>("auth/active-submodules"),
+  /**
    * Solicita el envío de un correo para restablecer la contraseña.
    * @param {Object} data - Payload de recuperación.
    * @param {string} data.email - Correo electrónico del usuario.

@@ -22,6 +22,8 @@ import { FiFlag, FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 interface EditValues {
   name: string;
   description: string;
@@ -125,6 +127,18 @@ const EditPermissions = () => {
       <AppLayoutSB>
         <TitleTarget title="editPermission.title" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("PERMISSIONS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editPermission.title" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

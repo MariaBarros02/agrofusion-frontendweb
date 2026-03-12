@@ -9,6 +9,8 @@ import { getDetailsRoleService } from "../../services/agrofusion/auth.service";
 import { Pencil } from "lucide-react";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const badgeColors = [
   "info",
@@ -55,6 +57,17 @@ const RoleView = () => {
       <AppLayoutSB>
         <TitleTarget title="viewRole.title" description="viewRole.description" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="viewRole.title" description="viewRole.description" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

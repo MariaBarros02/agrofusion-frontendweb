@@ -30,6 +30,8 @@ import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { FiSave } from "react-icons/fi";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
 interface EditValues {
@@ -468,6 +470,17 @@ const EditUser = () => {
       <AppLayoutSB>
         <TitleTarget title="editUser.title" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("USERS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="editUser.title" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

@@ -3,6 +3,8 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -201,6 +203,17 @@ const ProjectsList = () => {
       <AppLayoutSB>
         <TitleTarget title="project.title" description="project.description" />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("PROJECTS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget title="project.title" description="project.description" />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

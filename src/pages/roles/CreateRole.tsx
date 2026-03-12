@@ -21,6 +21,8 @@ import AlertSimple from "../../components/layout/AlertSimple";
 import { getPermissionsBasicService } from "../../services/agrofusion/auth.service";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { PermissionBasicResponse } from "../../dto/response/listPermissions-response.dto";
 interface CreateValues {
   name: string;
@@ -160,6 +162,20 @@ const CreateRole = () => {
           description="createRole.descriptionTitle"
         />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("ROLES")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="createRole.title"
+          description="createRole.descriptionTitle"
+        />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

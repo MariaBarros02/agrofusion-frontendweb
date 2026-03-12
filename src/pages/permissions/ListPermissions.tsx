@@ -17,6 +17,8 @@ import type { listPermissionsRequest } from "../../dto/request/listPermissions-r
 import { listPermissionsService } from "../../services/agrofusion/auth.service";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const ListPermissions = () => {
   const { t } = useTranslation();
@@ -109,6 +111,25 @@ const ListPermissions = () => {
           ]}
         />
         <ModuleInactive />
+      </AppLayoutSB>
+    );
+  }
+
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  if (!canAccessSubmodule("PERMISSIONS")) {
+    return (
+      <AppLayoutSB>
+        <TitleTarget
+          title="permissions.title"
+          description="permissions.description"
+          activeTab="permissions"
+          tabs={[
+            { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+            { id: "permissions", label: "common.permissions", icon: BiCube, to: "/administration/permissions" },
+          ]}
+        />
+        <SubmoduleInactive />
       </AppLayoutSB>
     );
   }

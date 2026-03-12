@@ -14,8 +14,8 @@ RUN npm install
 # 5. Copiamos el resto del código del frontend
 COPY . .
 
-# 6. Exponemos el puerto 5173 (El puerto por defecto de Vite)
-EXPOSE 5173
+# 6. Exponemos el puerto 3000 (El puerto por defecto de Vite)
+EXPOSE 3000
 
 # 7. El comando para arrancar el servidor de desarrollo
 # NOTA CLAVE: Le agregamos "--", "--host", "0.0.0.0" para obligar a Vite a mostrar la página web hacia afuera del contenedor.
