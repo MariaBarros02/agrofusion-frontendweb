@@ -216,30 +216,19 @@ useEffect(() => {
 }, [roleDetails]);
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="editRole.title" />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("ROLES")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="editRole.title" />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("ROLES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("ROLES");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="editRole.title" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -417,6 +406,8 @@ useEffect(() => {
             setAlert(null);
           }}
         />
+      )}
+        </>
       )}
     </AppLayoutSB>
   );

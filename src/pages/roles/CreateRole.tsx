@@ -154,31 +154,11 @@ const CreateRole = () => {
   );
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget
-          title="createRole.title"
-          description="createRole.descriptionTitle"
-        />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("ROLES")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget
-          title="createRole.title"
-          description="createRole.descriptionTitle"
-        />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("ROLES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("ROLES");
 
   return (
     <AppLayoutSB>
@@ -186,6 +166,10 @@ const CreateRole = () => {
         title="createRole.title"
         description="createRole.descriptionTitle"
       />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -349,6 +333,8 @@ const CreateRole = () => {
             setAlert(null);
           }}
         />
+      )}
+        </>
       )}
     </AppLayoutSB>
   );

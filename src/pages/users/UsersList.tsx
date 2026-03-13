@@ -163,30 +163,16 @@ const UsersList = () => {
   }, []);
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="users.title" description="users.description" />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("USERS")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="users.title" description="users.description" />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-      {/* filtros */}
+      {/* filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex gap-2">
           <div className="w-72">
@@ -264,35 +250,37 @@ const UsersList = () => {
           </Button>
         </div>
       </div>
-      {/* tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
-        </div>
-      )}{" "}
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("users.error")}</p>{" "}
-        </div>
-      )}{" "}
-      {!loading && !error && paginatedUsers?.items.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {" "}
-            {t("users.noUsers")}{" "}
-          </p>{" "}
-        </div>
-      )}
-      {!loading && paginatedUsers && paginatedUsers.items.length !== 0 && (
-        <DataTable
-          data={paginatedUsers}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("users.users")}
-        />
+      {/* área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("users.loading")}</p>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("users.error")}</p>
+            </div>
+          )}
+          {!loading && !error && paginatedUsers?.items.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("users.noUsers")}
+              </p>
+            </div>
+          )}
+          {!loading && !error && paginatedUsers && paginatedUsers.items.length !== 0 && (
+            <DataTable
+              data={paginatedUsers}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("users.users")}
+            />
+          )}
+        </>
       )}
     </AppLayoutSB>
   );

@@ -98,41 +98,16 @@ const ListPermissions = () => {
   ];
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget
-          title="permissions.title"
-          description="permissions.description"
-          activeTab="permissions"
-          tabs={[
-            { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
-            { id: "permissions", label: "common.permissions", icon: BiCube, to: "/administration/permissions" },
-          ]}
-        />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("PERMISSIONS")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget
-          title="permissions.title"
-          description="permissions.description"
-          activeTab="permissions"
-          tabs={[
-            { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
-            { id: "permissions", label: "common.permissions", icon: BiCube, to: "/administration/permissions" },
-          ]}
-        />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PERMISSIONS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("PERMISSIONS");
+
+  const permissionsTabs = [
+    { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+    { id: "permissions", label: "common.permissions", icon: FiInfo, to: "/administration/permissions" },
+  ];
 
   return (
     <AppLayoutSB>
@@ -140,21 +115,9 @@ const ListPermissions = () => {
         title="permissions.title"
         description="permissions.description"
         activeTab="permissions"
-        tabs={[
-          {
-            id: "roles",
-            label: "common.roles",
-            icon: BiCube,
-            to: "/administration/roles",
-          },
-          {
-            id: "permissions",
-            label: "common.permissions",
-            icon: FiInfo,
-            to: "/administration/permissions",
-          },
-        ]}
+        tabs={permissionsTabs}
       />
+      {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex gap-2">
           <div className="w-72">
@@ -213,41 +176,42 @@ const ListPermissions = () => {
           </Button> */}
         </div>
       </div>
-      {/* tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("permissions.loading")}</p>{" "}
-        </div>
-      )}{" "}
-      {notListPerm && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>{" "}
-        </div>
-      )}{" "}
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("permissions.error")}</p>{" "}
-        </div>
-      )}{" "}
-      {!loading && !error && paginatedPerm?.items.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {" "}
-            {t("permissions.noPermissions")}{" "}
-          </p>{" "}
-        </div>
-      )}
-      {!loading && paginatedPerm && paginatedPerm.items.length !== 0  && (
-              <DataTable
-                data={paginatedPerm}
-                columns={columns}
-                onPageChange={handlePageChange}
-                paginationText={t("permissions.permissions")} 
-              />
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("permissions.loading")}</p>
+            </div>
+          )}
+          {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>
+            </div>
+          )}
+          {!loading && !notListPerm && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("permissions.error")}</p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedPerm?.items.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("permissions.noPermissions")}
+              </p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedPerm && paginatedPerm.items.length !== 0 && (
+            <DataTable
+              data={paginatedPerm}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("permissions.permissions")}
+            />
+          )}
+        </>
       )}
     </AppLayoutSB>
   );

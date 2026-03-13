@@ -183,12 +183,12 @@
     "description": "View and manage system submodules",
     "list": {
       "code": "Code",
-      "submoduleName": "Submodule name",
+      "submoduleName": "Submodule",
       "description": "Description",
       "parentModule": "Parent module",
       "associatedModule": "Associated module",
       "allModules": "All modules",
-      "createdAt": "Creation date",
+      "createdAt": "Date",
       "responsible": "Responsible",
       "searchPlaceholder": "Search by name or code",
       "loading": "Loading submodules...",
@@ -556,6 +556,9 @@
         "INCORRECT_PASSWORD": "The current password entered is incorrect",
         "INVALID_PASSWORD": "You cannot reuse a previous password",
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists"
+    },
+    "moduleRouteGuard": {
+        "preparing": "Preparing content..."
     },
     "moduleInactive": {
         "title": "Module inactive",

@@ -581,31 +581,19 @@ const CreateUser = () => {
   const isButtonDisabled = formik.isSubmitting;
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="users.title" description="users.description" />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("USERS")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="users.title" description="users.description" />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
         <div className={!userCreate ? "block mb-5" : "hidden mb-5"}>
           <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
@@ -1147,6 +1135,8 @@ const CreateUser = () => {
           />
         ))}
       </div>
+        </>
+      )}
     </AppLayoutSB>
   );
 };

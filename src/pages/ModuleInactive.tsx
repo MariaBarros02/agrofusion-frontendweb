@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { HiExclamation } from "react-icons/hi";
 
 /**
@@ -21,12 +20,6 @@ export default function ModuleInactive() {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           {t("moduleInactive.message")}
         </p>
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
-        >
-          {t("common.go")} {t("nav.dashboard")}
-        </Link>
       </div>
     </div>
   );
