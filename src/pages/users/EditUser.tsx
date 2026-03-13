@@ -465,29 +465,19 @@ const EditUser = () => {
     }, []);
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  if (!canAccessModule("ADMINISTRATION")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="editUser.title" />
-        <ModuleInactive />
-      </AppLayoutSB>
-    );
-  }
-
   useSubmoduleAccessStore((s) => s.loaded);
   const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
-  if (!canAccessSubmodule("USERS")) {
-    return (
-      <AppLayoutSB>
-        <TitleTarget title="editUser.title" />
-        <SubmoduleInactive />
-      </AppLayoutSB>
-    );
-  }
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="editUser.title" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -783,6 +773,8 @@ const EditUser = () => {
             setAlert(null);
           }}
         />
+      )}
+        </>
       )}
     </AppLayoutSB>
   );
