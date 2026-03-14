@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
@@ -26,6 +27,9 @@ import {
 } from "../../services/agrofusion/auth.service";
 import type { SubmoduleListResponse } from "../../dto/response/submoduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
+
 
 interface PaginatedSubmodulesResponse {
   items: SubmoduleListResponse[];
@@ -44,6 +48,8 @@ const SubmodulesList = () => {
   const [page, setPage] = useState(1);
   const [size] = useState(5);
 
+  const [notListPerm, setNotListPerm] = useState(null);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [moduleFilter, setModuleFilter] = useState("");
@@ -158,8 +164,14 @@ const SubmodulesList = () => {
       const data = await listSubmodulesService();
       setSubmodules(data);
       setPage(1);
-    } catch (err) {
+    } catch (err:any) {
       console.error(err);
+       const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError(t("submodule.list.loadError"));
     } finally {
       setLoading(false);
@@ -210,8 +222,20 @@ const SubmodulesList = () => {
           type: "success",
         },
       ]);
-    } catch (err) {
+    } catch (err:any) {
       console.error(err);
+            const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setAlert({
+          message: t(`errors.${errorMessage}`),
+          type:
+            errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
+              ? "warning"
+              : "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -315,10 +339,20 @@ const SubmodulesList = () => {
             </div>
           )}
 
-          {!loading && !error && filteredSubmodules.length === 0 && (
+          {!loading && !error && !notListPerm  && filteredSubmodules.length === 0 && (
             <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
               <p className="text-3xl font-bold text-black dark:text-gray-200">
                 {t("submodule.list.noSubmodules")}
+              </p>
+            </div>
+          )}
+
+                    {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">
+                {t(`errors.${notListPerm}`, {
+                  defaultValue: t("errors.unknown"),
+                })}
               </p>
             </div>
           )}
@@ -398,7 +432,16 @@ const SubmodulesList = () => {
           </Button>
         </ModalFooter>
       </Modal>
-
+     {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
       {/* Toasts de feedback */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (

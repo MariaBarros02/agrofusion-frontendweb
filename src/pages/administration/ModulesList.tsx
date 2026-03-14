@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
-import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
+import ToastSimple, {
+  type ToastData,
+} from "../../components/layout/ToastSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
@@ -26,6 +29,8 @@ import {
 } from "../../services/agrofusion/auth.service";
 import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 interface PaginatedModulesResponse {
   items: ModuleListResponse[];
@@ -42,13 +47,16 @@ const ModulesList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
 
   // Filtros (mismo diseño que gestión de proyectos)
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
   const [toasts, setToasts] = useState<ToastData[]>([]);
+
+  const [notListPerm, setNotListPerm] = useState(null);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [pendingStatusChange, setPendingStatusChange] = useState<{
     module: ModuleListResponse;
     newStatus: string;
@@ -121,8 +129,8 @@ const ModulesList = () => {
     if (searchLower) {
       result = result.filter(
         (m) =>
-          (m.name?.toLowerCase().includes(searchLower)) ||
-          (m.code?.toLowerCase().includes(searchLower))
+          m.name?.toLowerCase().includes(searchLower) ||
+          m.code?.toLowerCase().includes(searchLower),
       );
     }
     if (state) {
@@ -155,8 +163,14 @@ const ModulesList = () => {
       const data = await listModulesService();
       setModules(data);
       setPage(1);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError(t("module.list.loadError"));
     } finally {
       setLoading(false);
@@ -197,8 +211,8 @@ const ModulesList = () => {
         prev.map((m) =>
           m.af_module_id === module.af_module_id
             ? { ...m, status: newStatus }
-            : m
-        )
+            : m,
+        ),
       );
       setToasts((prev) => [
         ...prev,
@@ -208,8 +222,20 @@ const ModulesList = () => {
           type: "success",
         },
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setAlert({
+          message: t(`errors.${errorMessage}`),
+          type:
+            errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
+              ? "warning"
+              : "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -226,10 +252,14 @@ const ModulesList = () => {
   const hasActiveFilters = search || state || projectFilter;
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
   useSubmoduleAccessStore((s) => s.loaded);
-  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const canAccessSubmodule = useSubmoduleAccessStore(
+    (s) => s.canAccessSubmodule,
+  );
   const showModuleInactive = !canAccessModule("ADMINISTRATION");
-  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("MODULES");
-  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("MODULES");
+  const showSubmoduleInactive =
+    canAccessModule("ADMINISTRATION") && !canAccessSubmodule("MODULES");
+  const showContent =
+    canAccessModule("ADMINISTRATION") && canAccessSubmodule("MODULES");
 
   return (
     <AppLayoutSB>
@@ -266,7 +296,9 @@ const ModulesList = () => {
           </div>
 
           <div className="flex-shrink-0 w-52">
-            <Label className="text-xs">{t("module.list.associatedProject")}</Label>
+            <Label className="text-xs">
+              {t("module.list.associatedProject")}
+            </Label>
             <Select
               sizing="sm"
               value={projectFilter}
@@ -290,7 +322,12 @@ const ModulesList = () => {
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
 
-          <Button color="blue" size="xs" onClick={handleResetFilters} className="flex-shrink-0">
+          <Button
+            color="blue"
+            size="xs"
+            onClick={handleResetFilters}
+            className="flex-shrink-0"
+          >
             {t("common.filterReset")}
           </Button>
         </div>
@@ -309,14 +346,28 @@ const ModulesList = () => {
 
           {!loading && error && (
             <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {error}
+              </p>
             </div>
           )}
 
-          {!loading && !error && filteredModules.length === 0 && (
+          {!loading &&
+            !error &&
+            !notListPerm &&
+            filteredModules.length === 0 && (
+              <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+                <p className="text-3xl font-bold text-black dark:text-gray-200">
+                  {t("module.list.noModules")}
+                </p>
+              </div>
+            )}
+          {!loading && notListPerm && (
             <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-              <p className="text-3xl font-bold text-black dark:text-gray-200">
-                {t("module.list.noModules")}
+              <p className="text-3xl font-bold">
+                {t(`errors.${notListPerm}`, {
+                  defaultValue: t("errors.unknown"),
+                })}
               </p>
             </div>
           )}
@@ -333,11 +384,7 @@ const ModulesList = () => {
       )}
 
       {/* Modal de confirmación de cambio de estado */}
-      <Modal
-        show={!!pendingStatusChange}
-        onClose={handleCloseModal}
-        size="md"
-      >
+      <Modal show={!!pendingStatusChange} onClose={handleCloseModal} size="md">
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
@@ -413,6 +460,16 @@ const ModulesList = () => {
           />
         ))}
       </div>
+      {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
     </AppLayoutSB>
   );
 };
