@@ -1,6 +1,10 @@
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -100,18 +104,18 @@ const SubmodulesList = () => {
       type: "text",
       format: (value: string) => value ?? "-",
     },
-    {
-      key: "created_at",
-      label: t("submodule.list.createdAt"),
-      type: "text",
-      format: (value: string) => (value ? value.split("T")[0] : "-"),
-    },
-    {
-      key: "responsible",
-      label: t("submodule.list.responsible"),
-      type: "text",
-      format: (value: string) => value ?? "-",
-    },
+    // {
+    //   key: "created_at",
+    //   label: t("submodule.list.createdAt"),
+    //   type: "text",
+    //   format: (value: string) => (value ? value.split("T")[0] : "-"),
+    // },
+    // {
+    //   key: "responsible",
+    //   label: t("submodule.list.responsible"),
+    //   type: "text",
+    //   format: (value: string) => value ?? "-",
+    // },
   ];
 
   const filteredSubmodules = useMemo(() => {
@@ -222,12 +226,18 @@ const SubmodulesList = () => {
   };
 
   const hasActiveFilters = search || state || moduleFilter;
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("SUBMODULES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("SUBMODULES");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="submodule.title" description="submodule.description" />
 
-      {/* Filtros en una sola línea */}
+      {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
         <div className="flex flex-nowrap items-end gap-2 overflow-x-auto">
           <div className="flex-shrink-0 w-72">
@@ -288,34 +298,40 @@ const SubmodulesList = () => {
         </div>
       </div>
 
-      {/* Tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold">{t("submodule.list.loading")}</p>
-        </div>
-      )}
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("submodule.list.loading")}</p>
+            </div>
+          )}
 
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
+          {!loading && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
 
-      {!loading && !error && filteredSubmodules.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {t("submodule.list.noSubmodules")}
-          </p>
-        </div>
-      )}
+          {!loading && !error && filteredSubmodules.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("submodule.list.noSubmodules")}
+              </p>
+            </div>
+          )}
 
-      {!loading && !error && filteredSubmodules.length > 0 && (
-        <DataTable
-          data={paginatedData}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("submodule.list.paginationText")}
-        />
+          {!loading && !error && filteredSubmodules.length > 0 && (
+            <DataTable
+              data={paginatedData}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("submodule.list.paginationText")}
+            />
+          )}
+        </>
       )}
 
       {/* Modal de confirmación de cambio de estado */}

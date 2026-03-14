@@ -27,6 +27,12 @@ import type { createUserRequest } from "../../dto/request/createUser-request.dto
 import { useNavigate } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+
 interface ProjectRole {
   role_id: number;
   role_name: string;
@@ -573,10 +579,21 @@ const CreateUser = () => {
     return `${mixedBase}${separator}${numbers}`;
   };
   const isButtonDisabled = formik.isSubmitting;
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
         <div className={!userCreate ? "block mb-5" : "hidden mb-5"}>
           <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
@@ -1118,6 +1135,8 @@ const CreateUser = () => {
           />
         ))}
       </div>
+        </>
+      )}
     </AppLayoutSB>
   );
 };

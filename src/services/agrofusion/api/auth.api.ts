@@ -79,6 +79,15 @@ export const authApi = {
       { status }
     ),
   /**
+   * Obtiene módulos activos y rol del usuario (para control de acceso a rutas).
+   */
+  getActiveModules: () =>
+    authAgrofusionAxios.get<{
+      active_modules: string[];
+      role_code: string | null;
+    }>("auth/active-modules"),
+
+  /**
    * Realiza el inicio de sesión primario del usuario.
    * @param {LoginDto} data - Credenciales del usuario (email y password).
    * @returns {Promise<LoginResponse>} Respuesta con datos de sesión o estado de MFA.
@@ -104,6 +113,12 @@ export const authApi = {
    */
   verifyMfa: (data: MfaDto) =>
     authAgrofusionAxios.post<LoginResponse>("auth/verify-otp", data),
+  /**
+   * Obtiene los códigos de submódulos activos y el código del rol del usuario.
+   * Usado para restringir contenido por submódulo inactivo (SUPERADMINISTRADOR tiene acceso a todos).
+   */
+  getActiveSubmodules: () =>
+    authAgrofusionAxios.get<{ active_submodules: string[]; role_code: string | null }>("auth/active-submodules"),
   /**
    * Solicita el envío de un correo para restablecer la contraseña.
    * @param {Object} data - Payload de recuperación.

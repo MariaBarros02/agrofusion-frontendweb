@@ -7,6 +7,10 @@ import type { ListRolesResponse } from "../../dto/response/listRoles-response.dt
 import { Button, Badge } from "flowbite-react";
 import { getDetailsRoleService } from "../../services/agrofusion/auth.service";
 import { Pencil } from "lucide-react";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const badgeColors = [
   "info",
@@ -47,9 +51,20 @@ const RoleView = () => {
     }
   }, [roleId]);
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("ROLES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("ROLES");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="viewRole.title" description="viewRole.description" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -144,6 +159,8 @@ const RoleView = () => {
           }
           
         </div>
+      )}
+        </>
       )}
     </AppLayoutSB>
   );

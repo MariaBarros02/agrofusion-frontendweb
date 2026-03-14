@@ -23,6 +23,10 @@ import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
 import { getPermissionsBasicService } from "../../services/agrofusion/auth.service";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { PermissionBasicResponse } from "../../dto/response/listPermissions-response.dto";
 interface EditValues {
   name: string;
@@ -210,9 +214,21 @@ useEffect(() => {
     setRolePermissions(roleDetails.permissions || []);
   }
 }, [roleDetails]);
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("ROLES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("ROLES");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="editRole.title" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -390,6 +406,8 @@ useEffect(() => {
             setAlert(null);
           }}
         />
+      )}
+        </>
       )}
     </AppLayoutSB>
   );

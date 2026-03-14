@@ -1,5 +1,6 @@
 {
     "common":{
+        "loading": "Cargando...",
         "rightsReserved": "Todos los derechos reservados",
         "accept": "Aceptar",
         "goToDisriego": "Ir a Disriego",
@@ -56,6 +57,7 @@
         "modeDescription": "Modo oscuro funcionando sin librerías"
     },
     "nav": {
+        "dashboard": "Ir al inicio",
         "profile": "Perfil",
         "admin": "Administración",
         "check": "Comprobante",
@@ -183,12 +185,12 @@
         "description": "Consulta y administra los submódulos del sistema",
         "list": {
             "code": "Código",
-            "submoduleName": "Nombre del submódulo",
+            "submoduleName": "Submódulo",
             "description": "Descripción",
             "parentModule": "Módulo padre",
             "associatedModule": "Módulo asociado",
             "allModules": "Todos los módulos",
-            "createdAt": "Fecha de creación",
+            "createdAt": "Fecha",
             "responsible": "Responsable",
             "searchPlaceholder": "Buscar por nombre o código",
             "loading": "Cargando submódulos...",
@@ -578,5 +580,16 @@
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
     "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
-    }   
+    },
+    "moduleRouteGuard": {
+        "preparing": "Preparando contenido..."
+    },
+    "moduleInactive": {
+        "title": "Módulo inactivo",
+        "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
+    },
+    "submoduleInactive": {
+        "title": "Submódulo inactivo",
+        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
+    }
 }

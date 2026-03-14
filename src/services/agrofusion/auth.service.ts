@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authApi } from "./api/auth.api";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
@@ -13,6 +15,18 @@ import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
 import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
 
+
+/**
+ * Obtiene módulos activos y rol del usuario y actualiza el store.
+ * Debe llamarse cuando el usuario ya está autenticado (p. ej. al entrar a rutas protegidas).
+ */
+export const fetchActiveModulesService = async () => {
+  const { data } = await authApi.getActiveModules();
+  useModuleAccessStore.getState().setModuleAccess(
+    data.active_modules ?? [],
+    data.role_code ?? null
+  );
+};
 
 /**
  * Obtiene la lista de proyectos externos vinculados al usuario actual.
@@ -81,6 +95,17 @@ export const updateSubmoduleStatusService = async (
   return data;
 };
 
+/**
+ * Obtiene los submódulos activos y actualiza el store de acceso por submódulo.
+ * Debe llamarse cuando el usuario ya está autenticado (p. ej. en ProtectedRoute o layout).
+ */
+export const fetchActiveSubmodulesService = async () => {
+  const { data } = await authApi.getActiveSubmodules();
+  useSubmoduleAccessStore.getState().setActiveSubmodules({
+    active_submodules: data.active_submodules ?? [],
+    role_code: data.role_code ?? null,
+  });
+};
 
 /**
  * Inicia el proceso de autenticación estándar.
