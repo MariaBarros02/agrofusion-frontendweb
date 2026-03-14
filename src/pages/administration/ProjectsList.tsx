@@ -195,7 +195,6 @@ const ProjectsList = () => {
           type: "success",
         },
       ]);
-            handleCloseModal();
     } catch (err: any) {
       console.error(err);
       const errorMessage = err.response?.data?.detail?.code;
@@ -218,6 +217,8 @@ const ProjectsList = () => {
           type: "error",
         },
       ]);
+    }finally{
+      
       handleCloseModal();
     }
   };
@@ -397,7 +398,9 @@ const ProjectsList = () => {
               : t("project.list.activateButton")}
           </Button>
         </ModalFooter>
-        {alert && (
+       
+      </Modal>
+      {alert && (
           <AlertSimple
             message={t(alert.message)}
             type={alert.type}
@@ -407,8 +410,6 @@ const ProjectsList = () => {
             }}
           />
         )}
-      </Modal>
-
       {/* Toasts de feedback */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (
