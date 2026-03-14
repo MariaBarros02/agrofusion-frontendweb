@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
-import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
+import ToastSimple, {
+  type ToastData,
+} from "../../components/layout/ToastSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
@@ -26,6 +29,8 @@ import {
 } from "../../services/agrofusion/auth.service";
 import type { ProjectListResponse } from "../../dto/response/projectList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 interface PaginatedProjectsResponse {
   items: ProjectListResponse[];
@@ -42,7 +47,9 @@ const ProjectsList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
+  const [notListPerm, setNotListPerm] = useState(null);
+  const [alert, setAlert] = useState<AlertState>(null);
 
   // Filtros (mismo diseño que gestión de usuarios)
   const [search, setSearch] = useState("");
@@ -97,8 +104,8 @@ const ProjectsList = () => {
     if (searchLower) {
       result = result.filter(
         (p) =>
-          (p.project_name?.toLowerCase().includes(searchLower)) ||
-          (p.instance_code?.toLowerCase().includes(searchLower))
+          p.project_name?.toLowerCase().includes(searchLower) ||
+          p.instance_code?.toLowerCase().includes(searchLower),
       );
     }
     if (state) {
@@ -128,8 +135,14 @@ const ProjectsList = () => {
       const data = await listProjectsService();
       setProjects(data);
       setPage(1);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError(t("project.list.loadError"));
     } finally {
       setLoading(false);
@@ -171,8 +184,8 @@ const ProjectsList = () => {
         prev.map((p) =>
           p.external_project_id === project.external_project_id
             ? { ...p, status: newStatus }
-            : p
-        )
+            : p,
+        ),
       );
       setToasts((prev) => [
         ...prev,
@@ -182,8 +195,21 @@ const ProjectsList = () => {
           type: "success",
         },
       ]);
-    } catch (err) {
+            handleCloseModal();
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setAlert({
+          message: t(`errors.${errorMessage}`),
+          type:
+            errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
+              ? "warning"
+              : "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -192,17 +218,20 @@ const ProjectsList = () => {
           type: "error",
         },
       ]);
-    } finally {
       handleCloseModal();
     }
   };
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
   useSubmoduleAccessStore((s) => s.loaded);
-  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const canAccessSubmodule = useSubmoduleAccessStore(
+    (s) => s.canAccessSubmodule,
+  );
   const showModuleInactive = !canAccessModule("ADMINISTRATION");
-  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PROJECTS");
-  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("PROJECTS");
+  const showSubmoduleInactive =
+    canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PROJECTS");
+  const showContent =
+    canAccessModule("ADMINISTRATION") && canAccessSubmodule("PROJECTS");
 
   return (
     <AppLayoutSB>
@@ -247,7 +276,12 @@ const ProjectsList = () => {
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
 
-          <Button color="blue" size="xs" onClick={handleResetFilters} className="flex-shrink-0">
+          <Button
+            color="blue"
+            size="xs"
+            onClick={handleResetFilters}
+            className="flex-shrink-0"
+          >
             {t("common.filterReset")}
           </Button>
         </div>
@@ -266,17 +300,32 @@ const ProjectsList = () => {
 
           {!loading && error && (
             <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
-
-          {!loading && !error && filteredProjects.length === 0 && (
-            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-              <p className="text-3xl font-bold text-black dark:text-gray-200">
-                {t("project.list.noProjects")}
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {error}
               </p>
             </div>
           )}
+
+          {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">
+                {t(`errors.${notListPerm}`, {
+                  defaultValue: t("errors.unknown"),
+                })}
+              </p>
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            !notListPerm &&
+            filteredProjects.length === 0 && (
+              <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+                <p className="text-3xl font-bold text-black dark:text-gray-200">
+                  {t("project.list.noProjects")}
+                </p>
+              </div>
+            )}
 
           {!loading && !error && filteredProjects.length > 0 && (
             <DataTable
@@ -290,11 +339,7 @@ const ProjectsList = () => {
       )}
 
       {/* Modal de confirmación de cambio de estado */}
-      <Modal
-        show={!!pendingStatusChange}
-        onClose={handleCloseModal}
-        size="md"
-      >
+      <Modal show={!!pendingStatusChange} onClose={handleCloseModal} size="md">
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
@@ -352,6 +397,16 @@ const ProjectsList = () => {
               : t("project.list.activateButton")}
           </Button>
         </ModalFooter>
+        {alert && (
+          <AlertSimple
+            message={t(alert.message)}
+            type={alert.type}
+            to={alert.to}
+            onClose={() => {
+              setAlert(null);
+            }}
+          />
+        )}
       </Modal>
 
       {/* Toasts de feedback */}
