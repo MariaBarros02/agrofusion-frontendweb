@@ -32,9 +32,10 @@ import CreateRole from "../pages/roles/CreateRole";
  * 1. Rutas Protegidas: Requieren un token de sesión válido.
  * 2. Rutas Públicas: Solo accesibles si el usuario NO está autenticado (Login, Recobro).
  */
+const basename = import.meta.env.VITE_BASENAME || ""
 export function AppRouter() {
   return (
-    <BrowserRouter basename="/agrofusion">
+    <BrowserRouter basename={basename}>
       <Routes>
         {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
