@@ -20,7 +20,7 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiFilter, FiFlag, FiMinusCircle } from "react-icons/fi";
 import {
   listSubmodulesService,
   updateSubmoduleStatusService,
@@ -376,9 +376,16 @@ const SubmodulesList = () => {
       >
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
+                <FiMinusCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
+                <FiCheckCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {pendingStatusChange?.newStatus === "INACTIVE"
                 ? t("submodule.list.deactivateTitle")
@@ -422,7 +429,11 @@ const SubmodulesList = () => {
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "INACTIVE"
+                ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >
