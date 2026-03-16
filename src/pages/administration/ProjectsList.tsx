@@ -8,7 +8,7 @@ import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -33,23 +33,18 @@ import {
   listProjectsService,
   updateProjectStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { ProjectListResponse } from "../../dto/response/projectList-response.dto";
+import type {
+  PaginatedProjectsResponse,
+  ProjectListResponse,
+} from "../../dto/response/projectList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 
-interface PaginatedProjectsResponse {
-  items: ProjectListResponse[];
-  total: number;
-  page: number;
-  size: number;
-  total_pages: number;
-}
-
 const ProjectsList = () => {
   const { t } = useTranslation();
 
-  const [projects, setProjects] = useState<ProjectListResponse[]>([]);
+  const [paginatedData, setPaginatedData] = useState<PaginatedProjectsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -57,7 +52,6 @@ const ProjectsList = () => {
   const [notListPerm, setNotListPerm] = useState(null);
   const [alert, setAlert] = useState<AlertState>(null);
 
-  // Filtros (mismo diseño que gestión de usuarios)
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [toasts, setToasts] = useState<ToastData[]>([]);
@@ -103,44 +97,17 @@ const ProjectsList = () => {
     },
   ];
 
-  // Filtrar por búsqueda (nombre o código) y estado
-  const filteredProjects = useMemo(() => {
-    let result = [...projects];
-    const searchLower = search.trim().toLowerCase();
-    if (searchLower) {
-      result = result.filter(
-        (p) =>
-          p.project_name?.toLowerCase().includes(searchLower) ||
-          p.instance_code?.toLowerCase().includes(searchLower),
-      );
-    }
-    if (state) {
-      result = result.filter((p) => (p.status ?? "").toUpperCase() === state);
-    }
-    return result;
-  }, [projects, search, state]);
-
-  const paginatedData: PaginatedProjectsResponse = useMemo(() => {
-    const start = (page - 1) * size;
-    const items = filteredProjects.slice(start, start + size);
-    const total = filteredProjects.length;
-    const total_pages = Math.max(1, Math.ceil(total / size));
-    return {
-      items,
-      total,
-      page,
-      size,
-      total_pages,
-    };
-  }, [filteredProjects, page, size]);
-
   const getProjects = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listProjectsService();
-      setProjects(data);
-      setPage(1);
+      const data = await listProjectsService({
+        page_index: page,
+        page_size: size,
+        search: search.trim() || undefined,
+        state: state.trim() || undefined,
+      });
+      setPaginatedData(data);
     } catch (err: any) {
       console.error(err);
       const errorMessage = err.response?.data?.detail?.code;
@@ -157,9 +124,8 @@ const ProjectsList = () => {
 
   useEffect(() => {
     getProjects();
-  }, []);
+  }, [page, size, search, state]);
 
-  // Al cambiar filtros, volver a página 1
   useEffect(() => {
     setPage(1);
   }, [search, state]);
@@ -186,17 +152,7 @@ const ProjectsList = () => {
     const { project, newStatus } = pendingStatusChange;
     try {
       await updateProjectStatusService(project.external_project_id, newStatus);
-      if (newStatus === "DELETED") {
-        await getProjects();
-      } else {
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.external_project_id === project.external_project_id
-              ? { ...p, status: newStatus }
-              : p,
-          ),
-        );
-      }
+      await getProjects();
       setToasts((prev) => [
         ...prev,
         {
@@ -331,7 +287,8 @@ const ProjectsList = () => {
           {!loading &&
             !error &&
             !notListPerm &&
-            filteredProjects.length === 0 && (
+            paginatedData !== null &&
+            paginatedData.total === 0 && (
               <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
                 <p className="text-3xl font-bold text-black dark:text-gray-200">
                   {t("project.list.noProjects")}
@@ -339,7 +296,7 @@ const ProjectsList = () => {
               </div>
             )}
 
-          {!loading && !error && filteredProjects.length > 0 && (
+          {!loading && !error && paginatedData !== null && paginatedData.total > 0 && (
             <DataTable
               data={paginatedData}
               columns={columns}
