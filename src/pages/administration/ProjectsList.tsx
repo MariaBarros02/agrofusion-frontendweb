@@ -22,7 +22,13 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiFilter,
+  FiFlag,
+  FiMinusCircle,
+  FiTrash2,
+} from "react-icons/fi";
 import {
   listProjectsService,
   updateProjectStatusService,
@@ -78,7 +84,7 @@ const ProjectsList = () => {
       key: "status",
       label: t("common.state"),
       type: "statusEditable",
-      allowedStatuses: ["ACTIVE", "INACTIVE"],
+      allowedStatuses: ["ACTIVE", "INACTIVE", "DELETED"],
       onChange: (project, newStatus) => {
         setPendingStatusChange({ project, newStatus });
       },
@@ -180,13 +186,17 @@ const ProjectsList = () => {
     const { project, newStatus } = pendingStatusChange;
     try {
       await updateProjectStatusService(project.external_project_id, newStatus);
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.external_project_id === project.external_project_id
-            ? { ...p, status: newStatus }
-            : p,
-        ),
-      );
+      if (newStatus === "DELETED") {
+        await getProjects();
+      } else {
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.external_project_id === project.external_project_id
+              ? { ...p, status: newStatus }
+              : p,
+          ),
+        );
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -261,10 +271,11 @@ const ProjectsList = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">
-                {t("common.active")} / {t("common.inactive")}
+                {t("common.active")} / {t("common.inactive")} / {t("common.deleted")}
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
+              <option value="DELETED">{t("common.deleted")}</option>
             </Select>
           </div>
 
@@ -343,13 +354,27 @@ const ProjectsList = () => {
       <Modal show={!!pendingStatusChange} onClose={handleCloseModal} size="md">
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "DELETED" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-red-500">
+                <FiTrash2 className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
+                <FiMinusCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
+                <FiCheckCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              {pendingStatusChange?.newStatus === "INACTIVE"
-                ? t("project.list.deactivateTitle")
-                : t("project.list.activateTitle")}
+              {pendingStatusChange?.newStatus === "DELETED"
+                ? t("project.list.deleteTitle")
+                : pendingStatusChange?.newStatus === "INACTIVE"
+                  ? t("project.list.deactivateTitle")
+                  : t("project.list.activateTitle")}
             </h3>
           </div>
         </ModalHeader>
@@ -357,14 +382,18 @@ const ProjectsList = () => {
           {pendingStatusChange && (
             <>
               <p className="mb-2 font-bold text-gray-900 dark:text-white">
-                {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateQuestion")
-                  : t("project.list.activateQuestion")}
+                {pendingStatusChange.newStatus === "DELETED"
+                  ? t("project.list.deleteQuestion")
+                  : pendingStatusChange.newStatus === "INACTIVE"
+                    ? t("project.list.deactivateQuestion")
+                    : t("project.list.activateQuestion")}
               </p>
               <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateDescription")
-                  : t("project.list.activateDescription")}
+                {pendingStatusChange.newStatus === "DELETED"
+                  ? t("project.list.deleteDescription")
+                  : pendingStatusChange.newStatus === "INACTIVE"
+                    ? t("project.list.deactivateDescription")
+                    : t("project.list.activateDescription")}
               </p>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -376,9 +405,11 @@ const ProjectsList = () => {
                   htmlFor="confirm-status-change"
                   className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
                 >
-                  {pendingStatusChange.newStatus === "INACTIVE"
-                    ? t("project.list.deactivateCheckbox")
-                    : t("project.list.activateCheckbox")}
+                  {pendingStatusChange.newStatus === "DELETED"
+                    ? t("project.list.deleteCheckbox")
+                    : pendingStatusChange.newStatus === "INACTIVE"
+                      ? t("project.list.deactivateCheckbox")
+                      : t("project.list.activateCheckbox")}
                 </Label>
               </div>
             </>
@@ -389,13 +420,21 @@ const ProjectsList = () => {
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "DELETED"
+                ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 text-white"
+                : pendingStatusChange?.newStatus === "INACTIVE"
+                  ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                  : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >
-            {pendingStatusChange?.newStatus === "INACTIVE"
-              ? t("project.list.deactivateButton")
-              : t("project.list.activateButton")}
+            {pendingStatusChange?.newStatus === "DELETED"
+              ? t("project.list.deleteButton")
+              : pendingStatusChange?.newStatus === "INACTIVE"
+                ? t("project.list.deactivateButton")
+                : t("project.list.activateButton")}
           </Button>
         </ModalFooter>
        
