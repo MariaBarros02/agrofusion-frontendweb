@@ -3,8 +3,7 @@ import { Button } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { loginService, verifyMfaService } from "../../services/agrofusion/auth.service";
-import { useAuthStore } from "../../store/auth.store";
-import { useNavigate } from "react-router-dom";
+
 import {
   isOtpAuthError,
   type AuthErrorCode,
@@ -21,6 +20,8 @@ interface Props {
   password: string;
   /** Función para regresar al paso anterior (Login) */
   onBack: () => void;
+  
+  onSuccess: (tokens: any) => void;
 }
 /** Tiempo de vida del código OTP (5 minutos) */
 const OTP_TTL_SECONDS = 5 * 60; 
@@ -29,10 +30,9 @@ const OTP_TTL_SECONDS = 5 * 60;
  * Componente de formulario para la Verificación de Doble Factor (MFA).
  * Maneja la entrada de código de 6 dígitos, temporizador de expiración y reenvío.
  */
-export default function MfaForm({ email, password, onBack }: Props) {
+export default function MfaForm({ email, password, onBack, onSuccess }: Props) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const loginStore = useAuthStore();
+
 // --- ESTADO ---
   /** Arreglo de 6 strings para manejar cada caja del input individualmente */
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
@@ -42,6 +42,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
   const [otpError, setOtpError] = useState<OptAuthError | null>(null);
   /** Estado de bloqueo por demasiados intentos fallidos */
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
+  
   const [loading, setLoading] = useState(false); 
   const isExpired = secondsLeft <= 0;
 
@@ -97,16 +98,13 @@ export default function MfaForm({ email, password, onBack }: Props) {
    */ 
   const handleVerifyCode = async () => {
     const enteredCode = code.join("");
+    setLoading(true);
     setOtpError(null);
     try {
       
       const response = await verifyMfaService(email, enteredCode);
-      loginStore.login(
-        response.access_token ?? "",
-        response.refresh_token ?? "",
-        email
-      );
-      navigate("/");
+      onSuccess(response);
+
     } catch (error: any) {
       const data = error?.response?.data;
       const code = data?.detail.code as AuthErrorCode;
@@ -121,6 +119,8 @@ export default function MfaForm({ email, password, onBack }: Props) {
 
       setOtpError("AUTH_INVALID_OTP");
       console.error("Error verifying MFA code:", error);
+    }finally{
+      setLoading(false);
     }
   };
   /**
@@ -134,28 +134,30 @@ export default function MfaForm({ email, password, onBack }: Props) {
 
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">
+    <div className="flex flex-col items-center w-full gap-5 sm:gap-6">
+      <h2 className="text-xl font-bold text-center text-gray-800 sm:text-2xl dark:text-white">
         {t("login.mfaAuth")}
       </h2>
 
-      <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+      <p className="text-xs text-center text-gray-600 sm:text-sm dark:text-gray-400 break-all">
         {t("login.mfaAuthHelper")} <br />
         <span className="font-medium">{email}</span>
       </p>
 
       {/* OTP boxes */}
-      <div className="flex gap-2">
+      <div className="flex justify-center w-full gap-2 sm:gap-3">
         {code.map((value, i) => (
           <input
             key={i}
             id={`otp-${i}`}
-            type="text"
+            type="tel"
+            inputMode="numeric"
+
             maxLength={1}
             disabled={isExpired || isBlocked}
             value={value}
             onChange={(e) => handleChange(i, e.target.value)}
-            className={`w-12 h-12 text-xl text-center border rounded-lg
+            className={`w-10 h-10 sm:w-12 sm:h-12 text-lg sm:text-xl text-center border rounded-lg
               ${
                 isExpired || isBlocked
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -167,7 +169,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
       </div>
 
       <p
-        className={`text-sm font-medium ${
+        className={`text-xs sm:text-sm font-medium text-center ${
           isExpired ? "text-red-600" : "text-gray-600 dark:text-gray-400"
         }`}
       >
@@ -190,7 +192,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
       </p>
 
       {otpError && (
-        <div className="w-full p-3 text-sm font-medium text-center text-red-700 bg-red-100 border border-red-300 rounded-lg">
+        <div className="w-full px-3 py-2 text-xs sm:text-sm font-medium text-center text-red-700 bg-red-100 border border-red-300 rounded-lg">
           {t(`errors.${otpError}`)}
         </div>
       )}
@@ -198,7 +200,7 @@ export default function MfaForm({ email, password, onBack }: Props) {
       {/* Verify button */}
       <Button
         onClick={handleVerifyCode}
-        className="w-full bg-blue-600"
+        className="w-full py-2 text-sm sm:text-base bg-blue-600"
         disabled={isExpired || isBlocked || loading}
       >
         {t("login.verify")}
@@ -207,7 +209,8 @@ export default function MfaForm({ email, password, onBack }: Props) {
       <button
         type="button"
         onClick={onBack}
-        className="text-sm font-medium text-blue-600 hover:underline"
+        className="text-xs font-medium text-blue-600 sm:text-sm hover:underline"
+
       >
         {t("login.comeback")}
       </button>

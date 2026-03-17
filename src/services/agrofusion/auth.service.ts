@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authApi } from "./api/auth.api";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
-import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
@@ -159,10 +158,9 @@ export const verifyMfaService = async (
  * @param tokens Mapa de tokens de proyectos externos (ResetTokenMap).
  */
 export const reqResetPasswordService = async (
-  email: string,
-  tokens: ResetTokenMap
+  email: string
 ) => {
-  const { data } = await authApi.reqResetPassword({ email, tokens });
+  const { data } = await authApi.reqResetPassword({ email});
   return data;
 }
 /**

@@ -91,7 +91,8 @@
         "timeoutWarning": "Time remaining: ",
         "verify": "Verify code",
         "comeback": "Go back",
-        "errorSSOLogin": "Could not log in to {{project}}. Try manually."
+        "errorSSOLogin": "Could not log in to {{project}}. Try manually.",
+        "loginSuccess": "Login successful"
     },
     "editUser": {
         "title": "Edit user",
@@ -174,42 +175,42 @@
             "activateButton": "Activate module",
             "statusUpdateSuccess": "Module status updated successfully",
             "statusUpdateError": "Error updating module status",
-      "noModules": "No modules registered",
-      "paginationText": "modules"
-    }
-  },
-  "submodule": {
-    "title": "Submodule management",
-    "description": "View and manage system submodules",
-    "list": {
-      "code": "Code",
-      "submoduleName": "Submodule",
-      "description": "Description",
-      "parentModule": "Parent module",
-      "associatedModule": "Associated module",
-      "allModules": "All modules",
-      "createdAt": "Date",
-      "responsible": "Responsible",
-      "searchPlaceholder": "Search by name or code",
-      "loading": "Loading submodules...",
-      "loadError": "Error loading submodules",
-      "deactivateTitle": "Deactivate submodule",
-      "activateTitle": "Activate submodule",
-      "deactivateQuestion": "Do you want to deactivate this submodule?",
-      "activateQuestion": "Do you want to activate this submodule?",
-      "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive.",
-      "activateDescription": "This action will mark the submodule as Active and enable it in the system.",
-      "deactivateCheckbox": "I confirm that I wish to deactivate this submodule.",
-      "activateCheckbox": "I confirm that I wish to activate this submodule.",
-      "deactivateButton": "Deactivate submodule",
-      "activateButton": "Activate submodule",
-      "statusUpdateSuccess": "Submodule status updated successfully",
-      "statusUpdateError": "Error updating submodule status",
-      "noSubmodules": "No submodules registered",
-      "paginationText": "submodules"
-    }
-  },
-  "resetPassword": {
+            "noModules": "No modules registered",
+            "paginationText": "modules"
+        }
+    },
+    "submodule": {
+        "title": "Submodule management",
+        "description": "View and manage system submodules",
+        "list": {
+            "code": "Code",
+            "submoduleName": "Submodule",
+            "description": "Description",
+            "parentModule": "Parent module",
+            "associatedModule": "Associated module",
+            "allModules": "All modules",
+            "createdAt": "Date",
+            "responsible": "Responsible",
+            "searchPlaceholder": "Search by name or code",
+            "loading": "Loading submodules...",
+            "loadError": "Error loading submodules",
+            "deactivateTitle": "Deactivate submodule",
+            "activateTitle": "Activate submodule",
+            "deactivateQuestion": "Do you want to deactivate this submodule?",
+            "activateQuestion": "Do you want to activate this submodule?",
+            "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive.",
+            "activateDescription": "This action will mark the submodule as Active and enable it in the system.",
+            "deactivateCheckbox": "I confirm that I wish to deactivate this submodule.",
+            "activateCheckbox": "I confirm that I wish to activate this submodule.",
+            "deactivateButton": "Deactivate submodule",
+            "activateButton": "Activate submodule",
+            "statusUpdateSuccess": "Submodule status updated successfully",
+            "statusUpdateError": "Error updating submodule status",
+            "noSubmodules": "No submodules registered",
+            "paginationText": "submodules"
+        }
+    },
+    "resetPassword": {
         "resetPassword": "Set a new password.",
         "instructions": "This change will update the password for your accounts in all active AgroFusion projects. Remember it for your next login.",
         "newPassword": "New password",
@@ -222,6 +223,7 @@
         "errorExtPro": "{{service}}. Could not change password."
     },
     "reqResetPassword": {
+        "changeEmailToRetry": "Modify the email to try again.",
         "requestReset": "Recover your account!",
         "instructions": "Enter your email address registered in the system.",
         "sendResetLink": "Find my account",
@@ -329,7 +331,11 @@
         "passwordChangeFailed": "There was an error updating your password, please try again.",
         "changePasswordSuccess": "Your password was successfully updated.",
         "noChanges": "No changes to save",
-        "role": "Role"
+        "role": "Role",
+        "factorDoubleAuth": "Two-factor authentication",
+        "updating": "Updating...",
+        "mfaUpdateSuccess": "The user's two-factor authentication status has been successfully updated",
+        "mfaUpdateError": "There was an error updating the user's two-factor authentication status"
     },
     "accountActivation": {
         "resetPassword": "Set a new password",
@@ -512,6 +518,7 @@
         "passwordUppercase": "Password must contain at least one uppercase letter.",
         "passwordNumber": "Password must contain at least one number.",
         "passwordSpecialChar": "Password must contain at least one special character.",
+        "passwordSpecialCharacter": "Password must contain at least one special character.",
         "nameMin": "Name must contain at least 3 characters",
         "completeField": "Complete this field",
         "completedField": "Complete this field",
@@ -519,12 +526,13 @@
         "dateMustBeAfterBirthday": "Date must be after date of birth",
         "dateNotInFuture": "Date cannot be in the future",
         "descriptionMin": "Description must contain at least 8 characters",
-        "passwordSpecialCharacter": "Password must contain at least one special character",
         "passwordsMustMatch": "Passwords do not match.",
         "documentNumberMax": "Document number must have a maximum of {{max}} characters."
     },
     "errors": {
         "AUTH_USER_NOT_FOUND": "User does not exist or has been deleted from the system.",
+        "AUTH_USER_NOT_ACTIVE": "There was an error requesting the password change",
+        "AUTH_USER_NOT_FOUND_REQ": "There was an error requesting the password change",
         "AUTH_USER_DELETED": "User does not exist or has been deleted from the system.",
         "AUTH_USER_INACTIVE": "User is not active and cannot log in",
         "AUTH_INVALID_PASSWORD": "Incorrect email or password. Please try again.",
@@ -537,6 +545,7 @@
         "AUTH_PASSWORD_MISMATCH": "Passwords do not match.",
         "AUTH_PASSWORD_TOO_SHORT": "Password is too short. It must be at least {{min}} characters.",
         "AUTH_PASSWORD_TOO_LONG": "Password is too long. It cannot exceed {{max}} characters.",
+        "AUTH_INSUFFICIENT_PERMISSIONS": "You do not have sufficient permissions to perform this action.",
         "AUTH_PASSWORD_REQUIRE_UPPERCASE": "Password must contain at least one uppercase letter.",
         "AUTH_PASSWORD_REQUIRE_LOWERCASE": "Password must contain at least one lowercase letter.",
         "AUTH_PASSWORD_REQUIRE_NUMBER": "Password must contain at least one number.",
@@ -555,7 +564,11 @@
         "NOT_OWNER_PROFILE": "You cannot edit a profile that does not belong to you",
         "INCORRECT_PASSWORD": "The current password entered is incorrect",
         "INVALID_PASSWORD": "You cannot reuse a previous password",
-        "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists"
+        "ROLE_NAME_ALREADY_EXISTS": "A role with this name already exists",
+        "PERMISSION_NAME_ALREADY_EXISTS": "A permission with this name already exists",
+        "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
+        "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
+        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system."
     },
     "moduleRouteGuard": {
         "preparing": "Preparing content..."
