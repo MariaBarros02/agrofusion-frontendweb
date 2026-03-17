@@ -14,7 +14,6 @@ import type { PaginatedProjectsResponse, ProjectListResponse } from "../../../dt
 import type { ModuleListResponse, PaginatedModulesResponse } from "../../../dto/response/moduleList-response.dto";
 import type { PaginatedSubmodulesResponse, SubmoduleListResponse } from "../../../dto/response/submoduleList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
-import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
 import type { listRolesRequest } from "../../../dto/request/listRoles-request.dto";
 import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/response/listRoles-response.dto";
@@ -152,7 +151,7 @@ export const authApi = {
    * @param {string} data.email - Correo electrónico del usuario.
    * @param {ResetTokenMap} data.tokens - Mapeo de tokens requeridos por el servicio.
    */
-  reqResetPassword: (data: { email: string; tokens: ResetTokenMap }) =>
+  reqResetPassword: (data: { email: string }) =>
     authAgrofusionAxios.post("auth/request-reset-password", data),
   /**
    * Establece una nueva contraseña utilizando un token de validación.

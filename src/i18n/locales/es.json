@@ -93,7 +93,8 @@
         "timeoutWarning": "Tiempo restante: ",
         "verify": "Verificar código",
         "comeback": "Volver",
-        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente."
+        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente.",
+        "loginSuccess": "Inicio de sesión exitoso        "
     },
     "editUser": {
         "title": "Editar usuario",
@@ -219,7 +220,7 @@
     },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
-        "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
+        "instructions": "Este cambio actualizará la contraseña de tu cuenta de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
         "newPassword": "Nueva contraseña",
         "confirmPassword": "Confirmar contraseña",
         "resetButton": "Restablecer contraseña",
@@ -230,6 +231,7 @@
         "errorExtPro": "{{service}}. No se pudo realizar el cambio de contraseña."
     },
     "reqResetPassword":{
+        "changeEmailToRetry": "Modifica el correo electrónico para intentar nuevamente.",
         "requestReset": "¡Recupera tu cuenta!",
         "instructions": "Ingresa tu dirección de correo electrónico registrada en el sistema.",
         "sendResetLink": "Buscar mi cuenta",
@@ -547,6 +549,8 @@
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_USER_NOT_ACTIVE": "Hubo un error al solicitar el cambio de contraseña", 
+    "AUTH_USER_NOT_FOUND_REQ": "Hubo un error al solicitar el cambio de contraseña",
     "AUTH_USER_DELETED": "El usuario no existe o fue eliminado del sistema.",
     "AUTH_USER_INACTIVE": "El usuario no esta activo, no puede iniciar sesión",
     "AUTH_INVALID_PASSWORD": "Correo o contraseña incorrectos. Intenta nuevamente.",
