@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from "react-i18next";
 import { Card, Label, TextInput, Button } from "flowbite-react";
 import { useState } from "react";
@@ -17,6 +18,8 @@ import { MdInfoOutline } from "react-icons/md";
 import { useAuthStore } from "../store/auth.store";
 import { useNavigate } from "react-router-dom";
 import MfaForm from "../components/forms/MfaForm";
+import type { AlertState } from "../components/layout/AlertSimple";
+import AlertSimple from "../components/layout/AlertSimple";
 /**
  * Estructura de datos para el formulario de inicio de sesión.
  */
@@ -25,24 +28,22 @@ interface LoginValues {
   password: string;
 }
 /**
- * Esquema de validación dinámico. 
+ * Esquema de validación dinámico.
  * Recibe la función 't' para localizar los mensajes de error.
  */
 const LoginSchema = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: (key: string, options?: any) => string
+  t: (key: string, options?: any) => string,
 ): yup.Schema<LoginValues> =>
   yup.object({
     email: yup
       .string()
       .email(t("validation.emailInvalid"))
       .required(t("validation.emailRequired")),
-    password: yup
-      .string()
-      .required(t("validation.passwordRequired")),
+    password: yup.string().required(t("validation.passwordRequired")),
   });
 
-  /**
+/**
  * Componente de Página de Login.
  * Gestiona el acceso principal, visibilidad de contraseña y transiciones hacia MFA.
  */
@@ -51,6 +52,8 @@ const Login = () => {
   const navigate = useNavigate();
   // Hook de traducción
   const { t } = useTranslation();
+  const [alert, setAlert] = useState<AlertState>(null);
+  const [tokens, setTokens] = useState<any>(null);
 
   //Estado para controlar si la contraseña es visible
   const [showPassword, setShowPassword] = useState(false);
@@ -83,7 +86,6 @@ const Login = () => {
     enableReinitialize: true,
     validationSchema: LoginSchema(t),
     onSubmit: async (values) => {
-      
       try {
         setGlobalError(null);
         setPasswordError(null);
@@ -93,13 +95,13 @@ const Login = () => {
           setStep("mfa");
           return;
         }
-        // Flujo B: Acceso directo
-        loginStore.login(
-          response.access_token ?? "",
-          response.refresh_token ?? "",
-          values.email,
-        );
-        navigate("/dashboard");
+        setTokens(response);
+
+        setAlert({
+          message: "login.loginSuccess",
+          type: "success",
+          to: "/dashboard",
+        });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -119,7 +121,7 @@ const Login = () => {
     },
   });
 
-/** Helper para renderizar errores de validación local (Yup) */
+  /** Helper para renderizar errores de validación local (Yup) */
   const displayError = (name: keyof LoginValues) => {
     return formik.touched[name] && formik.errors[name] ? (
       <p className="mt-1 text-sm text-red-500 ">{formik.errors[name]}</p>
@@ -156,22 +158,24 @@ const Login = () => {
   const [step, setStep] = useState<LoginStep>("login");
 
   return (
-    <div className="flex flex-col w-full h-screen p-2 bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col w-full min-h-screen px-3 bg-gray-100 sm:px-6 dark:bg-gray-900">
       {/* Barra superior */}
       <Header />
 
       {/* Centro */}
-      <div className="flex flex-col items-center justify-center flex-1">
+      <div className="flex flex-col items-center justify-center flex-1 w-full py-6">
         {/* Contenedor con Slider para transición Login <-> MFA */}
-        
-        <Card className="w-full py-4 overflow-hidden bg-white rounded-xl sm:max-w-lg dark:bg-slate-950">
+
+       <Card className="w-full max-w-md py-6 overflow-hidden bg-white shadow-lg rounded-2xl sm:max-w-lg dark:bg-slate-950">
+
           <div
-            className={`flex w-[200%] transition-transform duration-300 ease-in-out ${
+            className={`flex w-[200%] transition-transform duration-300 ease-in-out touch-pan-y ${
               step === "mfa" ? "-translate-x-1/2" : "translate-x-0"
             }`}
           >
             {/* SECCIÓN 1: Formulario de Login */}
-            <div className="w-1/2 px-10 shrink-0">
+           <div className="w-1/2 px-5 sm:px-10 shrink-0">
+
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                 {t("login.login")}
               </h2>
@@ -183,7 +187,7 @@ const Login = () => {
                 </div>
               )}
               <form
-                className="flex flex-col max-w-lg gap-2"
+                className="flex flex-col w-full gap-3"
                 onSubmit={formik.handleSubmit}
               >
                 <div>
@@ -244,7 +248,8 @@ const Login = () => {
                   {displayError("password")}
                 </div>
                 {passwordError && (
-                  <p className="p-6 py-4 mt-1 text-sm font-bold text-center text-red-600 bg-red-200 mx-7 rounded-xl">
+                  <p className="px-4 py-3 mt-2 text-sm font-semibold text-center text-red-600 bg-red-200 rounded-lg">
+
                     {t(`errors.${passwordError}`, {
                       minutes: retryAfter
                         ? Math.ceil(retryAfter / 60)
@@ -258,10 +263,11 @@ const Login = () => {
                     className="text-sm font-semibold text-stone-900 dark:text-white "
                     to="/request-reset-password"
                   >
-                    {t("login.forgottenPassword")} {" "}
-                    <span className="font-medium text-blue-600 hover:underline">{t("login.recuperateIt")}</span>
+                    {t("login.forgottenPassword")}{" "}
+                    <span className="font-medium text-blue-600 hover:underline">
+                      {t("login.recuperateIt")}
+                    </span>
                   </Link>
-                 
                 </div>
 
                 <Button
@@ -269,7 +275,9 @@ const Login = () => {
                   type="submit"
                   disabled={isButtonDisabled}
                 >
-                  {formik.isSubmitting ? t("login.sending") : t("login.login")}{" "}
+                  {formik.isSubmitting
+                    ? t("login.sending")
+                    : t("login.login")}{" "}
                 </Button>
               </form>
               <p className="text-sm text-gray-900 dark:text-white">
@@ -285,15 +293,39 @@ const Login = () => {
                   email={formik.values.email}
                   password={formik.values.password}
                   onBack={() => setStep("login")}
+                  onSuccess={(tokens) => {
+                    setTokens(tokens);
+
+                    setAlert({
+                      message: "login.loginSuccess",
+                      type: "success",
+                    });
+                  }}
                 />
               </div>
             )}
           </div>
         </Card>
 
-        <p className="mt-2 text-xs text-gray-700 dark:text-gray-500">
+       <p className="mt-4 text-xs text-center text-gray-700 dark:text-gray-500">
+
           &copy; {anioActual} AgroFusion. {t("common.rightsReserved")}
         </p>
+        {alert && (
+          <AlertSimple
+            message={t(alert.message)}
+            type={alert.type}
+            onClose={() => {
+              loginStore.login(
+                tokens.access_token ?? "",
+                tokens.refresh_token ?? "",
+                formik.values.email,
+              );
+
+              navigate("/dashboard");
+            }}
+          />
+        )}
       </div>
     </div>
   );

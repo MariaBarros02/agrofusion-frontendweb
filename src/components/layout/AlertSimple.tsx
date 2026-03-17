@@ -64,7 +64,7 @@ const AlertSimple = ({ message, type = "success", to, onClose }: AlertSimpleProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-700/50">
-      <Card className="max-w-md p-1 ">
+      <Card className="w-[90%] max-w-md md:max-w-lg  p-1 ">
         <div className="flex items-center gap-3">
           <div
             className={`flex items-center justify-center w-12 h-12 rounded-xl ${style.bg}`}

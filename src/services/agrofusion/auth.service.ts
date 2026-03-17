@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authApi } from "./api/auth.api";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
-import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
@@ -38,11 +37,16 @@ export const getExternalProjects = async () => {
 }
 
 /**
- * Obtiene el listado de todos los proyectos externos (RF-GES-01).
- * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+ * Obtiene el listado paginado de proyectos externos (RF-GES-01).
+ * Parámetros: page_index, page_size, search?, state?
  */
-export const listProjectsService = async () => {
-  const { data } = await authApi.getExternalProjectsList();
+export const listProjectsService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+}) => {
+  const { data } = await authApi.getExternalProjectsList(params);
   return data;
 };
 
@@ -58,10 +62,21 @@ export const updateProjectStatusService = async (
 };
 
 /**
- * Obtiene el listado de todos los módulos.
+ * Obtiene el listado paginado de módulos.
  */
-export const listModulesService = async (): Promise<ModuleListResponse[]> => {
-  const { data } = await authApi.getModulesList();
+export const listModulesService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+  project_id?: string;
+}) => {
+  const { data } = await authApi.getModulesList(params);
+  return data;
+};
+
+export const getModuleProjectOptionsService = async () => {
+  const { data } = await authApi.getModuleProjectOptions();
   return data;
 };
 
@@ -77,10 +92,21 @@ export const updateModuleStatusService = async (
 };
 
 /**
- * Obtiene el listado de todos los submódulos.
+ * Obtiene el listado paginado de submódulos.
  */
-export const listSubmodulesService = async (): Promise<SubmoduleListResponse[]> => {
-  const { data } = await authApi.getSubmodulesList();
+export const listSubmodulesService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+  module_id?: string;
+}) => {
+  const { data } = await authApi.getSubmodulesList(params);
+  return data;
+};
+
+export const getSubmoduleModuleOptionsService = async () => {
+  const { data } = await authApi.getSubmoduleModuleOptions();
   return data;
 };
 
@@ -159,10 +185,9 @@ export const verifyMfaService = async (
  * @param tokens Mapa de tokens de proyectos externos (ResetTokenMap).
  */
 export const reqResetPasswordService = async (
-  email: string,
-  tokens: ResetTokenMap
+  email: string
 ) => {
-  const { data } = await authApi.reqResetPassword({ email, tokens });
+  const { data } = await authApi.reqResetPassword({ email});
   return data;
 }
 /**
