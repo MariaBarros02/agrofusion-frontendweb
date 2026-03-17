@@ -6,7 +6,7 @@ import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -20,29 +20,25 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiFilter, FiFlag, FiMinusCircle } from "react-icons/fi";
 import {
+  getSubmoduleModuleOptionsService,
   listSubmodulesService,
   updateSubmoduleStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { SubmoduleListResponse } from "../../dto/response/submoduleList-response.dto";
+import type {
+  SubmoduleListResponse,
+  PaginatedSubmodulesResponse,
+} from "../../dto/response/submoduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 
-
-interface PaginatedSubmodulesResponse {
-  items: SubmoduleListResponse[];
-  total: number;
-  page: number;
-  size: number;
-  total_pages: number;
-}
-
 const SubmodulesList = () => {
   const { t } = useTranslation();
 
-  const [submodules, setSubmodules] = useState<SubmoduleListResponse[]>([]);
+  const [paginatedData, setPaginatedData] = useState<PaginatedSubmodulesResponse | null>(null);
+  const [moduleOptions, setModuleOptions] = useState<{ id: string; code: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -59,22 +55,6 @@ const SubmodulesList = () => {
     newStatus: string;
   } | null>(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
-
-  const moduleOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const options: { id: string; code: string; name: string }[] = [];
-    for (const s of submodules) {
-      if (s.module_id && s.module_code && !seen.has(s.module_id)) {
-        seen.add(s.module_id);
-        options.push({
-          id: s.module_id,
-          code: s.module_code ?? "",
-          name: s.module_name ?? s.module_code ?? "",
-        });
-      }
-    }
-    return options.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  }, [submodules]);
 
   const columns: Column<SubmoduleListResponse>[] = [
     {
@@ -124,49 +104,21 @@ const SubmodulesList = () => {
     // },
   ];
 
-  const filteredSubmodules = useMemo(() => {
-    let result = [...submodules];
-    const searchLower = search.trim().toLowerCase();
-    if (searchLower) {
-      result = result.filter(
-        (s) =>
-          (s.name?.toLowerCase().includes(searchLower)) ||
-          (s.code?.toLowerCase().includes(searchLower))
-      );
-    }
-    if (state) {
-      result = result.filter((s) => (s.status ?? "").toUpperCase() === state);
-    }
-    if (moduleFilter) {
-      result = result.filter((s) => s.module_id === moduleFilter);
-    }
-    return result;
-  }, [submodules, search, state, moduleFilter]);
-
-  const paginatedData: PaginatedSubmodulesResponse = useMemo(() => {
-    const start = (page - 1) * size;
-    const items = filteredSubmodules.slice(start, start + size);
-    const total = filteredSubmodules.length;
-    const total_pages = Math.max(1, Math.ceil(total / size));
-    return {
-      items,
-      total,
-      page,
-      size,
-      total_pages,
-    };
-  }, [filteredSubmodules, page, size]);
-
   const getSubmodules = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listSubmodulesService();
-      setSubmodules(data);
-      setPage(1);
-    } catch (err:any) {
+      const data = await listSubmodulesService({
+        page_index: page,
+        page_size: size,
+        search: search.trim() || undefined,
+        state: state.trim() || undefined,
+        module_id: moduleFilter || undefined,
+      });
+      setPaginatedData(data);
+    } catch (err: any) {
       console.error(err);
-       const errorMessage = err.response?.data?.detail?.code;
+      const errorMessage = err.response?.data?.detail?.code;
 
       if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
         setNotListPerm(errorMessage);
@@ -179,8 +131,22 @@ const SubmodulesList = () => {
   };
 
   useEffect(() => {
-    getSubmodules();
+    getSubmoduleModuleOptionsService()
+      .then((list) =>
+        setModuleOptions(
+          list.map((m) => ({
+            id: m.module_id,
+            code: m.module_code ?? "",
+            name: m.module_name ?? m.module_code ?? "",
+          }))
+        )
+      )
+      .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    getSubmodules();
+  }, [page, size, search, state, moduleFilter]);
 
   useEffect(() => {
     setPage(1);
@@ -207,13 +173,7 @@ const SubmodulesList = () => {
     const { submodule, newStatus } = pendingStatusChange;
     try {
       await updateSubmoduleStatusService(submodule.af_submodule_id, newStatus);
-      setSubmodules((prev) =>
-        prev.map((s) =>
-          s.af_submodule_id === submodule.af_submodule_id
-            ? { ...s, status: newStatus }
-            : s
-        )
-      );
+      await getSubmodules();
       setToasts((prev) => [
         ...prev,
         {
@@ -339,7 +299,7 @@ const SubmodulesList = () => {
             </div>
           )}
 
-          {!loading && !error && !notListPerm  && filteredSubmodules.length === 0 && (
+          {!loading && !error && !notListPerm && paginatedData !== null && paginatedData.total === 0 && (
             <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
               <p className="text-3xl font-bold text-black dark:text-gray-200">
                 {t("submodule.list.noSubmodules")}
@@ -357,7 +317,7 @@ const SubmodulesList = () => {
             </div>
           )}
 
-          {!loading && !error && filteredSubmodules.length > 0 && (
+          {!loading && !error && paginatedData !== null && paginatedData.total > 0 && (
             <DataTable
               data={paginatedData}
               columns={columns}
@@ -376,9 +336,16 @@ const SubmodulesList = () => {
       >
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
+                <FiMinusCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
+                <FiCheckCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {pendingStatusChange?.newStatus === "INACTIVE"
                 ? t("submodule.list.deactivateTitle")
@@ -422,7 +389,11 @@ const SubmodulesList = () => {
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "INACTIVE"
+                ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >

@@ -8,7 +8,7 @@ import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -22,34 +22,30 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiFilter, FiFlag, FiMinusCircle } from "react-icons/fi";
 import {
+  getModuleProjectOptionsService,
   listModulesService,
   updateModuleStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { ModuleListResponse } from "../../dto/response/moduleList-response.dto";
+import type {
+  ModuleListResponse,
+  PaginatedModulesResponse,
+} from "../../dto/response/moduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 
-interface PaginatedModulesResponse {
-  items: ModuleListResponse[];
-  total: number;
-  page: number;
-  size: number;
-  total_pages: number;
-}
-
 const ModulesList = () => {
   const { t } = useTranslation();
 
-  const [modules, setModules] = useState<ModuleListResponse[]>([]);
+  const [paginatedData, setPaginatedData] = useState<PaginatedModulesResponse | null>(null);
+  const [projectOptions, setProjectOptions] = useState<{ id: string; code: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [size] = useState(5);
 
-  // Filtros (mismo diseño que gestión de proyectos)
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
@@ -62,23 +58,6 @@ const ModulesList = () => {
     newStatus: string;
   } | null>(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
-
-  // Proyectos únicos para el filtro
-  const projectOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const options: { id: string; code: string; name: string }[] = [];
-    for (const m of modules) {
-      if (m.af_project_id && m.project_code && !seen.has(m.af_project_id)) {
-        seen.add(m.af_project_id);
-        options.push({
-          id: m.af_project_id,
-          code: m.project_code ?? "",
-          name: m.project_name ?? m.project_code ?? "",
-        });
-      }
-    }
-    return options.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  }, [modules]);
 
   const columns: Column<ModuleListResponse>[] = [
     {
@@ -122,47 +101,18 @@ const ModulesList = () => {
     },
   ];
 
-  // Filtrar por búsqueda (nombre o código), estado y proyecto asociado
-  const filteredModules = useMemo(() => {
-    let result = [...modules];
-    const searchLower = search.trim().toLowerCase();
-    if (searchLower) {
-      result = result.filter(
-        (m) =>
-          m.name?.toLowerCase().includes(searchLower) ||
-          m.code?.toLowerCase().includes(searchLower),
-      );
-    }
-    if (state) {
-      result = result.filter((m) => (m.status ?? "").toUpperCase() === state);
-    }
-    if (projectFilter) {
-      result = result.filter((m) => m.af_project_id === projectFilter);
-    }
-    return result;
-  }, [modules, search, state, projectFilter]);
-
-  const paginatedData: PaginatedModulesResponse = useMemo(() => {
-    const start = (page - 1) * size;
-    const items = filteredModules.slice(start, start + size);
-    const total = filteredModules.length;
-    const total_pages = Math.max(1, Math.ceil(total / size));
-    return {
-      items,
-      total,
-      page,
-      size,
-      total_pages,
-    };
-  }, [filteredModules, page, size]);
-
   const getModules = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listModulesService();
-      setModules(data);
-      setPage(1);
+      const data = await listModulesService({
+        page_index: page,
+        page_size: size,
+        search: search.trim() || undefined,
+        state: state.trim() || undefined,
+        project_id: projectFilter || undefined,
+      });
+      setPaginatedData(data);
     } catch (err: any) {
       console.error(err);
       const errorMessage = err.response?.data?.detail?.code;
@@ -178,10 +128,23 @@ const ModulesList = () => {
   };
 
   useEffect(() => {
-    getModules();
+    getModuleProjectOptionsService()
+      .then((list) =>
+        setProjectOptions(
+          list.map((p) => ({
+            id: p.af_project_id,
+            code: p.project_code ?? "",
+            name: p.project_name ?? p.project_code ?? "",
+          }))
+        )
+      )
+      .catch(() => {});
   }, []);
 
-  // Al cambiar filtros, volver a página 1
+  useEffect(() => {
+    getModules();
+  }, [page, size, search, state, projectFilter]);
+
   useEffect(() => {
     setPage(1);
   }, [search, state, projectFilter]);
@@ -207,13 +170,7 @@ const ModulesList = () => {
     const { module, newStatus } = pendingStatusChange;
     try {
       await updateModuleStatusService(module.af_module_id, newStatus);
-      setModules((prev) =>
-        prev.map((m) =>
-          m.af_module_id === module.af_module_id
-            ? { ...m, status: newStatus }
-            : m,
-        ),
-      );
+      await getModules();
       setToasts((prev) => [
         ...prev,
         {
@@ -355,7 +312,7 @@ const ModulesList = () => {
           {!loading &&
             !error &&
             !notListPerm &&
-            filteredModules.length === 0 && (
+            paginatedData !== null && paginatedData.total === 0 && (
               <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
                 <p className="text-3xl font-bold text-black dark:text-gray-200">
                   {t("module.list.noModules")}
@@ -372,7 +329,7 @@ const ModulesList = () => {
             </div>
           )}
 
-          {!loading && !error && filteredModules.length > 0 && (
+          {!loading && !error && paginatedData !== null && paginatedData.total > 0 && (
             <DataTable
               data={paginatedData}
               columns={columns}
@@ -387,9 +344,16 @@ const ModulesList = () => {
       <Modal show={!!pendingStatusChange} onClose={handleCloseModal} size="md">
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
+                <FiMinusCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
+                <FiCheckCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {pendingStatusChange?.newStatus === "INACTIVE"
                 ? t("module.list.deactivateTitle")
@@ -433,7 +397,11 @@ const ModulesList = () => {
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "INACTIVE"
+                ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >

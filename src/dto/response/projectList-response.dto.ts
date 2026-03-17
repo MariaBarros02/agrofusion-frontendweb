@@ -17,3 +17,12 @@ export interface ProjectListResponse {
   /** Responsable (usuario creador del registro) */
   responsible: string | null;
 }
+
+/** Respuesta paginada del listado de proyectos externos */
+export interface PaginatedProjectsResponse {
+  items: ProjectListResponse[];
+  total: number;
+  page: number;
+  size: number;
+  total_pages: number;
+}

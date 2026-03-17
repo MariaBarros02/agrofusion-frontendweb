@@ -21,3 +21,12 @@ export interface ModuleListResponse {
   /** Responsable (usuario creador del registro) */
   responsible: string | null;
 }
+
+/** Respuesta paginada del listado de módulos */
+export interface PaginatedModulesResponse {
+  items: ModuleListResponse[];
+  total: number;
+  page: number;
+  size: number;
+  total_pages: number;
+}
