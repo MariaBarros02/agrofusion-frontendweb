@@ -17,8 +17,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
-        scope: '/agrofusionTest/',
-        start_url: '/agrofusionTest/',
+        scope: '/agrofusion/',
+        start_url: '/agrofusion/',
         
         icons: [
           {
@@ -65,7 +65,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: "/agrofusionTest/",
+  base: "/agrofusion/",
   server: {
     allowedHosts: ['inmero.co', 'www.inmero.co'] 
   },

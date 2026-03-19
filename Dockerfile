@@ -1,4 +1,3 @@
-
 # ETAPA 1: Construcción
 FROM node:20-alpine AS builder
 
