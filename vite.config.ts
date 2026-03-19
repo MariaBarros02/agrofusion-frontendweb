@@ -15,7 +15,7 @@ export default defineConfig({
         description: 'Plataforma de gestión agrícola integrada',
         theme_color: '#16a34a',
         background_color: '#ffffff',
-        display: 'minimal-ui',
+        display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/agrofusionTest/',
         start_url: '/agrofusionTest/',
