@@ -25,6 +25,7 @@ import ViewRole from "../pages/roles/ViewRole";
 import RoutesWrapper from "./RoutesWrapper";
 import EditRole from "../pages/roles/EditRole";
 import CreateRole from "../pages/roles/CreateRole";
+import { ModuleRouteGuard } from "./ModuleRouteGuard";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -33,6 +34,7 @@ import CreateRole from "../pages/roles/CreateRole";
  * 2. Rutas Públicas: Solo accesibles si el usuario NO está autenticado (Login, Recobro).
  */
 const basename = import.meta.env.VITE_BASENAME || ""
+
 export function AppRouter() {
   return (
     <BrowserRouter basename={basename}>
@@ -88,18 +90,20 @@ export function AppRouter() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ModuleRouteGuard moduleCode="DASHBOARD">
+                <Dashboard />
+              </ModuleRouteGuard>
             </ProtectedRoute>
           }
         />
 
-      
-        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <ModuleRouteGuard moduleCode="PROFILE">
+                <Profile />
+              </ModuleRouteGuard>
             </ProtectedRoute>
           }
         />
@@ -115,28 +119,28 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
+          <Route path="/dashboard" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
+          <Route path="/profile" element={<ModuleRouteGuard moduleCode="PROFILE"><Profile /></ModuleRouteGuard>} />
 
           {/* ADMINISTRATION */}
-          <Route path="/administration/users" element={<UsersList />} />
-          <Route path="/administration/users/create-user" element={<CreateUser />} />
-          <Route path="/administration/users/:userId" element={<ViewUser />} />
-          <Route path="/administration/users/edit-user/:userId" element={<EditUser />} />
+          <Route path="/administration/users" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><UsersList /></ModuleRouteGuard>} />
+          <Route path="/administration/users/create-user" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><CreateUser /></ModuleRouteGuard>} />
+          <Route path="/administration/users/:userId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ViewUser /></ModuleRouteGuard>} />
+          <Route path="/administration/users/edit-user/:userId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditUser /></ModuleRouteGuard>} />
 
-          <Route path="/administration/projects" element={<ProjectsList />} />
-          <Route path="/administration/modules" element={<ModulesList />} />
-          <Route path="/administration/submodules" element={<SubmodulesList />} />
+          <Route path="/administration/projects" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectsList /></ModuleRouteGuard>} />
+          <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
+          <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 
-          <Route path="/administration/permissions" element={<ListPermissions />} />
-          <Route path="/administration/permissions/:permId" element={<PermissionsView />} />
-          <Route path="/administration/permissions/edit-perm/:permId" element={<EditPermissions />} />
+          <Route path="/administration/permissions" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ListPermissions /></ModuleRouteGuard>} />
+          <Route path="/administration/permissions/:permId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><PermissionsView /></ModuleRouteGuard>} />
+          <Route path="/administration/permissions/edit-perm/:permId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditPermissions /></ModuleRouteGuard>} />
 
-          <Route path="/administration/roles" element={<ListRoles />} />
-          <Route path="/administration/role/:roleId" element={<ViewRole />} />
-          <Route path="/administration/roles/edit-role/:roleId" element={<EditRole/>}/>
-          <Route path="/administration/roles/create-role" element={<CreateRole/>}/>
+          <Route path="/administration/roles" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ListRoles /></ModuleRouteGuard>} />
+          <Route path="/administration/role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ViewRole /></ModuleRouteGuard>} />
+          <Route path="/administration/roles/edit-role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditRole /></ModuleRouteGuard>} />
+          <Route path="/administration/roles/create-role" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><CreateRole /></ModuleRouteGuard>} />
         </Route>
 
       </Routes>

@@ -111,7 +111,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           {/* LOGO */}
           <SidebarLogo
             href="/dashboard"
-            img={logoAgrofusionRemovebg2}
+            img={logoAgrofusionRemovebg2}            
             imgAlt="AgroFusion logo"
           >
             <div className=" !rounded-xl flex items-center justify-between w-full">

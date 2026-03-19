@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import AppLayoutSB from "../components/layout/AppLayoutSB";
 import TitleTarget from "../components/layout/TitleTarget";
+import ModuleInactive from "./ModuleInactive";
+import { useModuleAccessStore } from "../store/moduleAccess.store";
 import { getExternalProjects } from "../services/agrofusion/auth.service";
 import type { ExternalProject } from "../dto/shared/external-project.dto";
 import { useTranslation } from "react-i18next";
@@ -112,6 +114,10 @@ const Dashboard = () => {
     }
   };
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  const showModuleInactive = !canAccessModule("DASHBOARD");
+  const showContent = canAccessModule("DASHBOARD");
+
   return (
     <AppLayoutSB>
       <div className="flex flex-col h-full">
@@ -119,6 +125,9 @@ const Dashboard = () => {
           title="dashboard.title"
           description="dashboard.description"
         />
+        {showModuleInactive && <ModuleInactive />}
+        {showContent && (
+        <>
         {loading && (
           <div className="flex items-center justify-center p-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
             {" "}
@@ -238,6 +247,8 @@ const Dashboard = () => {
             />
           ))}
         </div>
+        </>
+        )}
       </div>
     </AppLayoutSB>
   );
