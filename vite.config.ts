@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg', 'robots.txt', 'logoAgrofusion-removebg2.png']],
+      includeAssets: ['vite.svg', 'robots.txt', 'logoAgrofusion-removebg2.png'],
       manifest: {
         name: 'AgroFusion',
         short_name: 'AgroFusion',
