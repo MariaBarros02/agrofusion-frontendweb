@@ -22,19 +22,19 @@ export default defineConfig({
         
         icons: [
           {
-            src: '/agrofusionTest/manifest-192x192.png',
+            src: '/manifest-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/agrofusionTest/manifest-512x512.png',
+            src: '/manifest-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/agrofusionTest/manifest-512x512.png',
+            src: '/manifest-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -44,7 +44,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-        navigateFallback: '/agrofusionTest/index.html',
+        navigateFallback: '/agrofusion/index.html',
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
