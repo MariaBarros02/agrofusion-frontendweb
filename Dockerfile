@@ -21,7 +21,7 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    location / { \
+    location /agrofusionTest/ { \
         try_files $uri $uri/ /index.html; \
     } \
     \
