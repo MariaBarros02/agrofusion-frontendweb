@@ -17,8 +17,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'minimal-ui',
         orientation: 'portrait-primary',
-        scope: '/agrofusion/',
-        start_url: '/agrofusion/',
+        scope: '/agrofusionTest/',
+        start_url: '/agrofusionTest/',
         
         icons: [
           {
