@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "build:prod": "tsc -p tsconfig.prod.json --noEmit && vite build",
     "preview": "vite preview",
+    "lint": "eslint .",
     "docs": "typedoc",
     "test": "jest",
     "test:watch": "jest --watchAll"
