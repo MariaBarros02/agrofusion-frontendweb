@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarItem,
@@ -25,11 +26,101 @@ import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Módulo de componentes de navegación lateral.
+ * Contiene el sidebar principal de la aplicación con menús y submenús.
+ * 
+ * @module NavigationComponents
+ */
+
+/**
+ * Props del componente NavSideBar.
+ * 
+ * @interface NavSideBarProps
+ * @description
+ * Configuración para controlar la visibilidad y comportamiento del sidebar.
+ */
 interface NavSideBarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * Componente de barra de navegación lateral (sidebar).
+ * 
+ * @component NavSideBar
+ * @description
+ * Sidebar principal de la aplicación que proporciona navegación a todas las secciones.
+ * Es responsivo: se oculta en móvil y se muestra como panel deslizable.
+ * 
+ * Características:
+ * - Diseño responsivo (móvil/desktop)
+ * - Submenú colapsable para sección de administración
+ * - Resaltado automático de ruta activa
+ * - Integración con autenticación (logout)
+ * - Internacionalización (i18n)
+ * - Tema oscuro/claro
+ * - Scroll personalizado con estilos cross-browser
+ * - Controles de tema e idioma integrados
+ * 
+ * Estructura:
+ * - Logo con botón de cierre en móvil
+ * - Items de navegación principales
+ * - Submenú de administración (colapsable)
+ * - Footer con ThemeToggle y LanguageSwitcher
+ * 
+ * @param {NavSideBarProps} props - Propiedades del componente
+ * @param {boolean} props.isOpen - Estado de visibilidad en móvil
+ * @param {() => void} props.onClose - Callback para cerrar el sidebar
+ * 
+ * @returns {JSX.Element} Barra de navegación lateral
+ * 
+ * @example
+ * ```tsx
+ * // Uso en layout principal
+ * import { NavSideBar } from './components/NavSideBar';
+ * import { useState } from 'react';
+ * 
+ * function AppLayout({ children }) {
+ *   const [sidebarOpen, setSidebarOpen] = useState(false);
+ *   
+ *   return (
+ *     <div className="flex">
+ *       <NavSideBar 
+ *         isOpen={sidebarOpen}
+ *         onClose={() => setSidebarOpen(false)}
+ *       />
+ *       <main className="flex-1">
+ *         <button onClick={() => setSidebarOpen(true)}>
+ *           Abrir menú
+ *         </button>
+ *         {children}
+ *       </main>
+ *     </div>
+ *   );
+ * }
+ * ```
+ * 
+ * @example
+ * ```tsx
+ * // Integración con AppLayoutSB
+ * import { NavSideBar } from './components/NavSideBar';
+ * 
+ * function AppLayoutSB({ children, sidebarOpen, setSidebarOpen }) {
+ *   return (
+ *     <div className="flex">
+ *       <NavSideBar 
+ *         isOpen={sidebarOpen}
+ *         onClose={() => setSidebarOpen(false)}
+ *       />
+ *       <div className="flex-1 p-4">
+ *         {children}
+ *       </div>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
@@ -62,11 +153,22 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
   const logoutItem =
     "font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors dark:text-gray-300 " +
     "[&>svg]:text-red-600 hover:[&>svg]:!text-red-700";
-
   /**
    * Cierra la sesión del usuario.
-   * Intenta invalidar el token en el backend y limpia el estado local
-   * independientemente del resultado de la red.
+   * 
+   * @async
+   * @function logout
+   * @description
+   * Realiza el proceso completo de logout:
+   * 1. Intenta invalidar el token en el backend (logoutService)
+   * 2. Limpia el store de autenticación local
+   * 3. Elimina datos persistentes de localStorage
+   * 4. Redirige al login
+   * 
+   * El bloque try-catch asegura que incluso si falla la comunicación
+   * con el backend, se limpia el estado local y se redirige al usuario.
+   * 
+   * @throws {Error} Error del backend (capturado y logueado)
    */
   const logout = async () => {
     try {
@@ -108,8 +210,9 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           "
         >
           {/* LOGO */}
+          <Link to="/dashboard">
           <SidebarLogo
-            href="/dashboard"
+            href="#"
             img="/logoAgrofusion-removebg2.png"
             imgAlt="AgroFusion logo"
           >
@@ -123,6 +226,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               </button>
             </div>
           </SidebarLogo>
+          </Link>
 
           {/* ITEMS */}
           <SidebarItems
@@ -142,13 +246,14 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             [&::-webkit-scrollbar-button]:h-0"
           >
             <SidebarItemGroup>
+              <Link to="/profile">
               <SidebarItem
-                href="/profile"
                 icon={FaRegUser}
                 className={`${baseItem} ${isActive("/profile") ? activeItem : ""}`}
               >
                 {t("nav.profile")}
               </SidebarItem>
+              </Link>
 
               {/* ADMIN HEADER */}
               <button
@@ -172,8 +277,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               {/* SUBMENU */}
               {adminOpen && (
                 <div className="mt-1 space-y-1 ">
+                  <Link to="/administration/projects">
                   <SidebarItem
-                    href="/administration/projects"
                     icon={LuFolderKanban}
                     className={`${subItem} ${
                       isActive("/administration/projects") ? activeItem : ""
@@ -181,9 +286,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   >
                     {t("nav.projects")}
                   </SidebarItem>
-
-                  <SidebarItem
-                    href="/administration/modules"
+                  </Link>
+                  
+                  <Link to="/administration/modules">
+                   <SidebarItem
                     icon={LuFolderGit2}
                     className={`${subItem} ${
                       isActive("/administration/modules") ? activeItem : ""
@@ -192,8 +298,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     {t("nav.modules")}
                   </SidebarItem>
 
-                  <SidebarItem
-                    href="/administration/submodules"
+                  </Link>
+                 <Link to="/administration/submodules">
+                 <SidebarItem
+                    
                     icon={LiaCubesSolid}
                     className={`${subItem} ${
                       isActive("/administration/submodules") ? activeItem : ""
@@ -201,9 +309,11 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   >
                     {t("nav.submodules")}
                   </SidebarItem>
-
+                 </Link>
+                  
+                  <Link to="/administration/roles">
                   <SidebarItem
-                    href="/administration/roles"
+                    
                     icon={FiShield}
                     className={`${subItem} ${
                       isActive("/administration/roles") ? activeItem : ""
@@ -212,8 +322,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     {t("nav.roles")}
                   </SidebarItem>
 
-                  <SidebarItem
-                    href="/administration/users"
+                  </Link>
+                  <Link to="/administration/users">
+                   <SidebarItem
+                    
                     icon={LuUsers}
                     className={`${subItem} ${
                       isActive("/administration/users") ? activeItem : ""
@@ -221,20 +333,23 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   >
                     {t("nav.users")}
                   </SidebarItem>
+                  </Link>
+                 
 
                 </div>
               )}
-
+              <Link to="/check">
               <SidebarItem
-                href="/check"
                 icon={FiClipboard}
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
               >
                 {t("nav.check")}
               </SidebarItem>
-
+              </Link>
+              
+              <Link to="/digitalSignature">
               <SidebarItem
-                href="/digitalSignature"
+                
                 icon={GoPencil}
                 className={`${baseItem} ${
                   isActive("/digitalSignature") ? activeItem : ""
@@ -242,15 +357,19 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               >
                 {t("nav.digitalSig")}
               </SidebarItem>
-
-              <SidebarItem
-                href="/audit"
+              </Link>
+              
+              <Link to="/audit">
+               <SidebarItem
+                
                 icon={FiBookOpen}
                 className={`${baseItem} ${isActive("/audit") ? activeItem : ""}`}
               >
                 {t("nav.audit")}
               </SidebarItem>
-
+              </Link>
+             
+              
               <SidebarItem
                 onClick={() => logout()}
                 icon={LuLogOut}
