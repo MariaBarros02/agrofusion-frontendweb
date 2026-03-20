@@ -10,7 +10,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-import { createProjectService } from "../../services/agrofusion/auth.service";
+//import { createProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -80,14 +80,14 @@ const AddProject = () => {
       setLoading(true);
       setAlert(null);
       try {
-        await createProjectService({
-          ...values,
-        });
-        setAlert({
-          message: "project.create.success",
-          type: "success",
-          to: "/administration/projects",
-        });
+        // await createProjectService({
+        //   ...values,
+        // });
+        // setAlert({
+        //   message: "project.create.success",
+        //   type: "success",
+        //   to: "/administration/projects",
+        // });
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
@@ -261,11 +261,11 @@ const AddProject = () => {
           </div>
 
             <div className="mb-6">
-              <Label className="mb-2 block">
+              <Label className="block mb-2">
                 {t("project.create.status")}
               </Label>
 
-              <div className="inline-flex items-center gap-3 px-4 py-2 border rounded-xl border-gray-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-800/50">
+              <div className="inline-flex items-center gap-3 px-4 py-2 border border-gray-300 rounded-xl dark:border-gray-500 bg-gray-50 dark:bg-gray-800/50">
                 <ToggleSwitch
                   checked={formik.values.is_active}
                   label={formik.values.is_active ? t("common.active") : t("common.inactive")}
@@ -282,7 +282,7 @@ const AddProject = () => {
                 {t("project.create.imageUpload")} <span className="text-red-500">*</span>
               </Label>
               <div
-                className="flex flex-col items-center justify-center p-6 mt-1 border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                className="flex flex-col items-center justify-center p-6 mt-1 border-2 border-gray-300 border-dashed rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
               >
                 <FiUploadCloud className="w-10 h-10 mb-2 text-blue-500" />
                 <input
@@ -302,7 +302,7 @@ const AddProject = () => {
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="max-h-24 mt-2 rounded"
+                    className="mt-2 rounded max-h-24"
                   />
                 )}
               </div>
@@ -321,7 +321,7 @@ const AddProject = () => {
               {formik.values.modules.map((_, index) => (
                 <div
                   key={index}
-                  className="p-4 mb-4 border rounded-lg border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                  className="p-4 mb-4 border border-gray-200 rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                 >
                   <h4 className="mb-3 font-medium text-gray-700 dark:text-gray-300">
                     {t("project.create.module")} {index + 1}
@@ -463,7 +463,7 @@ const AddProject = () => {
                 color="blue"
                 disabled={loading || !formik.isValid}
               >
-                <FiSave className="mr-2 inline" size={18} />
+                <FiSave className="inline mr-2" size={18} />
                 {t("example.save")}
               </Button>
             </div>
