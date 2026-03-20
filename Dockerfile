@@ -12,7 +12,9 @@ RUN npm run build:prod
 # ETAPA 2: Servir con Nginx en puerto 3000
 FROM nginx:alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/agrofusionTest
+
+COPY --from=builder /app/dist /usr/share/nginx/html/agrofusionTest
 
 RUN echo 'server { \
     listen 3000; \
@@ -20,9 +22,13 @@ RUN echo 'server { \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
+    location /agrofusionTest/ {
+        try_files $uri $uri/ /agrofusionTest/index.html;
+    }
+
+    location / {
+        return 404;
+    }
     \
     # Para archivos estáticos (JS, CSS, imágenes) \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2|json)$ { \
