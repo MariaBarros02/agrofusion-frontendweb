@@ -172,7 +172,7 @@ const UsersList = () => {
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-      {/* filtros - siempre visibles */}
+      {/* filtros */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex gap-2">
           <div className="w-72">
@@ -185,7 +185,6 @@ const UsersList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -204,7 +203,6 @@ const UsersList = () => {
               <option value="BLOCKED"> {t("common.blocked")}</option>
             </Select>
           </div>
-
           <div className="max-w-md">
             <Label className="text-xs">{t("users.associateRole")}</Label>
             <Select
@@ -214,7 +212,6 @@ const UsersList = () => {
               onChange={(e) => setRol(e.target.value)}
             >
               <option value="">{t("users.roles")}</option>
-
               {basicRoles.map((role) => (
                 <option key={role.role_id} value={role.role_id}>
                   {role.name}
@@ -223,12 +220,10 @@ const UsersList = () => {
             </Select>
           </div>
         </div>
-
         <div className="flex items-end justify-end gap-2 mt-2 md:w-1/2 md:mt-0">
           <Button size="xs" onClick={() => getUsers(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -240,7 +235,6 @@ const UsersList = () => {
           >
             {t("common.filterReset")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
