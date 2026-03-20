@@ -24,6 +24,7 @@ import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
 import { useNavigate } from "react-router-dom";
+import logoAgrofusionRemovebg2 from "/logoAgrofusion-removebg2.png"
 
 /**
  * Módulo de componentes de navegación lateral.
