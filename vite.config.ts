@@ -17,24 +17,24 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
-        scope: '/agrofusionTest/',
-        start_url: '/agrofusionTest/',
+        scope: '/',
+        start_url: '/',
         
         icons: [
           {
-            src: '/agrofusionTest/manifest-192x192.png',
+            src: '/manifest-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/agrofusionTest/manifest-512x512.png',
+            src: '/manifest-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/agrofusionTest/manifest-512x512.png',
+            src: '/manifest-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -44,7 +44,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-        navigateFallback: '/agrofusionTest/index.html',
+        navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
@@ -65,7 +65,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: "/agrofusionTest/",
+  base: "/",
   server: {
     allowedHosts: ['inmero.co', 'www.inmero.co'] 
   },
