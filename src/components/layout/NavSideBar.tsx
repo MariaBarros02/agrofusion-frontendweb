@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarItem,
@@ -210,9 +209,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           "
         >
           {/* LOGO */}
-          <Link to="/dashboard">
           <SidebarLogo
             href="#"
+            onClick={() => navigate("/dashboard")}
+
             img="/logoAgrofusion-removebg2.png"
             imgAlt="AgroFusion logo"
           >
@@ -226,7 +226,6 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               </button>
             </div>
           </SidebarLogo>
-          </Link>
 
           {/* ITEMS */}
           <SidebarItems
@@ -246,14 +245,16 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             [&::-webkit-scrollbar-button]:h-0"
           >
             <SidebarItemGroup>
-              <Link to="/profile">
+              
               <SidebarItem
                 icon={FaRegUser}
                 className={`${baseItem} ${isActive("/profile") ? activeItem : ""}`}
+                onClick={() => navigate("/profile")}
+
               >
                 {t("nav.profile")}
               </SidebarItem>
-              </Link>
+           
 
               {/* ADMIN HEADER */}
               <button
@@ -277,79 +278,78 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               {/* SUBMENU */}
               {adminOpen && (
                 <div className="mt-1 space-y-1 ">
-                  <Link to="/administration/projects">
+                  
                   <SidebarItem
                     icon={LuFolderKanban}
                     className={`${subItem} ${
                       isActive("/administration/projects") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/projects")}
                   >
                     {t("nav.projects")}
                   </SidebarItem>
-                  </Link>
-                  
-                  <Link to="/administration/modules">
+                
                    <SidebarItem
                     icon={LuFolderGit2}
                     className={`${subItem} ${
                       isActive("/administration/modules") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/models")}
+
                   >
                     {t("nav.modules")}
                   </SidebarItem>
 
-                  </Link>
-                 <Link to="/administration/submodules">
                  <SidebarItem
                     
                     icon={LiaCubesSolid}
                     className={`${subItem} ${
                       isActive("/administration/submodules") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/submodules")}
+
                   >
                     {t("nav.submodules")}
                   </SidebarItem>
-                 </Link>
                   
-                  <Link to="/administration/roles">
                   <SidebarItem
                     
                     icon={FiShield}
                     className={`${subItem} ${
                       isActive("/administration/roles") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/roles")}
+
                   >
                     {t("nav.roles")}
                   </SidebarItem>
 
-                  </Link>
-                  <Link to="/administration/users">
                    <SidebarItem
                     
                     icon={LuUsers}
                     className={`${subItem} ${
                       isActive("/administration/users") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/users")}
+
                   >
                     {t("nav.users")}
                   </SidebarItem>
-                  </Link>
                  
 
                 </div>
               )}
-              <Link to="/check">
               <SidebarItem
                 icon={FiClipboard}
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
+                onClick={() => navigate("/check")}
+
               >
                 {t("nav.check")}
               </SidebarItem>
-              </Link>
               
-              <Link to="/digitalSignature">
               <SidebarItem
-                
+                onClick={() => navigate("/digitalSignature")}
                 icon={GoPencil}
                 className={`${baseItem} ${
                   isActive("/digitalSignature") ? activeItem : ""
@@ -357,17 +357,15 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               >
                 {t("nav.digitalSig")}
               </SidebarItem>
-              </Link>
               
-              <Link to="/audit">
                <SidebarItem
-                
+                onClick={() => navigate("/audit")}
+
                 icon={FiBookOpen}
                 className={`${baseItem} ${isActive("/audit") ? activeItem : ""}`}
               >
                 {t("nav.audit")}
               </SidebarItem>
-              </Link>
              
               
               <SidebarItem
