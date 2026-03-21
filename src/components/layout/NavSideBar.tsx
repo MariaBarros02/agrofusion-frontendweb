@@ -112,7 +112,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           {/* LOGO */}
           <SidebarLogo
             href="#"
-            onClick={() => navigate(`${basename}/dashboard`)}
+            onClick={(e) => { e.preventDefault(); navigate(`${basename}/dashboard`)}}
             img={logoAgrofusionRemovebg2}            
             imgAlt="AgroFusion logo"
           >
@@ -147,7 +147,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             <SidebarItemGroup>
               <SidebarItem
               
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate(`${basename}/profile`)}
                 icon={FaRegUser}
                 className={`${baseItem} ${isActive("/profile") ? activeItem : ""}`}
               >
