@@ -294,7 +294,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/modules") ? activeItem : ""
                     }`}
-                    onClick={() => navigate("/administration/models")}
+                    onClick={() => navigate("/administration/modules")}
 
                   >
                     {t("nav.modules")}
