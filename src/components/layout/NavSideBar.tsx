@@ -145,7 +145,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           >
             <SidebarItemGroup>
               <SidebarItem
-                href="/profile"
+              
+                onClick={() => navigate("/profile")}
                 icon={FaRegUser}
                 className={`${baseItem} ${isActive("/profile") ? activeItem : ""}`}
               >
