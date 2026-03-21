@@ -112,7 +112,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           {/* LOGO */}
           <SidebarLogo
             href="#"
-            onClick={(e) => { e.preventDefault(); navigate(`${basename}/dashboard`)}}
+            onClick={(e) => { e.preventDefault(); navigate(`/dashboard`)}}
             img={logoAgrofusionRemovebg2}            
             imgAlt="AgroFusion logo"
           >
@@ -177,7 +177,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               {adminOpen && (
                 <div className="mt-1 space-y-1 ">
                   <SidebarItem
-                    href="/administration/projects"
+                    onClick={() => navigate(`${basename}/administration/projects`)}
                     icon={LuFolderKanban}
                     className={`${subItem} ${
                       isActive("/administration/projects") ? activeItem : ""
@@ -187,7 +187,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/administration/modules"
+                    onClick={() => navigate(`${basename}/administration/modules`)}
                     icon={LuFolderGit2}
                     className={`${subItem} ${
                       isActive("/administration/modules") ? activeItem : ""
@@ -197,7 +197,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/administration/submodules"
+                    onClick={() => navigate(`${basename}/administration/submodules`)}
                     icon={LiaCubesSolid}
                     className={`${subItem} ${
                       isActive("/administration/submodules") ? activeItem : ""
@@ -207,7 +207,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/administration/roles"
+                    onClick={() => navigate(`${basename}/administration/roles`)}
                     icon={FiShield}
                     className={`${subItem} ${
                       isActive("/administration/roles") ? activeItem : ""
@@ -217,7 +217,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                   </SidebarItem>
 
                   <SidebarItem
-                    href="/administration/users"
+                    onClick={() => navigate(`${basename}/administration/users`)}
+
                     icon={LuUsers}
                     className={`${subItem} ${
                       isActive("/administration/users") ? activeItem : ""
@@ -230,7 +231,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               )}
 
               <SidebarItem
-                href="/check"
+                onClick={() => navigate(`${basename}/check`)}
+
                 icon={FiClipboard}
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
               >
@@ -238,7 +240,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               </SidebarItem>
 
               <SidebarItem
-                href="/digitalSignature"
+                onClick={() => navigate(`${basename}/digitalSignature`)}
                 icon={GoPencil}
                 className={`${baseItem} ${
                   isActive("/digitalSignature") ? activeItem : ""
@@ -248,7 +250,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               </SidebarItem>
 
               <SidebarItem
-                href="/audit"
+                onClick={() => navigate(`${basename}/audit`)}
+
                 icon={FiBookOpen}
                 className={`${baseItem} ${isActive("/audit") ? activeItem : ""}`}
               >
