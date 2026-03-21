@@ -36,6 +36,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
   const { pathname } = useLocation();
   const authStore = useAuthStore();
   const navigate = useNavigate();
+  const basename = import.meta.env.VITE_BASENAME || ""
 
   // helpers
   const isActive = (path: string) => pathname.startsWith(path);
@@ -111,7 +112,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
           {/* LOGO */}
           <SidebarLogo
             href="#"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate(`${basename}/dashboard`)}
             img={logoAgrofusionRemovebg2}            
             imgAlt="AgroFusion logo"
           >
