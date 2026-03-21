@@ -110,7 +110,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
         >
           {/* LOGO */}
           <SidebarLogo
-            href="/dashboard"
+            href="#"
+            onClick={() => navigate("/dashboard")}
             img={logoAgrofusionRemovebg2}            
             imgAlt="AgroFusion logo"
           >
