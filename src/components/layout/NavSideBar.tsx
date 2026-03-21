@@ -210,7 +210,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
         >
           {/* LOGO */}
           <SidebarLogo
-            href="#"
+            href="/dashboard"
             onClick={() => navigate("/dashboard")}
 
             img="/logoAgrofusion-removebg2.png"

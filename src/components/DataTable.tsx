@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -121,6 +121,24 @@ export default function DataTable<T extends Record<string, any>>({
   const [openStatusRowIndex, setOpenStatusRowIndex] = useState<number | null>(
     null,
   );
+  const statusPopoverRef = useRef<HTMLTableCellElement | null>(null);
+
+  useEffect(() => {
+    if (openStatusRowIndex === null) return;
+
+    const closeIfOutside = (event: PointerEvent) => {
+      const el = statusPopoverRef.current;
+      if (!el) return;
+      const target = event.target;
+      if (target instanceof Node && !el.contains(target)) {
+        setOpenStatusRowIndex(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    return () =>
+      document.removeEventListener("pointerdown", closeIfOutside, true);
+  }, [openStatusRowIndex]);
 
   return (
     <div className="w-full space-y-4">
@@ -194,10 +212,16 @@ export default function DataTable<T extends Record<string, any>>({
                       return (
                         <td
                           key={String(col.key)}
+                          ref={
+                            openStatusRowIndex === rowIndex
+                              ? statusPopoverRef
+                              : undefined
+                          }
                           className="relative px-3 py-3 text-center"
                         >
                           <span className="inline-flex justify-center">
                           <button
+                            type="button"
                             onClick={() =>
                               setOpenStatusRowIndex(
                                 openStatusRowIndex === rowIndex
@@ -221,6 +245,7 @@ export default function DataTable<T extends Record<string, any>>({
                                 ?.filter((status) => status !== value)
                                 .map((status) => (
                                   <button
+                                    type="button"
                                     key={status}
                                     className="block w-full px-3 py-2 text-left rounded-lg hover:bg-gray-100"
                                     onClick={() => {
