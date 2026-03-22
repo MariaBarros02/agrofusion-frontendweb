@@ -225,7 +225,7 @@
             "allModules": "All modules",
             "createdAt": "Date",
             "responsible": "Responsible",
-            "searchPlaceholder": "Search by name or code",
+            "searchPlaceholder": "Search by name, code, or description",
             "loading": "Loading submodules...",
             "loadError": "Error loading submodules",
             "deactivateTitle": "Deactivate submodule",

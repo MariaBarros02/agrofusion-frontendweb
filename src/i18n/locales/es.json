@@ -228,7 +228,7 @@
             "allModules": "Todos los módulos",
             "createdAt": "Fecha",
             "responsible": "Responsable",
-            "searchPlaceholder": "Buscar por nombre o código",
+            "searchPlaceholder": "Buscar por nombre, código o descripción",
             "loading": "Cargando submódulos...",
             "loadError": "Error al cargar submódulos",
             "deactivateTitle": "Desactivar submódulo",
