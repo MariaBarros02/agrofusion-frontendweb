@@ -68,6 +68,54 @@
         "emailGes": "Gestor de correos",
         "roles":"Roles / Permisos"
     },
+    "kms": {
+        "genericError": "No se pudo completar la operación. Revisa permisos y datos.",
+        "home": {
+            "title": "KMS — Claves y firmas",
+            "subtitle": "Formularios conectados al microservicio de auditoría. Elige una acción.",
+            "go": "Continuar",
+            "cardCreateKey": "Crear clave criptográfica",
+            "cardCreateKeyDesc": "Genera un par de claves en el proyecto indicado (requiere permiso 026).",
+            "cardCert": "Registrar certificado X.509",
+            "cardCertDesc": "Asocia un certificado PEM a una clave existente (permiso 032).",
+            "cardVerify": "Verificar firma digital",
+            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada (permiso 028)."
+        },
+        "createKey": {
+            "title": "Crear clave criptográfica",
+            "projectId": "ID del proyecto (UUID)",
+            "alias": "Alias de la clave",
+            "algorithm": "Algoritmo",
+            "purpose": "Propósito",
+            "validToOptional": "Válida hasta (opcional)",
+            "submit": "Crear clave"
+        },
+        "cert": {
+            "title": "Registrar certificado",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Entidad emisora (Issuer)",
+            "keyKind": "Tipo de clave (referencia)",
+            "keyKindHint": "Informativo: la clave real la define el registro en KMS.",
+            "serial": "Número de serie",
+            "validFrom": "Válido desde",
+            "validTo": "Válido hasta",
+            "keyId": "ID de clave KMS",
+            "fileOrPaste": "Certificado PEM",
+            "uploadPem": "Subir archivo .pem / .crt",
+            "confirm": "Confirmar",
+            "success": "Certificado registrado correctamente."
+        },
+        "verify": {
+            "title": "Verificar firma digital",
+            "documentHash": "Hash del documento",
+            "hashAlg": "Algoritmo de hash",
+            "signatureIdOptional": "ID de firma (opcional)",
+            "keyIdOptional": "ID de clave (opcional)",
+            "signatureB64": "Firma en Base64",
+            "uploadSig": "Subir archivo de firma",
+            "confirm": "Confirmar"
+        }
+    },
     "login":{
         "login": "Iniciar sesión",
         "email": "Correo electrónico",

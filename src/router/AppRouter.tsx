@@ -25,6 +25,10 @@ import ViewRole from "../pages/roles/ViewRole";
 import RoutesWrapper from "./RoutesWrapper";
 import EditRole from "../pages/roles/EditRole";
 import CreateRole from "../pages/roles/CreateRole";
+import KmsHome from "../pages/kms/KmsHome";
+import RegisterCertificate from "../pages/kms/RegisterCertificate";
+import VerifySignature from "../pages/kms/VerifySignature";
+import CreateKey from "../pages/kms/CreateKey";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -136,6 +140,14 @@ export function AppRouter() {
           <Route path="/administration/role/:roleId" element={<ViewRole />} />
           <Route path="/administration/roles/edit-role/:roleId" element={<EditRole/>}/>
           <Route path="/administration/roles/create-role" element={<CreateRole/>}/>
+
+          {/* KMS (auditoría) */}
+          <Route path="/kms" element={<KmsHome />} />
+          <Route path="/kms/crear-clave" element={<CreateKey />} />
+          <Route path="/kms/certificado" element={<RegisterCertificate />} />
+          <Route path="/kms/verificar-firma" element={<VerifySignature />} />
+          {/* Alias: enlace antiguo del menú */}
+          <Route path="/digitalSignature" element={<KmsHome />} />
         </Route>
 
       </Routes>

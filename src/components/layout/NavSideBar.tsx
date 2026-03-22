@@ -234,10 +234,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               </SidebarItem>
 
               <SidebarItem
-                href="/digitalSignature"
+                href="/kms"
                 icon={GoPencil}
                 className={`${baseItem} ${
-                  isActive("/digitalSignature") ? activeItem : ""
+                  isActive("/kms") || isActive("/digitalSignature") ? activeItem : ""
                 }`}
               >
                 {t("nav.digitalSig")}

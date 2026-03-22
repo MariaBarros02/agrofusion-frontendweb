@@ -67,6 +67,54 @@
         "emailGes": "Email manager",
         "roles": "Roles / Permissions"
     },
+    "kms": {
+        "genericError": "Operation failed. Check permissions and input.",
+        "home": {
+            "title": "KMS — Keys and signatures",
+            "subtitle": "Forms wired to the audit microservice. Pick an action.",
+            "go": "Continue",
+            "cardCreateKey": "Create cryptographic key",
+            "cardCreateKeyDesc": "Generate a key pair for the given project (requires permission 026).",
+            "cardCert": "Register X.509 certificate",
+            "cardCertDesc": "Attach a PEM certificate to an existing key (permission 032).",
+            "cardVerify": "Verify digital signature",
+            "cardVerifyDesc": "Validate hash and signature (permission 028)."
+        },
+        "createKey": {
+            "title": "Create cryptographic key",
+            "projectId": "Project ID (UUID)",
+            "alias": "Key alias",
+            "algorithm": "Algorithm",
+            "purpose": "Purpose",
+            "validToOptional": "Valid until (optional)",
+            "submit": "Create key"
+        },
+        "cert": {
+            "title": "Register certificate",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Issuing entity (Issuer)",
+            "keyKind": "Key type (reference)",
+            "keyKindHint": "Informational: the real key is the KMS key record.",
+            "serial": "Serial number",
+            "validFrom": "Valid from",
+            "validTo": "Valid to",
+            "keyId": "KMS key ID",
+            "fileOrPaste": "Certificate PEM",
+            "uploadPem": "Upload .pem / .crt file",
+            "confirm": "Confirm",
+            "success": "Certificate registered successfully."
+        },
+        "verify": {
+            "title": "Verify digital signature",
+            "documentHash": "Document hash",
+            "hashAlg": "Hash algorithm",
+            "signatureIdOptional": "Signature ID (optional)",
+            "keyIdOptional": "Key ID (optional)",
+            "signatureB64": "Signature (Base64)",
+            "uploadSig": "Upload signature file",
+            "confirm": "Confirm"
+        }
+    },
     "login": {
         "login": "Login",
         "email": "Email",
