@@ -1,0 +1,46 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.(jsx|js|ts|tsx)$",
+    "excludePattern": "(node_modules/|docs/|dist/|coverage/|.*\\.test\\.(jsx|js|ts|tsx)$)"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "better-docs/component",
+    "better-docs/typescript"
+  ],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "better-docs": {
+      "name": "Agrofusion Frontend Web",
+      "logo": "src/assets/logo.png",
+      "title": "Agrofusion Documentation",
+      "css": "src/styles/docs.css",
+      "trackingCode": "",
+      "navigation": [
+        {
+          "label": "Inicio",
+          "href": "index.html"
+        },
+        {
+          "label": "GitHub",
+          "href": "https://github.com/tu-usuario/agrofusion-frontendweb"
+        }
+      ]
+    }
+  },
+  "opts": {
+    "destination": "./docs/",
+    "encoding": "utf8",
+    "recurse": true,
+    "verbose": true,
+    "template": "node_modules/better-docs",
+    "readme": "README.md",
+    "tutorials": "./tutorials"
+  }
+}
