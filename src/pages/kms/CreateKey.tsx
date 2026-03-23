@@ -47,13 +47,9 @@ export default function CreateKey() {
 
   return (
     <AppLayoutSB>
-      <div className="max-w-xl mx-auto">
-        <TitleTarget title="kms.createKey.title" />
-
-        <form
-          onSubmit={submit}
-          className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-700"
-        >
+      <TitleTarget title="kms.createKey.title" />
+      <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+        <form onSubmit={submit} className="max-w-4xl mx-auto">
           {error && (
             <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-200">
               {error}

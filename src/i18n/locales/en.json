@@ -74,11 +74,11 @@
             "subtitle": "Forms wired to the audit microservice. Pick an action.",
             "go": "Continue",
             "cardCreateKey": "Create cryptographic key",
-            "cardCreateKeyDesc": "Generate a key pair for the given project (requires permission 026).",
+            "cardCreateKeyDesc": "Generate a key pair for the given project.",
             "cardCert": "Register X.509 certificate",
-            "cardCertDesc": "Attach a PEM certificate to an existing key (permission 032).",
+            "cardCertDesc": "Attach a PEM certificate to an existing key.",
             "cardVerify": "Verify digital signature",
-            "cardVerifyDesc": "Validate hash and signature (permission 028)."
+            "cardVerifyDesc": "Validate hash and signature against a stored key or signature."
         },
         "createKey": {
             "title": "Create cryptographic key",

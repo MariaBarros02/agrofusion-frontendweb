@@ -75,11 +75,11 @@
             "subtitle": "Formularios conectados al microservicio de auditoría. Elige una acción.",
             "go": "Continuar",
             "cardCreateKey": "Crear clave criptográfica",
-            "cardCreateKeyDesc": "Genera un par de claves en el proyecto indicado (requiere permiso 026).",
+            "cardCreateKeyDesc": "Genera un par de claves en el proyecto indicado.",
             "cardCert": "Registrar certificado X.509",
-            "cardCertDesc": "Asocia un certificado PEM a una clave existente (permiso 032).",
+            "cardCertDesc": "Asocia un certificado PEM a una clave existente.",
             "cardVerify": "Verificar firma digital",
-            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada (permiso 028)."
+            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada."
         },
         "createKey": {
             "title": "Crear clave criptográfica",
