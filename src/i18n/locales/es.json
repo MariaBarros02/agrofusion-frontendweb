@@ -573,8 +573,8 @@
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
 
         "passwordsMustMatch": "Las contraseñas no coinciden.",
-        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres."
-        
+        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres.",
+        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres."
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
