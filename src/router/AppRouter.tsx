@@ -26,6 +26,9 @@ import RoutesWrapper from "./RoutesWrapper";
 import EditRole from "../pages/roles/EditRole";
 import CreateRole from "../pages/roles/CreateRole";
 import { ModuleRouteGuard } from "./ModuleRouteGuard";
+
+import AuditList from "../pages/audit/AuditList";
+import ErrorList from "../pages/audit/ErrorList";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -120,6 +123,8 @@ export function AppRouter() {
           <Route path="/" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
           <Route path="/dashboard" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
           <Route path="/profile" element={<ModuleRouteGuard moduleCode="PROFILE"><Profile /></ModuleRouteGuard>} />
+          <Route path="/audit" element={<ModuleRouteGuard moduleCode="AUDIT"><AuditList /></ModuleRouteGuard>}/>
+          <Route path="audit/errors" element={<ModuleRouteGuard moduleCode="AUDIT"><ErrorList /></ModuleRouteGuard>}/>
 
           {/* ADMINISTRATION */}
           <Route path="/administration/users" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><UsersList /></ModuleRouteGuard>} />

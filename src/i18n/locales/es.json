@@ -41,7 +41,14 @@
         "create": "Crear registro",
         "update": "Actualizar registro",
         "delete": "Eliminar registro",
-        "read": "Vizualizar registro(s)"
+        "read": "Vizualizar registro(s)",
+        "success": "Exitoso",
+        "rejected": "Rechazado",
+        "High": "Alto",
+        "applyFilters": "Aplicar filtros",
+        "resetFilters": "Reiniciar"
+        
+
         
     },
     "theme":{
@@ -591,5 +598,99 @@
     "submoduleInactive": {
         "title": "Submódulo inactivo",
         "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
-    }
+    },
+
+    "audit": {
+  "title": "Auditoría",
+  "description": "Consulta y validación de comprobantes generados por las integraciones del sistema",
+
+  "loading": "Actualizando datos de auditoría...",
+  "error": "Error cargando auditoría",
+  "noData": "No hay registros de auditoría",
+  "pagination": "Auditoría",
+
+  "columns": {
+    "id": "ID Evento",
+    "origin": "Origen",
+    "result": "Resultado",
+    "date": "Fecha/Hora",
+    "action": "Acción",
+    "user": "Usuario",
+    "message": "Mensaje"
+  },
+
+  "messages": {
+    "tokenRefreshed": "Token renovado",
+    "sessionCreated": "Sesión iniciada",
+    "loginSuccess": "Inicio de sesión exitoso",
+    "passwordResetCompleted": "Contraseña restablecida",
+    "passwordResetRequested": "Solicitud de cambio de contraseña",
+    "userCreated": "Usuario creado",
+    "userUpdated": "Usuario actualizado",
+    "userDeleted": "Usuario eliminado",
+    "default": "Evento registrado"
+  },
+
+  "filters": {
+  "search": "Buscar",
+  "searchPlaceholder": "Buscar por ID",
+  "date": "Fecha",
+  "dateRange": "Rango",
+  "user": "Usuario",
+  "userPlaceholder": "Buscar usuario...",
+  "origin": "Origen",
+  "result": "Resultado",
+  "event": "Evento",
+  "all": "Todos"
+},
+    "switch": {
+    "audit": "Auditoría AgroFusión",
+    "errors": "Errores proyectos externos"
+  }
+},
+
+    "externalErrors": {
+  "title": "Errores Proyectos Externos",
+  "description": "Consulta de errores registrados en integraciones externas",
+
+  "loading": "Actualizando datos de errores...",
+  "error": "Error cargando errores",
+  "noData": "No hay registros de errores",
+  "pagination": "Errores",
+
+  "columns": {
+    "id": "ID Error",
+    "project": "Proyecto",
+    "severity": "Severidad",
+    "component": "Componente",
+    "code": "Código",
+    "date": "Fecha/Hora",
+    "message": "Mensaje"
+  },
+
+  "severity": {
+    "high": "Alto",
+    "medium": "Medio",
+    "low": "Bajo"
+  },
+
+  "messages": {
+    "ssoTokenError": "Fallo generación token SSO",
+    "passwordChangeError": "Fallo cambio de contraseña",
+    "loginError": "Fallo inicio de sesión"
+  },
+
+  "filters": {
+  "search": "Buscar",
+  "searchPlaceholder": "Buscar...",
+  "date": "Fecha",
+  "dateRange": "Rango",
+  "project": "Proyecto",
+  "projectPlaceholder": "Proyecto...",
+  "severity": "Severidad",
+  "component": "Componente",
+  "code": "Código",
+  "all": "Todos"
+}
+}
 }

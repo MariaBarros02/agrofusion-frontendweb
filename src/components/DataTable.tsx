@@ -72,6 +72,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   onPageChange: (page: number) => void;
   paginationText?: string;
+  maxVisiblePages?: number;  //Usado en Auditoria
 }
 
 // =============================
@@ -115,7 +116,13 @@ export default function DataTable<T extends Record<string, any>>({
   columns,
   onPageChange,
   paginationText,
+  maxVisiblePages, //Usado en DataTable
 }: DataTableProps<T>) {
+  const maxPages = maxVisiblePages ?? data.total_pages;
+
+  const startPage = Math.max(1, data.page - Math.floor(maxPages / 2));
+  const endPage = Math.min(data.total_pages, startPage + maxPages - 1);
+  
   const { t } = useTranslation();
 
   const [openStatusRowIndex, setOpenStatusRowIndex] = useState<number | null>(
@@ -125,7 +132,7 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
-        <table className="w-full text-sm rounded-2xl">
+        <table className="w-full table-fixed text-sm rounded-2xl">
           <thead className="bg-gray-200 rounded-2xl dark:bg-gray-800">
             <tr className="rounded-2xl">
               {columns.map((col) => (
@@ -315,8 +322,9 @@ export default function DataTable<T extends Record<string, any>>({
             <IoIosArrowBack className="size-4" />
             {t("common.previous")}
           </button>
+          
 
-          {Array.from({ length: data.total_pages }, (_, i) => i + 1).map(
+          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
             (pageNumber) => (
               <button
                 key={pageNumber}
