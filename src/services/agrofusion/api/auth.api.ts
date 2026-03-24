@@ -10,11 +10,10 @@ import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/resp
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
-import type { ProjectListResponse } from "../../../dto/response/projectList-response.dto";
-import type { ModuleListResponse } from "../../../dto/response/moduleList-response.dto";
-import type { SubmoduleListResponse } from "../../../dto/response/submoduleList-response.dto";
+import type { PaginatedProjectsResponse, ProjectListResponse } from "../../../dto/response/projectList-response.dto";
+import type { ModuleListResponse, PaginatedModulesResponse } from "../../../dto/response/moduleList-response.dto";
+import type { PaginatedSubmodulesResponse, SubmoduleListResponse } from "../../../dto/response/submoduleList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
-import type { ResetTokenMap } from "../../orchestrator/authOrchestrator.service";
 import { authAgrofusionAxios } from "./axios";
 import type { listRolesRequest } from "../../../dto/request/listRoles-request.dto";
 import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/response/listRoles-response.dto";
@@ -34,11 +33,16 @@ export const authApi = {
     authAgrofusionAxios.get<ExternalProject[]>("/external-projects"),
 
   /**
-   * Obtiene el listado de todos los proyectos externos (RF-GES-01).
-   * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+   * Obtiene el listado paginado de proyectos externos (RF-GES-01).
+   * Parámetros: page_index, page_size, search?, state?
    */
-  getExternalProjectsList: () =>
-    authAgrofusionAxios.get<ProjectListResponse[]>("/external-projects/list"),
+  getExternalProjectsList: (params?: {
+    page_index?: number;
+    page_size?: number;
+    search?: string;
+    state?: string;
+  }) =>
+    authAgrofusionAxios.get<PaginatedProjectsResponse>("/external-projects/list", { params: params ?? {} }),
 
   /**
    * Actualiza el estado de un proyecto externo (ACTIVE/INACTIVE).
@@ -50,10 +54,21 @@ export const authApi = {
     ),
 
   /**
-   * Obtiene el listado de todos los módulos.
+   * Obtiene el listado paginado de módulos.
+   * Parámetros: page_index, page_size, search?, state?, project_id?
    */
-  getModulesList: () =>
-    authAgrofusionAxios.get<ModuleListResponse[]>("/modules/list"),
+  getModulesList: (params?: {
+    page_index?: number;
+    page_size?: number;
+    search?: string;
+    state?: string;
+    project_id?: string;
+  }) =>
+    authAgrofusionAxios.get<PaginatedModulesResponse>("/modules/list", { params: params ?? {} }),
+
+  /** Opciones de proyectos para el filtro del listado de módulos */
+  getModuleProjectOptions: () =>
+    authAgrofusionAxios.get<{ af_project_id: string; project_code: string | null; project_name: string | null }[]>("/modules/project-options"),
 
   /**
    * Actualiza el estado de un módulo (ACTIVE/INACTIVE).
@@ -65,10 +80,21 @@ export const authApi = {
     ),
 
   /**
-   * Obtiene el listado de todos los submódulos.
+   * Obtiene el listado paginado de submódulos.
+   * Parámetros: page_index, page_size, search?, state?, module_id?
    */
-  getSubmodulesList: () =>
-    authAgrofusionAxios.get<SubmoduleListResponse[]>("/submodules/list"),
+  getSubmodulesList: (params?: {
+    page_index?: number;
+    page_size?: number;
+    search?: string;
+    state?: string;
+    module_id?: string;
+  }) =>
+    authAgrofusionAxios.get<PaginatedSubmodulesResponse>("/submodules/list", { params: params ?? {} }),
+
+  /** Opciones de módulos para el filtro del listado de submódulos */
+  getSubmoduleModuleOptions: () =>
+    authAgrofusionAxios.get<{ module_id: string; module_code: string | null; module_name: string | null }[]>("/submodules/module-options"),
 
   /**
    * Actualiza el estado de un submódulo (ACTIVE/INACTIVE).
@@ -125,7 +151,7 @@ export const authApi = {
    * @param {string} data.email - Correo electrónico del usuario.
    * @param {ResetTokenMap} data.tokens - Mapeo de tokens requeridos por el servicio.
    */
-  reqResetPassword: (data: { email: string; tokens: ResetTokenMap }) =>
+  reqResetPassword: (data: { email: string }) =>
     authAgrofusionAxios.post("auth/request-reset-password", data),
   /**
    * Establece una nueva contraseña utilizando un token de validación.

@@ -12,6 +12,7 @@
         "state": "Estado",
         "active": "Activo",
         "inactive": "Inactivo",
+        "deleted": "Eliminado",
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
@@ -30,7 +31,6 @@
         "nitOtherCountry": "Nit de otro país",
         "nuip": "NUIP",
         "blocked": "Bloqueado",
-        "deleted": "Eliminado",
         "pending": "Pendiente",
         "showing": "Mostrando",
         "previous": "Anterior",
@@ -77,6 +77,54 @@
         "emailGes": "Gestor de correos",
         "roles":"Roles / Permisos"
     },
+    "kms": {
+        "genericError": "No se pudo completar la operación. Revisa permisos y datos.",
+        "home": {
+            "title": "KMS — Claves y firmas",
+            "subtitle": "Formularios conectados al microservicio de auditoría. Elige una acción.",
+            "go": "Continuar",
+            "cardCreateKey": "Crear clave criptográfica",
+            "cardCreateKeyDesc": "Genera un par de claves en el proyecto indicado.",
+            "cardCert": "Registrar certificado X.509",
+            "cardCertDesc": "Asocia un certificado PEM a una clave existente.",
+            "cardVerify": "Verificar firma digital",
+            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada."
+        },
+        "createKey": {
+            "title": "Crear clave criptográfica",
+            "projectId": "ID del proyecto (UUID)",
+            "alias": "Alias de la clave",
+            "algorithm": "Algoritmo",
+            "purpose": "Propósito",
+            "validToOptional": "Válida hasta (opcional)",
+            "submit": "Crear clave"
+        },
+        "cert": {
+            "title": "Registrar certificado",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Entidad emisora (Issuer)",
+            "keyKind": "Tipo de clave (referencia)",
+            "keyKindHint": "Informativo: la clave real la define el registro en KMS.",
+            "serial": "Número de serie",
+            "validFrom": "Válido desde",
+            "validTo": "Válido hasta",
+            "keyId": "ID de clave KMS",
+            "fileOrPaste": "Certificado PEM",
+            "uploadPem": "Subir archivo .pem / .crt",
+            "confirm": "Confirmar",
+            "success": "Certificado registrado correctamente."
+        },
+        "verify": {
+            "title": "Verificar firma digital",
+            "documentHash": "Hash del documento",
+            "hashAlg": "Algoritmo de hash",
+            "signatureIdOptional": "ID de firma (opcional)",
+            "keyIdOptional": "ID de clave (opcional)",
+            "signatureB64": "Firma en Base64",
+            "uploadSig": "Subir archivo de firma",
+            "confirm": "Confirmar"
+        }
+    },
     "login":{
         "login": "Iniciar sesión",
         "email": "Correo electrónico",
@@ -99,7 +147,8 @@
         "timeoutWarning": "Tiempo restante: ",
         "verify": "Verificar código",
         "comeback": "Volver",
-        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente."
+        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente.",
+        "loginSuccess": "Inicio de sesión exitoso        "
     },
     "editUser": {
         "title": "Editar usuario",
@@ -152,10 +201,45 @@
             "activateCheckbox": "Confirmo que deseo activar este proyecto.",
             "deactivateButton": "Desactivar proyecto",
             "activateButton": "Activar proyecto",
+            "deleteTitle": "Eliminar proyecto",
+            "deleteQuestion": "¿Quieres marcar este proyecto como eliminado?",
+            "deleteDescription": "El proyecto dejará de mostrarse en el listado. Los datos se conservan y el cambio queda registrado en auditoría.",
+            "deleteCheckbox": "Confirmo que deseo marcar este proyecto como eliminado.",
+            "deleteButton": "Eliminar proyecto",
             "statusUpdateSuccess": "Estado del proyecto actualizado correctamente",
             "statusUpdateError": "Error al actualizar el estado del proyecto",
             "noProjects": "No hay proyectos registrados",
             "paginationText": "proyectos"
+        },
+        "create": {
+            "addProject": "Agregar proyecto",
+            "title": "Nuevo proyecto",
+            "description": "Registra un nuevo proyecto externo con sus módulos de acceso rápido.",
+            "descriptionInput": "Descripción",
+            "instanceCode": "Código del proyecto",
+            "projectUrl": "URL principal del proyecto",
+            "projectName": "Nombre del proyecto",
+            "apiUrlBase": "URL api del proyecto",
+            "descriptionPlaceholder": "Breve descripción del proyecto",
+            "status": "Estado",
+            "imageUpload": "Imagen del proyecto",
+            "chooseFiles": "Elegir archivos para subir",
+            "dragAndDrop": "o arrástralos y suéltalos aquí",
+            "quickAccessModules": "Registro de módulos de acceso rápido",
+            "module": "Módulo",
+            "moduleName": "Nombre del módulo",
+            "moduleBaseUrl": "Ruta",
+            "moduleBaseUrlPlaceholder": "Ej. https://inmero.co/disriego/notification",
+            "moduleIcon": "Icono",
+            "moduleSelectIcon": "Seleccionar icono",
+            "moduleDescription": "Descripción del módulo",
+            "validationRequired": "Este campo es obligatorio",
+            "validationExactlyThreeModules": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "success": "Proyecto registrado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         }
     },
     "module": {
@@ -199,7 +283,7 @@
             "allModules": "Todos los módulos",
             "createdAt": "Fecha",
             "responsible": "Responsable",
-            "searchPlaceholder": "Buscar por nombre o código",
+            "searchPlaceholder": "Buscar por nombre, código o descripción",
             "loading": "Cargando submódulos...",
             "loadError": "Error al cargar submódulos",
             "deactivateTitle": "Desactivar submódulo",
@@ -220,7 +304,7 @@
     },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
-        "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
+        "instructions": "Este cambio actualizará la contraseña de tu cuenta de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
         "newPassword": "Nueva contraseña",
         "confirmPassword": "Confirmar contraseña",
         "resetButton": "Restablecer contraseña",
@@ -231,6 +315,7 @@
         "errorExtPro": "{{service}}. No se pudo realizar el cambio de contraseña."
     },
     "reqResetPassword":{
+        "changeEmailToRetry": "Modifica el correo electrónico para intentar nuevamente.",
         "requestReset": "¡Recupera tu cuenta!",
         "instructions": "Ingresa tu dirección de correo electrónico registrada en el sistema.",
         "sendResetLink": "Buscar mi cuenta",
@@ -543,11 +628,13 @@
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
 
         "passwordsMustMatch": "Las contraseñas no coinciden.",
-        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres."
-        
+        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres.",
+        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres."
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_USER_NOT_ACTIVE": "Hubo un error al solicitar el cambio de contraseña", 
+    "AUTH_USER_NOT_FOUND_REQ": "Hubo un error al solicitar el cambio de contraseña",
     "AUTH_USER_DELETED": "El usuario no existe o fue eliminado del sistema.",
     "AUTH_USER_INACTIVE": "El usuario no esta activo, no puede iniciar sesión",
     "AUTH_INVALID_PASSWORD": "Correo o contraseña incorrectos. Intenta nuevamente.",
@@ -586,7 +673,24 @@
     "PERMISSION_NAME_ALREADY_EXISTS": "Ya existe un permiso con este nombre",
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
-    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
+    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema.",
+    "KEY_NOT_FOUND": "No se encontró la clave indicada.",
+    "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
+    "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",
+    "DUPLICATE_KEY_FINGERPRINT": "Ya existe una clave con la misma huella digital.",
+    "INVALID_STATUS": "El filtro de estado no es válido.",
+    "INVALID_PURPOSE": "El propósito de clave no es válido.",
+    "CERTIFICATE_ALREADY_EXISTS": "Ya existe un certificado con el mismo contenido (huella).",
+    "CERTIFICATE_CREATION_FAILED": "No se pudo registrar el certificado. Revisa el formato PEM y los datos.",
+    "SIGNATURE_CREATION_FAILED": "No se pudo generar la firma digital.",
+    "SIGNATURE_VERIFICATION_FAILED": "No se pudo verificar la firma. Revisa hash, firma y clave.",
+    "SIGNATURE_NOT_FOUND": "No se encontró la firma indicada.",
+    "KEY_ROTATION_FAILED": "No se pudo rotar la clave.",
+    "KEY_NOT_ACTIVE": "La clave no está activa.",
+    "KEY_EXPIRED": "La clave ha expirado.",
+    "KEY_PURPOSE_INVALID": "La clave no tiene el propósito adecuado para esta operación.",
+    "INVALID_HASH_FORMAT": "Formato no válido o hash incorrecto.",
+    "KEY_ID_REQUIRED": "Debes indicar el ID de clave."
     },
     "moduleRouteGuard": {
         "preparing": "Preparando contenido..."

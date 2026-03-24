@@ -73,6 +73,54 @@
         "emailGes": "Email manager",
         "roles": "Roles / Permissions"
     },
+    "kms": {
+        "genericError": "Operation failed. Check permissions and input.",
+        "home": {
+            "title": "KMS — Keys and signatures",
+            "subtitle": "Forms wired to the audit microservice. Pick an action.",
+            "go": "Continue",
+            "cardCreateKey": "Create cryptographic key",
+            "cardCreateKeyDesc": "Generate a key pair for the given project.",
+            "cardCert": "Register X.509 certificate",
+            "cardCertDesc": "Attach a PEM certificate to an existing key.",
+            "cardVerify": "Verify digital signature",
+            "cardVerifyDesc": "Validate hash and signature against a stored key or signature."
+        },
+        "createKey": {
+            "title": "Create cryptographic key",
+            "projectId": "Project ID (UUID)",
+            "alias": "Key alias",
+            "algorithm": "Algorithm",
+            "purpose": "Purpose",
+            "validToOptional": "Valid until (optional)",
+            "submit": "Create key"
+        },
+        "cert": {
+            "title": "Register certificate",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Issuing entity (Issuer)",
+            "keyKind": "Key type (reference)",
+            "keyKindHint": "Informational: the real key is the KMS key record.",
+            "serial": "Serial number",
+            "validFrom": "Valid from",
+            "validTo": "Valid to",
+            "keyId": "KMS key ID",
+            "fileOrPaste": "Certificate PEM",
+            "uploadPem": "Upload .pem / .crt file",
+            "confirm": "Confirm",
+            "success": "Certificate registered successfully."
+        },
+        "verify": {
+            "title": "Verify digital signature",
+            "documentHash": "Document hash",
+            "hashAlg": "Hash algorithm",
+            "signatureIdOptional": "Signature ID (optional)",
+            "keyIdOptional": "Key ID (optional)",
+            "signatureB64": "Signature (Base64)",
+            "uploadSig": "Upload signature file",
+            "confirm": "Confirm"
+        }
+    },
     "login": {
         "login": "Login",
         "email": "Email",
@@ -95,7 +143,8 @@
         "timeoutWarning": "Time remaining: ",
         "verify": "Verify code",
         "comeback": "Go back",
-        "errorSSOLogin": "Could not log in to {{project}}. Try manually."
+        "errorSSOLogin": "Could not log in to {{project}}. Try manually.",
+        "loginSuccess": "Login successful"
     },
     "editUser": {
         "title": "Edit user",
@@ -147,10 +196,44 @@
             "activateCheckbox": "I confirm that I want to activate this project.",
             "deactivateButton": "Deactivate project",
             "activateButton": "Activate project",
+            "deleteTitle": "Delete project",
+            "deleteQuestion": "Do you want to mark this project as deleted?",
+            "deleteDescription": "The project will no longer appear in the list. Data is preserved and the change is recorded in the audit log.",
+            "deleteCheckbox": "I confirm that I want to mark this project as deleted.",
+            "deleteButton": "Delete project",
             "statusUpdateSuccess": "Project status updated successfully",
             "statusUpdateError": "Error updating project status",
             "noProjects": "No registered projects",
             "paginationText": "projects"
+        },
+        "create": {
+            "addProject": "Add project",
+            "title": "New project",
+            "description": "Register a new external project with its quick access modules.",
+            "descriptionInput": "Description",
+            "instanceCode": "Project code",
+            "projectUrl": "Project main URL",
+            "projectName": "Project name",
+            "apiUrlBase": "Project API URL",
+            "descriptionPlaceholder": "Brief project description",
+            "status": "Status",
+            "imageUpload": "Project image",
+            "chooseFiles": "Choose files to upload",
+            "dragAndDrop": "or drag and drop them here",
+            "quickAccessModules": "Quick access modules registration",
+            "module": "Module",
+            "moduleName": "Module name",
+            "moduleBaseUrl": "Route",
+            "moduleIcon": "Icon",
+            "moduleSelectIcon": "Select icon",
+            "moduleDescription": "Module description",
+            "validationRequired": "This field is required",
+            "validationExactlyThreeModules": "You must register exactly three quick access modules for the project.",
+            "success": "Project registered successfully.",
+            "errorDuplicateCode": "A project with this code is already registered.",
+            "errorModulesCount": "You must register exactly three quick access modules for the project.",
+            "errorNoPermission": "Unauthorized action. You do not have permission to register projects.",
+            "errorGeneric": "Something went wrong. The project could not be registered."
         }
     },
     "module": {
@@ -178,42 +261,42 @@
             "activateButton": "Activate module",
             "statusUpdateSuccess": "Module status updated successfully",
             "statusUpdateError": "Error updating module status",
-      "noModules": "No modules registered",
-      "paginationText": "modules"
-    }
-  },
-  "submodule": {
-    "title": "Submodule management",
-    "description": "View and manage system submodules",
-    "list": {
-      "code": "Code",
-      "submoduleName": "Submodule",
-      "description": "Description",
-      "parentModule": "Parent module",
-      "associatedModule": "Associated module",
-      "allModules": "All modules",
-      "createdAt": "Date",
-      "responsible": "Responsible",
-      "searchPlaceholder": "Search by name or code",
-      "loading": "Loading submodules...",
-      "loadError": "Error loading submodules",
-      "deactivateTitle": "Deactivate submodule",
-      "activateTitle": "Activate submodule",
-      "deactivateQuestion": "Do you want to deactivate this submodule?",
-      "activateQuestion": "Do you want to activate this submodule?",
-      "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive.",
-      "activateDescription": "This action will mark the submodule as Active and enable it in the system.",
-      "deactivateCheckbox": "I confirm that I wish to deactivate this submodule.",
-      "activateCheckbox": "I confirm that I wish to activate this submodule.",
-      "deactivateButton": "Deactivate submodule",
-      "activateButton": "Activate submodule",
-      "statusUpdateSuccess": "Submodule status updated successfully",
-      "statusUpdateError": "Error updating submodule status",
-      "noSubmodules": "No submodules registered",
-      "paginationText": "submodules"
-    }
-  },
-  "resetPassword": {
+            "noModules": "No modules registered",
+            "paginationText": "modules"
+        }
+    },
+    "submodule": {
+        "title": "Submodule management",
+        "description": "View and manage system submodules",
+        "list": {
+            "code": "Code",
+            "submoduleName": "Submodule",
+            "description": "Description",
+            "parentModule": "Parent module",
+            "associatedModule": "Associated module",
+            "allModules": "All modules",
+            "createdAt": "Date",
+            "responsible": "Responsible",
+            "searchPlaceholder": "Search by name, code, or description",
+            "loading": "Loading submodules...",
+            "loadError": "Error loading submodules",
+            "deactivateTitle": "Deactivate submodule",
+            "activateTitle": "Activate submodule",
+            "deactivateQuestion": "Do you want to deactivate this submodule?",
+            "activateQuestion": "Do you want to activate this submodule?",
+            "deactivateDescription": "This action will not delete physical data, but will mark it as Inactive.",
+            "activateDescription": "This action will mark the submodule as Active and enable it in the system.",
+            "deactivateCheckbox": "I confirm that I wish to deactivate this submodule.",
+            "activateCheckbox": "I confirm that I wish to activate this submodule.",
+            "deactivateButton": "Deactivate submodule",
+            "activateButton": "Activate submodule",
+            "statusUpdateSuccess": "Submodule status updated successfully",
+            "statusUpdateError": "Error updating submodule status",
+            "noSubmodules": "No submodules registered",
+            "paginationText": "submodules"
+        }
+    },
+    "resetPassword": {
         "resetPassword": "Set a new password.",
         "instructions": "This change will update the password for your accounts in all active AgroFusion projects. Remember it for your next login.",
         "newPassword": "New password",
@@ -226,6 +309,7 @@
         "errorExtPro": "{{service}}. Could not change password."
     },
     "reqResetPassword": {
+        "changeEmailToRetry": "Modify the email to try again.",
         "requestReset": "Recover your account!",
         "instructions": "Enter your email address registered in the system.",
         "sendResetLink": "Find my account",
@@ -333,7 +417,11 @@
         "passwordChangeFailed": "There was an error updating your password, please try again.",
         "changePasswordSuccess": "Your password was successfully updated.",
         "noChanges": "No changes to save",
-        "role": "Role"
+        "role": "Role",
+        "factorDoubleAuth": "Two-factor authentication",
+        "updating": "Updating...",
+        "mfaUpdateSuccess": "The user's two-factor authentication status has been successfully updated",
+        "mfaUpdateError": "There was an error updating the user's two-factor authentication status"
     },
     "accountActivation": {
         "resetPassword": "Set a new password",
@@ -516,6 +604,7 @@
         "passwordUppercase": "Password must contain at least one uppercase letter.",
         "passwordNumber": "Password must contain at least one number.",
         "passwordSpecialChar": "Password must contain at least one special character.",
+        "passwordSpecialCharacter": "Password must contain at least one special character.",
         "nameMin": "Name must contain at least 3 characters",
         "completeField": "Complete this field",
         "completedField": "Complete this field",
@@ -523,12 +612,13 @@
         "dateMustBeAfterBirthday": "Date must be after date of birth",
         "dateNotInFuture": "Date cannot be in the future",
         "descriptionMin": "Description must contain at least 8 characters",
-        "passwordSpecialCharacter": "Password must contain at least one special character",
         "passwordsMustMatch": "Passwords do not match.",
         "documentNumberMax": "Document number must have a maximum of {{max}} characters."
     },
     "errors": {
         "AUTH_USER_NOT_FOUND": "User does not exist or has been deleted from the system.",
+        "AUTH_USER_NOT_ACTIVE": "There was an error requesting the password change",
+        "AUTH_USER_NOT_FOUND_REQ": "There was an error requesting the password change",
         "AUTH_USER_DELETED": "User does not exist or has been deleted from the system.",
         "AUTH_USER_INACTIVE": "User is not active and cannot log in",
         "AUTH_INVALID_PASSWORD": "Incorrect email or password. Please try again.",
@@ -541,6 +631,7 @@
         "AUTH_PASSWORD_MISMATCH": "Passwords do not match.",
         "AUTH_PASSWORD_TOO_SHORT": "Password is too short. It must be at least {{min}} characters.",
         "AUTH_PASSWORD_TOO_LONG": "Password is too long. It cannot exceed {{max}} characters.",
+        "AUTH_INSUFFICIENT_PERMISSIONS": "You do not have sufficient permissions to perform this action.",
         "AUTH_PASSWORD_REQUIRE_UPPERCASE": "Password must contain at least one uppercase letter.",
         "AUTH_PASSWORD_REQUIRE_LOWERCASE": "Password must contain at least one lowercase letter.",
         "AUTH_PASSWORD_REQUIRE_NUMBER": "Password must contain at least one number.",
@@ -559,7 +650,28 @@
         "NOT_OWNER_PROFILE": "You cannot edit a profile that does not belong to you",
         "INCORRECT_PASSWORD": "The current password entered is incorrect",
         "INVALID_PASSWORD": "You cannot reuse a previous password",
-        "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists"
+        "ROLE_NAME_ALREADY_EXISTS": "A role with this name already exists",
+        "PERMISSION_NAME_ALREADY_EXISTS": "A permission with this name already exists",
+        "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
+        "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
+        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system.",
+        "KEY_NOT_FOUND": "The specified key was not found.",
+        "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
+        "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
+        "DUPLICATE_KEY_FINGERPRINT": "A key with the same fingerprint already exists.",
+        "INVALID_STATUS": "The status filter is not valid.",
+        "INVALID_PURPOSE": "The key purpose is not valid.",
+        "CERTIFICATE_ALREADY_EXISTS": "A certificate with the same fingerprint already exists.",
+        "CERTIFICATE_CREATION_FAILED": "Could not register the certificate. Check the PEM and fields.",
+        "SIGNATURE_CREATION_FAILED": "Could not create the digital signature.",
+        "SIGNATURE_VERIFICATION_FAILED": "Could not verify the signature. Check hash, signature, and key.",
+        "SIGNATURE_NOT_FOUND": "The specified signature was not found.",
+        "KEY_ROTATION_FAILED": "Could not rotate the key.",
+        "KEY_NOT_ACTIVE": "The key is not active.",
+        "KEY_EXPIRED": "The key has expired.",
+        "KEY_PURPOSE_INVALID": "The key does not have the right purpose for this operation.",
+        "INVALID_HASH_FORMAT": "Invalid format or incorrect hash.",
+        "KEY_ID_REQUIRED": "You must provide a key ID."
     },
     "moduleRouteGuard": {
         "preparing": "Preparing content..."

@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import ToastSimple from "../components/layout/ToastSimple";
 import Header from "../components/layout/Header";
 import { Label, TextInput, Card, Button } from "flowbite-react";
@@ -10,14 +10,9 @@ import {
   type AuthErrorCode,
 } from "../scope/auth/authError.scope";
 import { useTranslation } from "react-i18next";
-import {
-  getExternalProjects,
-  reqResetPasswordService,
-} from "../services/agrofusion/auth.service";
+import { reqResetPasswordService } from "../services/agrofusion/auth.service";
 import { Link } from "react-router-dom";
 import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
-import { handleReqResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente de Recuperación de Contraseña.
@@ -34,6 +29,7 @@ const ReqResetPass = () => {
   /** Define el paso actual del flujo de recuperación */
   type resetStep = "request" | "email-sent";
   const [step, setStep] = useState<resetStep>("request");
+  const [emailLocked, setEmailLocked] = useState(false);
   /**
    * Configuración de Formik para el formulario de recuperación.
    */
@@ -50,32 +46,8 @@ const ReqResetPass = () => {
       try {
         setGlobalError(null);
 
-        // 1. Obtener los proyectos vinculados al usuario
-        const externalProjects = await getExternalProjects();
-
-        // 2. Orquestar la solicitud en proyectos externos (SSO)
-        // Retorna tokens de éxito y una lista de errores por proyecto
-        const { tokens, errors } = await handleReqResPasswordEP(
-          values.email,
-          externalProjects,
-        );
-        // 3. Si hubo errores en proyectos externos, se notifican individualmente
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
-
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: "error",
-              ...(link ?? {}),
-            },
-          ]);
-        });
         // 4. Ejecutar el servicio principal de AgroFusion
-        await reqResetPasswordService(values.email, tokens);
+        await reqResetPasswordService(values.email.toLowerCase().trim());
         // 5. Cambiar a la vista de "Correo enviado"
         setStep("email-sent");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,6 +56,7 @@ const ReqResetPass = () => {
         const code = data?.detail.code as AuthErrorCode;
 
         handleAuthError(code ?? "AUTH_GENERIC");
+        setEmailLocked(true);
       }
     },
   });
@@ -121,7 +94,7 @@ const ReqResetPass = () => {
                 )}
 
                 <div>
-                  <form onSubmit={formik.handleSubmit}>
+                  <form onSubmit={formik.handleSubmit }>
                     <div className="block mb-2">
                       <Label htmlFor="email">{t("login.email")}</Label>
                     </div>
@@ -133,6 +106,16 @@ const ReqResetPass = () => {
                       placeholder={t("login.emailPlaceholder")}
                       required
                       {...formik.getFieldProps("email")}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+
+                        if (emailLocked && newValue !== formik.values.email) {
+                          setEmailLocked(false);
+                          setGlobalError(null);
+                        }
+
+                        formik.handleChange(e);
+                      }}
                       color={
                         globalError ||
                         (formik.touched.email && formik.errors.email)
@@ -141,10 +124,15 @@ const ReqResetPass = () => {
                       }
                     />
 
+                    {emailLocked && (
+                      <p className="text-xs text-center text-gray-500">
+                        {t("reqResetPassword.changeEmailToRetry")}
+                      </p>
+                    )}
                     <Button
                       className="block w-full my-3 bg-blue-600 rounded-2xl"
                       type="submit"
-                      disabled={formik.isSubmitting}
+                      disabled={formik.isSubmitting || emailLocked}
                     >
                       {formik.isSubmitting
                         ? t("reqResetPassword.sending")

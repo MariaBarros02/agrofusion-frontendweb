@@ -63,7 +63,8 @@ const EditPermissions = () => {
       name: yup
         .string()
         .required(t("validation.completeField"))
-        .min(3, t("validation.nameMin")),
+        .min(3, t("validation.nameMin"))
+        .max(120, t("validation.nameMaxPermissions")),
 
       state: yup.string().required(t("validation.completeField")),
 

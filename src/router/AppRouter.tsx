@@ -16,6 +16,7 @@ import ListRoles from "../pages/roles/ListRoles";
 import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
+import AddProject from "../pages/administration/AddProject";
 import ModulesList from "../pages/administration/ModulesList";
 import SubmodulesList from "../pages/administration/SubmodulesList";
 
@@ -29,6 +30,10 @@ import { ModuleRouteGuard } from "./ModuleRouteGuard";
 
 import AuditList from "../pages/audit/AuditList";
 import ErrorList from "../pages/audit/ErrorList";
+import KmsHome from "../pages/kms/KmsHome";
+import RegisterCertificate from "../pages/kms/RegisterCertificate";
+import VerifySignature from "../pages/kms/VerifySignature";
+import CreateKey from "../pages/kms/CreateKey";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -36,9 +41,11 @@ import ErrorList from "../pages/audit/ErrorList";
  * 1. Rutas Protegidas: Requieren un token de sesión válido.
  * 2. Rutas Públicas: Solo accesibles si el usuario NO está autenticado (Login, Recobro).
  */
+const basename = import.meta.env.VITE_BASENAME || ""
+
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
@@ -133,6 +140,7 @@ export function AppRouter() {
           <Route path="/administration/users/edit-user/:userId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditUser /></ModuleRouteGuard>} />
 
           <Route path="/administration/projects" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectsList /></ModuleRouteGuard>} />
+          <Route path="/administration/projects/create" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AddProject /></ModuleRouteGuard>} />
           <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
           <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 
@@ -144,6 +152,13 @@ export function AppRouter() {
           <Route path="/administration/role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ViewRole /></ModuleRouteGuard>} />
           <Route path="/administration/roles/edit-role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditRole /></ModuleRouteGuard>} />
           <Route path="/administration/roles/create-role" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><CreateRole /></ModuleRouteGuard>} />
+
+          {/* KMS / Firma digital (API auditoría) — mismo patrón de carga que el resto */}
+          <Route path="/kms" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
+          <Route path="/kms/crear-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><CreateKey /></ModuleRouteGuard>} />
+          <Route path="/kms/certificado" element={<ModuleRouteGuard moduleCode="AUDIT"><RegisterCertificate /></ModuleRouteGuard>} />
+          <Route path="/kms/verificar-firma" element={<ModuleRouteGuard moduleCode="AUDIT"><VerifySignature /></ModuleRouteGuard>} />
+          <Route path="/digitalSignature" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
         </Route>
 
       </Routes>

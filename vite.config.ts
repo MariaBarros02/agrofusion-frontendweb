@@ -8,14 +8,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg', 'robots.txt'],
+      includeAssets: ['vite.svg', 'robots.txt', 'logoAgrofusion-removebg2.png'],
       manifest: {
         name: 'AgroFusion',
         short_name: 'AgroFusion',
         description: 'Plataforma de gestión agrícola integrada',
         theme_color: '#16a34a',
         background_color: '#ffffff',
-        display: 'minimal-ui',
+        display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
         start_url: '/',
@@ -24,25 +24,28 @@ export default defineConfig({
           {
             src: '/manifest-192x192.png',
             sizes: '192x192',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any',
           },
           {
             src: '/manifest-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'any',
           },
           {
             src: '/manifest-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
+            type: 'image/png',
             purpose: 'maskable',
           },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/i,

@@ -7,6 +7,8 @@ export const AUTH_ERROR_SCOPE = {
   /** Errores que afectan a la cuenta de usuario completa o flujo general */
   GLOBAL: [
     "AUTH_USER_NOT_FOUND",          // Usuario no existe
+    "AUTH_USER_NOT_FOUND_REQ",          // Usuario no existe
+    "AUTH_USER_NOT_ACTIVE",
     "AUTH_USER_DELETED",            // Cuenta borrada
     "AUTH_USER_INACTIVE",
     "AUTH_ACCOUNT_NOT_ACTIVATED",   // Requiere activación por correo
