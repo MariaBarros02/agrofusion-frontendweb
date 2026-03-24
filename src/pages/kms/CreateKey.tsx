@@ -5,6 +5,8 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
 import { Button, Label, TextInput, Select } from "flowbite-react";
 import { kmsApi } from "../../services/agrofusion/kms.api";
+import { KmsFeedbackModal, type KmsFeedbackVariant } from "../../components/kms/KmsFeedbackModal";
+import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
 
 /**
  * Crear clave criptográfica (POST /kms/keys). Requiere permiso 026 en backend.
@@ -13,7 +15,10 @@ export default function CreateKey() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    variant: KmsFeedbackVariant;
+    message: string;
+  } | null>(null);
   const [created, setCreated] = useState<Record<string, unknown> | null>(null);
 
   const [projectId, setProjectId] = useState("");
@@ -24,7 +29,7 @@ export default function CreateKey() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFeedback(null);
     setCreated(null);
     setLoading(true);
     try {
@@ -37,9 +42,10 @@ export default function CreateKey() {
       });
       setCreated(data as Record<string, unknown>);
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { detail?: { code?: string } } } };
-      const code = ax.response?.data?.detail?.code;
-      setError(code ?? t("kms.genericError"));
+      setFeedback({
+        variant: "error",
+        message: resolveKmsErrorMessage(t, err),
+      });
     } finally {
       setLoading(false);
     }
@@ -49,13 +55,13 @@ export default function CreateKey() {
     <AppLayoutSB>
       <TitleTarget title="kms.createKey.title" />
       <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+        <KmsFeedbackModal
+          open={!!feedback}
+          variant={feedback?.variant ?? "error"}
+          message={feedback?.message ?? ""}
+          onAccept={() => setFeedback(null)}
+        />
         <form onSubmit={submit} className="max-w-4xl mx-auto">
-          {error && (
-            <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-200">
-              {error}
-            </p>
-          )}
-
           <div className="space-y-4">
             <div>
               <Label htmlFor="pid">{t("kms.createKey.projectId")}</Label>

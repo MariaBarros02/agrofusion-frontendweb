@@ -650,7 +650,24 @@
         "PERMISSION_NAME_ALREADY_EXISTS": "A permission with this name already exists",
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
         "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
-        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system."
+        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system.",
+        "KEY_NOT_FOUND": "The specified key was not found.",
+        "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
+        "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
+        "DUPLICATE_KEY_FINGERPRINT": "A key with the same fingerprint already exists.",
+        "INVALID_STATUS": "The status filter is not valid.",
+        "INVALID_PURPOSE": "The key purpose is not valid.",
+        "CERTIFICATE_ALREADY_EXISTS": "A certificate with the same fingerprint already exists.",
+        "CERTIFICATE_CREATION_FAILED": "Could not register the certificate. Check the PEM and fields.",
+        "SIGNATURE_CREATION_FAILED": "Could not create the digital signature.",
+        "SIGNATURE_VERIFICATION_FAILED": "Could not verify the signature. Check hash, signature, and key.",
+        "SIGNATURE_NOT_FOUND": "The specified signature was not found.",
+        "KEY_ROTATION_FAILED": "Could not rotate the key.",
+        "KEY_NOT_ACTIVE": "The key is not active.",
+        "KEY_EXPIRED": "The key has expired.",
+        "KEY_PURPOSE_INVALID": "The key does not have the right purpose for this operation.",
+        "INVALID_HASH_FORMAT": "Invalid format or incorrect hash.",
+        "KEY_ID_REQUIRED": "You must provide a key ID."
     },
     "moduleRouteGuard": {
         "preparing": "Preparing content..."

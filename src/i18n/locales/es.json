@@ -666,7 +666,24 @@
     "PERMISSION_NAME_ALREADY_EXISTS": "Ya existe un permiso con este nombre",
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
-    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
+    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema.",
+    "KEY_NOT_FOUND": "No se encontró la clave indicada.",
+    "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
+    "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",
+    "DUPLICATE_KEY_FINGERPRINT": "Ya existe una clave con la misma huella digital.",
+    "INVALID_STATUS": "El filtro de estado no es válido.",
+    "INVALID_PURPOSE": "El propósito de clave no es válido.",
+    "CERTIFICATE_ALREADY_EXISTS": "Ya existe un certificado con el mismo contenido (huella).",
+    "CERTIFICATE_CREATION_FAILED": "No se pudo registrar el certificado. Revisa el formato PEM y los datos.",
+    "SIGNATURE_CREATION_FAILED": "No se pudo generar la firma digital.",
+    "SIGNATURE_VERIFICATION_FAILED": "No se pudo verificar la firma. Revisa hash, firma y clave.",
+    "SIGNATURE_NOT_FOUND": "No se encontró la firma indicada.",
+    "KEY_ROTATION_FAILED": "No se pudo rotar la clave.",
+    "KEY_NOT_ACTIVE": "La clave no está activa.",
+    "KEY_EXPIRED": "La clave ha expirado.",
+    "KEY_PURPOSE_INVALID": "La clave no tiene el propósito adecuado para esta operación.",
+    "INVALID_HASH_FORMAT": "Formato no válido o hash incorrecto.",
+    "KEY_ID_REQUIRED": "Debes indicar el ID de clave."
     },
     "moduleRouteGuard": {
         "preparing": "Preparando contenido..."

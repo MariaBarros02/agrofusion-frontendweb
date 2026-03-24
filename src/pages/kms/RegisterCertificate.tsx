@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Button, Label, TextInput, Select } from "flowbite-react";
 import { kmsApi } from "../../services/agrofusion/kms.api";
 import { Plus } from "lucide-react";
+import { KmsFeedbackModal, type KmsFeedbackVariant } from "../../components/kms/KmsFeedbackModal";
+import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
 
 /**
  * Registro de certificado X.509 (POST /kms/certificates).
@@ -15,8 +17,10 @@ export default function RegisterCertificate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    variant: KmsFeedbackVariant;
+    message: string;
+  } | null>(null);
 
   const [keyId, setKeyId] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
@@ -40,8 +44,7 @@ export default function RegisterCertificate() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setFeedback(null);
     setLoading(true);
     try {
       await kmsApi.createCertificate({
@@ -53,11 +56,12 @@ export default function RegisterCertificate() {
         valid_from: new Date(validFrom).toISOString(),
         valid_to: new Date(validTo).toISOString(),
       });
-      setSuccess(t("kms.cert.success"));
+      setFeedback({ variant: "success", message: t("kms.cert.success") });
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { detail?: { code?: string; meta?: unknown } } } };
-      const code = ax.response?.data?.detail?.code;
-      setError(code ?? t("kms.genericError"));
+      setFeedback({
+        variant: "error",
+        message: resolveKmsErrorMessage(t, err),
+      });
     } finally {
       setLoading(false);
     }
@@ -67,18 +71,13 @@ export default function RegisterCertificate() {
     <AppLayoutSB>
       <TitleTarget title="kms.cert.title" />
       <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+        <KmsFeedbackModal
+          open={!!feedback}
+          variant={feedback?.variant ?? "error"}
+          message={feedback?.message ?? ""}
+          onAccept={() => setFeedback(null)}
+        />
         <form onSubmit={submit} className="max-w-5xl mx-auto">
-          {error && (
-            <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-200">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
-              {success}
-            </p>
-          )}
-
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <Label htmlFor="subject">{t("kms.cert.subjectDn")}</Label>

@@ -36,12 +36,8 @@ export default function KmsHome() {
 
   return (
     <AppLayoutSB>
-      <TitleTarget title="kms.home.title" />
+      <TitleTarget title="kms.home.title" description="kms.home.subtitle" />
       <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
-        <p className="text-gray-600 dark:text-gray-300 mb-8 text-sm md:text-base">
-          {t("kms.home.subtitle")}
-        </p>
-
         <div className="grid gap-6 md:grid-cols-3">
           {cards.map(({ to, title, desc, icon: Icon, accent }) => (
             <Link
