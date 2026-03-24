@@ -17,6 +17,7 @@ interface BaseColumn<T> {
   label: string;
   type: ColumnType;
   align?: "left" | "center" | "right";
+  width?: string | number;
 }
 
 interface ActionConfig<T> {
@@ -150,12 +151,13 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
-        <table className="w-full table-fixed text-sm rounded-2xl">
+        <table className="w-full text-sm table-fixed rounded-2xl">
           <thead className="bg-gray-200 rounded-2xl dark:bg-gray-800">
             <tr className="rounded-2xl">
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
+                  style={{ width: col.width }}
                   className={`px-4 py-3 font-semibold ${
                     col.align === "left"
                       ? "text-left"
@@ -182,6 +184,7 @@ export default function DataTable<T extends Record<string, any>>({
                       const textCol = col as TextColumn<T>;
                       return (
                         <td
+                          style={{ width: col.width }}
                           key={String(col.key)}
                           className={`px-4 py-3 ${
                             col.align === "left"

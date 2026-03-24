@@ -61,6 +61,7 @@ const ErrorList = () => {
       key: "error_id",
       label: t("externalErrors.columns.id"),
       type: "text",
+      width: "100px",
       format: (value: string) => value?.slice(0, 7),
     },
     { key: "project", label: t("externalErrors.columns.project"), type: "text" },
@@ -68,6 +69,7 @@ const ErrorList = () => {
       key: "severity",
       label: t("externalErrors.columns.severity"),
       type: "text",
+      width:"90px",
       format: (value: string) => {
         if (value === "HIGH") {
           return (
@@ -102,7 +104,7 @@ const ErrorList = () => {
       label: t("externalErrors.columns.code"),
       type: "text",
       format: (value: string) => (
-        <span className="whitespace-nowrap text-xs font-medium">{value}</span>
+        <span className="text-xs font-medium whitespace-nowrap">{value}</span>
       ),
     },
     {

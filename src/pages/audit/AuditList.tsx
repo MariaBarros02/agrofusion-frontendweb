@@ -156,12 +156,13 @@ const AuditList = () => {
 
 // Definición de columnas para la tabla de auditoría
   const columns: Column<AuditEvent>[] = [
-    { key: "event_id", label: t("audit.columns.id"), type: "text" },
+    { key: "event_id", label: t("audit.columns.id"), type: "text", width:"70px" },
     { key: "origin", label: t("audit.columns.origin"), type: "text" },
     {
       key: "result",
       label: t("audit.columns.result"),
       type: "text",
+      width:"90px",
       format: (value: string) => {
         if (value === "SUCCESS") {
           return (

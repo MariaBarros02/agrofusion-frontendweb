@@ -708,7 +708,7 @@
   "title": "Auditoría",
   "description": "Consulta y validación de comprobantes generados por las integraciones del sistema",
 
-  "loading": "Actualizando datos de auditoría...",
+  "loading": "Cargando datos de auditoría...",
   "error": "Error cargando auditoría",
   "noData": "No hay registros de auditoría",
   "pagination": "Auditoría",
@@ -757,7 +757,7 @@
   "title": "Errores Proyectos Externos",
   "description": "Consulta de errores registrados en integraciones externas",
 
-  "loading": "Actualizando datos de errores...",
+  "loading": "Cargando datos de errores...",
   "error": "Error cargando errores",
   "noData": "No hay registros de errores",
   "pagination": "Errores",

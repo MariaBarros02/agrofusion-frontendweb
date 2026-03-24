@@ -13,7 +13,7 @@ const AuditSwitch = ({ active }: Props) => {
 
   return (
     <div className="absolute right-6 top-6">
-      <div className="flex items-center p-1 border rounded-xl bg-gray-700 border-gray-600">
+      <div className="flex items-center p-1 border dark:border-gray-600 rounded-xl dark:bg-gray-700">
 
         {/* Auditoría */}
         <button
@@ -21,7 +21,7 @@ const AuditSwitch = ({ active }: Props) => {
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
             active === "audit"
               ? "bg-blue-600 text-white shadow"
-              : "text-gray-300 hover:bg-gray-600"
+              : "dark:text-gray-300 dark:hover:bg-gray-600 hover:bg-gray-100"
           }`}
         >
           <HiOutlineClipboardList size={18} />
@@ -34,7 +34,7 @@ const AuditSwitch = ({ active }: Props) => {
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
             active === "errors"
               ? "bg-blue-600 text-white shadow"
-              : "text-gray-300 hover:bg-gray-600"
+              : "dark:text-gray-300 dark:hover:bg-gray-600  hover:bg-gray-100"
           }`}
         >
           <HiOutlineExclamationCircle size={18} />
