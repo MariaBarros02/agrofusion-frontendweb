@@ -70,6 +70,54 @@
         "emailGes": "Gestor de correos",
         "roles":"Roles / Permisos"
     },
+    "kms": {
+        "genericError": "No se pudo completar la operación. Revisa permisos y datos.",
+        "home": {
+            "title": "KMS — Claves y firmas",
+            "subtitle": "Formularios conectados al microservicio de auditoría. Elige una acción.",
+            "go": "Continuar",
+            "cardCreateKey": "Crear clave criptográfica",
+            "cardCreateKeyDesc": "Genera un par de claves en el proyecto indicado.",
+            "cardCert": "Registrar certificado X.509",
+            "cardCertDesc": "Asocia un certificado PEM a una clave existente.",
+            "cardVerify": "Verificar firma digital",
+            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada."
+        },
+        "createKey": {
+            "title": "Crear clave criptográfica",
+            "projectId": "ID del proyecto (UUID)",
+            "alias": "Alias de la clave",
+            "algorithm": "Algoritmo",
+            "purpose": "Propósito",
+            "validToOptional": "Válida hasta (opcional)",
+            "submit": "Crear clave"
+        },
+        "cert": {
+            "title": "Registrar certificado",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Entidad emisora (Issuer)",
+            "keyKind": "Tipo de clave (referencia)",
+            "keyKindHint": "Informativo: la clave real la define el registro en KMS.",
+            "serial": "Número de serie",
+            "validFrom": "Válido desde",
+            "validTo": "Válido hasta",
+            "keyId": "ID de clave KMS",
+            "fileOrPaste": "Certificado PEM",
+            "uploadPem": "Subir archivo .pem / .crt",
+            "confirm": "Confirmar",
+            "success": "Certificado registrado correctamente."
+        },
+        "verify": {
+            "title": "Verificar firma digital",
+            "documentHash": "Hash del documento",
+            "hashAlg": "Algoritmo de hash",
+            "signatureIdOptional": "ID de firma (opcional)",
+            "keyIdOptional": "ID de clave (opcional)",
+            "signatureB64": "Firma en Base64",
+            "uploadSig": "Subir archivo de firma",
+            "confirm": "Confirmar"
+        }
+    },
     "login":{
         "login": "Iniciar sesión",
         "email": "Correo electrónico",
@@ -618,7 +666,24 @@
     "PERMISSION_NAME_ALREADY_EXISTS": "Ya existe un permiso con este nombre",
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
-    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
+    "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema.",
+    "KEY_NOT_FOUND": "No se encontró la clave indicada.",
+    "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
+    "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",
+    "DUPLICATE_KEY_FINGERPRINT": "Ya existe una clave con la misma huella digital.",
+    "INVALID_STATUS": "El filtro de estado no es válido.",
+    "INVALID_PURPOSE": "El propósito de clave no es válido.",
+    "CERTIFICATE_ALREADY_EXISTS": "Ya existe un certificado con el mismo contenido (huella).",
+    "CERTIFICATE_CREATION_FAILED": "No se pudo registrar el certificado. Revisa el formato PEM y los datos.",
+    "SIGNATURE_CREATION_FAILED": "No se pudo generar la firma digital.",
+    "SIGNATURE_VERIFICATION_FAILED": "No se pudo verificar la firma. Revisa hash, firma y clave.",
+    "SIGNATURE_NOT_FOUND": "No se encontró la firma indicada.",
+    "KEY_ROTATION_FAILED": "No se pudo rotar la clave.",
+    "KEY_NOT_ACTIVE": "La clave no está activa.",
+    "KEY_EXPIRED": "La clave ha expirado.",
+    "KEY_PURPOSE_INVALID": "La clave no tiene el propósito adecuado para esta operación.",
+    "INVALID_HASH_FORMAT": "Formato no válido o hash incorrecto.",
+    "KEY_ID_REQUIRED": "Debes indicar el ID de clave."
     },
     "moduleRouteGuard": {
         "preparing": "Preparando contenido..."
