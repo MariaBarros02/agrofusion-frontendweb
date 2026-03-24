@@ -22,6 +22,12 @@ import AlertConfirmation from "../../components/layout/AlertConfirmation";
 
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+
 const ListRoles = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -148,29 +154,29 @@ const ListRoles = () => {
     },
   ];
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("ROLES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("ROLES");
+
+  const rolesTabs = [
+    { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+    { id: "permissions", label: "common.permissions", icon: FiInfo, to: "/administration/permissions" },
+  ];
+
   return (
     <AppLayoutSB>
       <TitleTarget
         title="roles.title"
         description="roles.description"
         activeTab="roles"
-        tabs={[
-          {
-            id: "roles",
-            label: "common.roles",
-            icon: BiCube,
-            to: "/administration/roles",
-          },
-          {
-            id: "permissions",
-            label: "common.permissions",
-            icon: FiInfo,
-            to: "/administration/permissions",
-          },
-        ]}
+        tabs={rolesTabs}
       />
+      {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap flex-1 gap-2 overflow-x-auto">
           <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
@@ -181,7 +187,6 @@ const ListRoles = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -191,21 +196,18 @@ const ListRoles = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">
-                {t("common.active")} / {t("common.inactive")}
+                {t("common.active")} / {t("common.inactive")} / {t("common.deleted")}
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
               <option value="DELETED">{t("common.deleted")}</option>
-
             </Select>
           </div>
         </div>
-
-        <div className="flex items-end justify-end gap-2 mt-2 ml-4 md:w-1/2 md:mt-0">
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button size="xs" onClick={() => getRoles(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -225,42 +227,42 @@ const ListRoles = () => {
           </Button>
         </div>
       </div>
-      {/* tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("roles.loading")}</p>{" "}
-        </div>
-      )}{" "}
-      {notListPerm && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>{" "}
-        </div>
-      )}{" "}
-
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("roles.error")}</p>{" "}
-        </div>
-      )}{" "}
-      {!loading && !error && paginatedRole?.items.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {" "}
-            {t("roles.noRoles")}{" "}
-          </p>{" "}
-        </div>
-      )}
-      {!loading && paginatedRole && paginatedRole.items.length !== 0 && (
-        <DataTable
-          data={paginatedRole}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("roles.roles")}
-        />
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("roles.loading")}</p>
+            </div>
+          )}
+          {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>
+            </div>
+          )}
+          {!loading && !notListPerm && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("roles.error")}</p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedRole?.items.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("roles.noRoles")}
+              </p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedRole && paginatedRole.items.length !== 0 && (
+            <DataTable
+              data={paginatedRole}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("roles.roles")}
+            />
+          )}
+        </>
       )}
       <AlertConfirmation
         show={showDeleteModal}

@@ -1,5 +1,6 @@
 {
     "common":{
+        "loading": "Cargando...",
         "rightsReserved": "Todos los derechos reservados",
         "accept": "Aceptar",
         "goToDisriego": "Ir a Disriego",
@@ -11,6 +12,7 @@
         "state": "Estado",
         "active": "Activo",
         "inactive": "Inactivo",
+        "deleted": "Eliminado",
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
@@ -29,7 +31,6 @@
         "nitOtherCountry": "Nit de otro país",
         "nuip": "NUIP",
         "blocked": "Bloqueado",
-        "deleted": "Eliminado",
         "pending": "Pendiente",
         "showing": "Mostrando",
         "previous": "Anterior",
@@ -56,6 +57,7 @@
         "modeDescription": "Modo oscuro funcionando sin librerías"
     },
     "nav": {
+        "dashboard": "Ir al inicio",
         "profile": "Perfil",
         "admin": "Administración",
         "check": "Comprobante",
@@ -138,7 +140,8 @@
         "timeoutWarning": "Tiempo restante: ",
         "verify": "Verificar código",
         "comeback": "Volver",
-        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente."
+        "errorSSOLogin": "No se pudo inciar sesion en {{project}}. Intentalo manualmente.",
+        "loginSuccess": "Inicio de sesión exitoso        "
     },
     "editUser": {
         "title": "Editar usuario",
@@ -191,10 +194,45 @@
             "activateCheckbox": "Confirmo que deseo activar este proyecto.",
             "deactivateButton": "Desactivar proyecto",
             "activateButton": "Activar proyecto",
+            "deleteTitle": "Eliminar proyecto",
+            "deleteQuestion": "¿Quieres marcar este proyecto como eliminado?",
+            "deleteDescription": "El proyecto dejará de mostrarse en el listado. Los datos se conservan y el cambio queda registrado en auditoría.",
+            "deleteCheckbox": "Confirmo que deseo marcar este proyecto como eliminado.",
+            "deleteButton": "Eliminar proyecto",
             "statusUpdateSuccess": "Estado del proyecto actualizado correctamente",
             "statusUpdateError": "Error al actualizar el estado del proyecto",
             "noProjects": "No hay proyectos registrados",
             "paginationText": "proyectos"
+        },
+        "create": {
+            "addProject": "Agregar proyecto",
+            "title": "Nuevo proyecto",
+            "description": "Registra un nuevo proyecto externo con sus módulos de acceso rápido.",
+            "descriptionInput": "Descripción",
+            "instanceCode": "Código del proyecto",
+            "projectUrl": "URL principal del proyecto",
+            "projectName": "Nombre del proyecto",
+            "apiUrlBase": "URL api del proyecto",
+            "descriptionPlaceholder": "Breve descripción del proyecto",
+            "status": "Estado",
+            "imageUpload": "Imagen del proyecto",
+            "chooseFiles": "Elegir archivos para subir",
+            "dragAndDrop": "o arrástralos y suéltalos aquí",
+            "quickAccessModules": "Registro de módulos de acceso rápido",
+            "module": "Módulo",
+            "moduleName": "Nombre del módulo",
+            "moduleBaseUrl": "Ruta",
+            "moduleBaseUrlPlaceholder": "Ej. https://inmero.co/disriego/notification",
+            "moduleIcon": "Icono",
+            "moduleSelectIcon": "Seleccionar icono",
+            "moduleDescription": "Descripción del módulo",
+            "validationRequired": "Este campo es obligatorio",
+            "validationExactlyThreeModules": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "success": "Proyecto registrado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         }
     },
     "module": {
@@ -231,14 +269,14 @@
         "description": "Consulta y administra los submódulos del sistema",
         "list": {
             "code": "Código",
-            "submoduleName": "Nombre del submódulo",
+            "submoduleName": "Submódulo",
             "description": "Descripción",
             "parentModule": "Módulo padre",
             "associatedModule": "Módulo asociado",
             "allModules": "Todos los módulos",
-            "createdAt": "Fecha de creación",
+            "createdAt": "Fecha",
             "responsible": "Responsable",
-            "searchPlaceholder": "Buscar por nombre o código",
+            "searchPlaceholder": "Buscar por nombre, código o descripción",
             "loading": "Cargando submódulos...",
             "loadError": "Error al cargar submódulos",
             "deactivateTitle": "Desactivar submódulo",
@@ -259,7 +297,7 @@
     },
     "resetPassword":{
         "resetPassword": "Establece una nueva contraseña.",
-        "instructions": "Este cambio actualizará la contraseña de tus cuentas en todos los proyectos activos de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
+        "instructions": "Este cambio actualizará la contraseña de tu cuenta de AgroFusion. Recuerdala para tu próximo inicio de sesión.",
         "newPassword": "Nueva contraseña",
         "confirmPassword": "Confirmar contraseña",
         "resetButton": "Restablecer contraseña",
@@ -270,6 +308,7 @@
         "errorExtPro": "{{service}}. No se pudo realizar el cambio de contraseña."
     },
     "reqResetPassword":{
+        "changeEmailToRetry": "Modifica el correo electrónico para intentar nuevamente.",
         "requestReset": "¡Recupera tu cuenta!",
         "instructions": "Ingresa tu dirección de correo electrónico registrada en el sistema.",
         "sendResetLink": "Buscar mi cuenta",
@@ -582,11 +621,13 @@
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
 
         "passwordsMustMatch": "Las contraseñas no coinciden.",
-        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres."
-        
+        "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres.",
+        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres."
     },
     "errors": {
     "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
+    "AUTH_USER_NOT_ACTIVE": "Hubo un error al solicitar el cambio de contraseña", 
+    "AUTH_USER_NOT_FOUND_REQ": "Hubo un error al solicitar el cambio de contraseña",
     "AUTH_USER_DELETED": "El usuario no existe o fue eliminado del sistema.",
     "AUTH_USER_INACTIVE": "El usuario no esta activo, no puede iniciar sesión",
     "AUTH_INVALID_PASSWORD": "Correo o contraseña incorrectos. Intenta nuevamente.",
@@ -626,5 +667,16 @@
     "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
     "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
     "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema."
-    }   
+    },
+    "moduleRouteGuard": {
+        "preparing": "Preparando contenido..."
+    },
+    "moduleInactive": {
+        "title": "Módulo inactivo",
+        "message": "Este módulo está inactivo. Debe contactarse con el administrador del sistema para solicitar su activación."
+    },
+    "submoduleInactive": {
+        "title": "Submódulo inactivo",
+        "message": "Este submódulo está desactivado. Si necesitas acceso, contacta al administrador del sistema."
+    }
 }

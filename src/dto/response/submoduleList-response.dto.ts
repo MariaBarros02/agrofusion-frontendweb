@@ -23,3 +23,12 @@ export interface SubmoduleListResponse {
   /** Responsable (usuario creador del registro) */
   responsible: string | null;
 }
+
+/** Respuesta paginada del listado de submódulos */
+export interface PaginatedSubmodulesResponse {
+  items: SubmoduleListResponse[];
+  total: number;
+  page: number;
+  size: number;
+  total_pages: number;
+}

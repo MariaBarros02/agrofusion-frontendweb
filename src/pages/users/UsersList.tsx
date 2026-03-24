@@ -18,6 +18,10 @@ import type {
 } from "../../dto/response/listUsers-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
 import type { ListBasicRole } from "../../dto/response/listBasicRoles-response.dto";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const UsersList = () => {
   const { t } = useTranslation();
@@ -158,6 +162,13 @@ const UsersList = () => {
     getBasicRoles();
   }, []);
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
@@ -174,7 +185,6 @@ const UsersList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -193,7 +203,6 @@ const UsersList = () => {
               <option value="BLOCKED"> {t("common.blocked")}</option>
             </Select>
           </div>
-
           <div className="max-w-md">
             <Label className="text-xs">{t("users.associateRole")}</Label>
             <Select
@@ -203,7 +212,6 @@ const UsersList = () => {
               onChange={(e) => setRol(e.target.value)}
             >
               <option value="">{t("users.roles")}</option>
-
               {basicRoles.map((role) => (
                 <option key={role.role_id} value={role.role_id}>
                   {role.name}
@@ -212,12 +220,10 @@ const UsersList = () => {
             </Select>
           </div>
         </div>
-
         <div className="flex items-end justify-end gap-2 mt-2 md:w-1/2 md:mt-0">
           <Button size="xs" onClick={() => getUsers(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -229,7 +235,6 @@ const UsersList = () => {
           >
             {t("common.filterReset")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -239,35 +244,37 @@ const UsersList = () => {
           </Button>
         </div>
       </div>
-      {/* tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("users.loading")}</p>{" "}
-        </div>
-      )}{" "}
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("users.error")}</p>{" "}
-        </div>
-      )}{" "}
-      {!loading && !error && paginatedUsers?.items.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {" "}
-            {t("users.noUsers")}{" "}
-          </p>{" "}
-        </div>
-      )}
-      {!loading && paginatedUsers && paginatedUsers.items.length !== 0 && (
-        <DataTable
-          data={paginatedUsers}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("users.users")}
-        />
+      {/* área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("users.loading")}</p>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("users.error")}</p>
+            </div>
+          )}
+          {!loading && !error && paginatedUsers?.items.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("users.noUsers")}
+              </p>
+            </div>
+          )}
+          {!loading && !error && paginatedUsers && paginatedUsers.items.length !== 0 && (
+            <DataTable
+              data={paginatedUsers}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("users.users")}
+            />
+          )}
+        </>
       )}
     </AppLayoutSB>
   );
