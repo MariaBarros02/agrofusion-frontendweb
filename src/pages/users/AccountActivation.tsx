@@ -8,18 +8,13 @@ import { Label, TextInput, Card, Button } from "flowbite-react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {
-  accountActivateService,
-  getExternalProjects,
-} from "../../services/agrofusion/auth.service";
+import { accountActivateService } from "../../services/agrofusion/auth.service";
 import { type AuthErrorCode } from "../../scope/auth/authError.scope";
 import { useTranslation } from "react-i18next";
 import { FaLock, FaRegClock } from "react-icons/fa";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import AlertSimple from "../../components/layout/AlertSimple";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
-import { handleAccountActivationEP } from "../../services/orchestrator/userOrchestrator.services";
-import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente para el establecimiento de una nueva contraseña.
@@ -82,69 +77,26 @@ onSubmit: async (values) => {
   try {
     setGlobalError(null);
 
-    const payloadAgrofusion: AccountActivateRequest = {
+    // Los tokens de activación de externos vienen en los query params de la URL
+    const externalTokens = getExtTokenFromUrl();
+
+    const payload: AccountActivateRequest = {
       token: getTokenFromUrl(),
       new_password: values.newPassword,
       confirm_password: values.confirmPassword,
       old_password: values.oldPassword,
+      // El backend orquesta la activación en SIGMA, DISRIEGO, etc.
+      external_tokens: Object.keys(externalTokens).length > 0
+        ? externalTokens
+        : undefined,
     };
 
-    /* ======================================
-       1. ACTIVAR CUENTA CENTRAL
-    ====================================== */
-
-    const userActivate = await accountActivateService(payloadAgrofusion);
-
-    if (!userActivate) return;
-
-    /* ======================================
-       2. OBTENER PROYECTOS EXTERNOS + TOKENS ACTIVACIÓN
-    ====================================== */
-
-    const externalProjects = await getExternalProjects();
-    const activationTokens = await getExtTokenFromUrl();
-
-    /* ======================================
-       3. ORQUESTAR ACTIVACIÓN + RESET PASSWORD EXTERNOS
-    ====================================== */
-
-    const { errors } = await handleAccountActivationEP(
-      {
-        activationTokens,
-        email: userActivate.email, // importante
-        newPassword: values.newPassword,
-        confirmPassword: values.confirmPassword,
-      },
-      externalProjects
-    );
-
-    /* ======================================
-       4. ALERTA ÉXITO GLOBAL
-    ====================================== */
+    await accountActivateService(payload);
 
     setAlert({
       type: "success",
       message: t("accountActivation.successAlert"),
       to: "/login",
-    });
-
-    /* ======================================
-       5. TOASTS ERRORES PARCIALES EXTERNOS
-    ====================================== */
-
-    errors.forEach((err) => {
-      const link = projectsLinks[err.project];
-
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: err.messageKey,
-          messageParams: err.messageParams,
-          type: err.type ?? "warning",
-          ...(link ?? {}),
-        },
-      ]);
     });
 
   } catch (error: any) {

@@ -1,69 +1,33 @@
 /**
+ * Datos de un proyecto externo específico para el usuario a crear.
+ */
+export interface ExternalProjectData {
+    type_document_id: number | string;
+    roles: number[];
+}
+
+/**
  * Payload utilizado para crear un nuevo usuario en el sistema.
- * 
- * Este modelo es enviado normalmente por un administrador o proceso
- * de registro controlado.
- * 
- * @interface CreateUserRequest
+ * El backend orquesta la creación en los proyectos externos (SIGMA, DISRIEGO)
+ * usando los datos en `external_data`.
+ *
+ * @interface createUserRequest
  */
 export interface createUserRequest {
-
-    /**
-     * Nombre completo del usuario.
-     */
     name: string;
-
-    /**
-     * Correo electrónico del usuario.
-     * 
-     * Debe ser único dentro del sistema.
-     */
     email: string;
-
-    /**
-     * Contraseña inicial del usuario.
-     * 
-     * Debe cumplir la política de contraseñas del sistema.
-     */
     password: string;
-
-    /**
-     * Confirmación de la contraseña.
-     * 
-     * Debe coincidir con `password`.
-     */
     confirm_password: string;
-
-    /**
-     * Número de identificación del usuario.
-     * 
-     * Puede ser cédula, pasaporte u otro identificador único.
-     */
     identity_number: string;
-
-    
-    /**
-     * Número de identificación del rol asignado.
-     * 
-     */
     role_id: string;
-
-
-    /**
-     * Tokens externos asociados al usuario.
-     * 
-     * Usado para integraciones con sistemas externos, autenticación SSO,
-     * o provisión automática de accesos.
-     * 
-     * La clave representa el sistema externo y el valor el token asignado.
-     * 
-     * @example
-     * {
-     *   "crm": "token_abc123",
-     *   "erp": "token_xyz456"
-     * }
-     */
-    tokens: {
-        [key: string]: string;
-    };
+    first_last_name?: string;
+    second_last_name?: string;
+    /** Fecha de nacimiento en formato yyyy-MM-dd */
+    birthday?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    gender_id?: any;
+    /** Fecha de expedición del documento en formato yyyy-MM-dd */
+    date_issuance_document?: string;
+    /** Datos por proyecto externo, clave = instance_code (ej: "DISRIEGO", "SIGMA") */
+    external_data?: Record<string, ExternalProjectData>;
 }

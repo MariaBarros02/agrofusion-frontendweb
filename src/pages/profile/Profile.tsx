@@ -14,15 +14,11 @@ import {
   changeFDoubleAService,
   changePasswordService,
   editProfileService,
+  getExternalProjectUsersService,
   getExternalProjects,
   getProfileService,
 } from "../../services/agrofusion/auth.service";
-import {
-  handleChangePasswordEP,
-  handleEditUserProfileEP,
-  handleGetUserByEmailEP,
-} from "../../services/orchestrator/userOrchestrator.services";
-import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
+import { mapBackendErrors, projectsLinks } from "../../services/orchestrator/userOrchestrator.services";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple from "../../components/layout/ToastSimple";
 import ModalChangePassword from "./ModalChangePassword";
@@ -205,109 +201,41 @@ useEffect(() => {
 }
   });
   const handleSaveProfile = async (values: any) => {
-    if (!userId) return;
+    if (!userId || !userDetails?.email) return;
 
     setLoading(true);
 
     try {
       /* ===========================
-       1️ ACTUALIZAR CORE
+       ACTUALIZAR PERFIL (BACKEND ORQUESTA A EXTERNOS)
     ============================ */
+      const editPayload = {
+        email: userDetails.email,
+        name: values.name,
+        first_last_name: values.first_last_name || undefined,
+        second_last_name: values.second_last_name || undefined,
+        identity_number: values.document_number,
+        birthday: values.birthday || undefined,
+        date_issuance_document: values.date_issuance_document || undefined,
+        gender_id: values.gender_id ? Number(values.gender_id) : undefined,
+      };
 
-      await editProfileService(
-        userId,
-        firstExternalUser
-          ? values.name +
-              " " +
-              values.first_last_name +
-              " " +
-              values.second_last_name
-          : values.name,
-        values.document_number,
-      );
-      /* ===========================
-       2️ SI NO HAY EXTERNOS
-    ============================ */
+      const editResponse = await editProfileService(userId, editPayload);
 
-      if (!projects || !userDetails?.email) {
-        showSuccessToast();
-        setModalEdit(false);
-        return;
-      }
-
-      /* ===========================
-       3️ BUSCAR USUARIOS EXTERNOS
-    ============================ */
-
-      const { users: externalUsersResponse, errors: getUserErrors } =
-        await handleGetUserByEmailEP(userDetails.email, projects);
-
-      getUserErrors.forEach((err) => {
-        const link = projectsLinks[err.project];
+      // Mostrar sync_errors no bloqueantes del backend
+      const syncErrors = (editResponse as any)?.sync_errors ?? [];
+      syncErrors.forEach((err: { instance_code: string; error: string }) => {
         setToasts((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
+            messageKey: "profile.externalSyncError",
+            messageParams: { service: err.instance_code, error: err.error },
+            type: "warning" as const,
+            to: projectsLinks[err.instance_code]?.to,
+            linkText: projectsLinks[err.instance_code]?.linkText ?? "",
           },
         ]);
-      });
-
-      if (!externalUsersResponse) {
-        showSuccessToast();
-        setModalEdit(false);
-        return;
-      }
-
-      /* ===========================
-       4️ PAYLOAD EXTERNO
-    ============================ */
-
-    const editResults = await Promise.all(
-  Object.entries(externalUsersResponse).map(([service, user]) => {
-    const externalPayload = {
-      name: values.name,
-      first_last_name: values.first_last_name,
-      second_last_name: values.second_last_name,
-      document_number: values.document_number,
-      type_document_id: user.type_document_id, 
-      date_issuance_document: values.date_issuance_document,
-      birthday: values.birthday,
-      gender_id: Number(values.gender_id),
-      roles: user.roles ?? [], 
-    };
-
-    return handleEditUserProfileEP(
-      externalPayload,
-      user.id,
-      projects.filter((p) => p.instance_code === service),
-    );
-  }),
-);
-
-      console.log(editResults);
-
-      /* ===========================
-       6️ TOAST ERRORES
-    ============================ */
-
-      editResults.forEach(({ errors }) => {
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: err.type ?? "error",
-              ...(link ?? {}),
-            },
-          ]);
-        });
       });
 
       showSuccessToast();
@@ -360,7 +288,6 @@ const handleChangePassword = async (values: {
 }) => {
   if (!userId) return;
 
-
   try {
     const payload = {
       old_password: values.old_password,
@@ -368,53 +295,16 @@ const handleChangePassword = async (values: {
       confirm_password: values.confirm_password,
     };
 
-    /* ===========================
-       1️⃣ CAMBIO CORE
-    ============================ */
-
+    // El backend orquesta el cambio de contraseña en SIGMA, DISRIEGO, etc.
     await changePasswordService(userId, payload);
 
-    /* ===========================
-       2️⃣ SIN PROYECTOS EXTERNOS
-    ============================ */
+    setModalChangePass(false);
+    setAlert({
+      message: "profile.changePasswordSuccess",
+      type: "success",
+    });
 
-    if (!projects || !userDetails?.email) {
-      showSuccessToast();
-      return;
-    }
-
-    /* ===========================
-       3️⃣ EXTERNOS
-    ============================ */
-
-    const { users: externalUsersResponse } =
-      await handleGetUserByEmailEP(userDetails.email, projects);
-
-    if (!externalUsersResponse) {
-      setModalChangePass(false);
-      setAlert({
-  message: "profile.changePasswordSuccess",
-  type: "success",
-});
-      return;
-    }
-
-    await Promise.all(
-      Object.entries(externalUsersResponse).map(([service, user]) =>
-        handleChangePasswordEP(
-          payload,
-          user.id,
-          projects.filter((p) => p.instance_code === service),
-        ),
-      ),
-    );
-setModalChangePass(false);
-   setAlert({
-  message: "profile.changePasswordSuccess",
-  type: "success",
-});
-
-     return true;
+    return true;
   } catch (error: any) {
     console.log(error);
 
@@ -431,8 +321,8 @@ setModalChangePass(false);
       type: "error",
       messageKey: "profile.passwordChangeFailed",
     });
-     return false;
-  } 
+    return false;
+  }
 };
   const firstProjectKey = externalUsers ? Object.keys(externalUsers)[0] : null;
   const formatDate = (date?: string | null) => {
@@ -490,34 +380,32 @@ setModalChangePass(false);
     try {
       setLoading(true);
 
-      const { users: externalUsersResponse, errors: getUserErrors } =
-        await handleGetUserByEmailEP(userDetails?.email || "", projects);
+      const response = await getExternalProjectUsersService(
+        userDetails?.email || "",
+      );
 
-      console.log("ExternalUsers:", externalUsersResponse);
-
-      if (
-        externalUsersResponse &&
-        Object.keys(externalUsersResponse).length > 0
-      ) {
-        setExternalUsers(externalUsersResponse);
+      if (response.results && Object.keys(response.results).length > 0) {
+        setExternalUsers(response.results);
       } else {
         setExternalUsers(null);
       }
 
-      getUserErrors.forEach((err) => {
-        const link = projectsLinks[err.project];
-
-        setToasts((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
-          },
-        ]);
-      });
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "profile");
+        uiErrors.forEach((err) => {
+          const link = projectsLinks[err.project];
+          setToasts((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              messageKey: err.messageKey,
+              messageParams: err.messageParams,
+              type: err.type ?? "error",
+              ...(link ?? {}),
+            },
+          ]);
+        });
+      }
     } catch (error) {
       console.log(error);
     } finally {
