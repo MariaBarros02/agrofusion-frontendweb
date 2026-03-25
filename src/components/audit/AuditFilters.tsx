@@ -16,6 +16,7 @@ interface Origin {
 
 interface Event {
   code: string;
+  label: string;
 }
 
 interface Props {
@@ -149,7 +150,7 @@ const AuditFilters = ({
         {type === "audit" && (
           <>
             {/* Usuario */}
-            <div className="relative first-line:flex flex-col w-full lg:col-start-2 lg:row-start-1">
+            <div className="relative flex-col w-full first-line:flex lg:col-start-2 lg:row-start-1">
               <Label>{t(`${baseKey}.filters.user`)}</Label>
 
               <TextInput
@@ -194,7 +195,7 @@ const AuditFilters = ({
 
                 {origins.map((origin) => (
                   <option key={origin.code} value={origin.code}>
-                    {origin.code}
+                    {t(`audit.${origin.code}`)}
                   </option>
                 ))}
               </Select>
@@ -231,7 +232,7 @@ const AuditFilters = ({
 
                 {events.map((event) => (
                   <option key={event.code} value={event.code}>
-                    {event.code}
+                    {event.label}
                   </option>
                 ))}
               </Select>
@@ -312,7 +313,7 @@ const AuditFilters = ({
         )}
 
         {/* Botones */}
-        <div className="flex justify-end items-end gap-2 lg:col-start-3 lg:col-span-2 lg:row-start-2">
+        <div className="flex items-end justify-end gap-2 lg:col-start-3 lg:col-span-2 lg:row-start-2">
           <Button size="xs" onClick={applyFilters} color="alternative">
             <FiFilter size={18} /> {t("common.applyFilters")}
           </Button>

@@ -238,10 +238,10 @@ const AuditList = () => {
         return {
           ...event,
           event_id: event.event_id?.substring(0, 7),
-          origin: truncate(event.origin, 20),
-          action: truncate(event.action, 20),
-          user: truncate(event.user ?? event.user_id, 20),
-          message: formatAuditMessage(event.action, t),
+          origin: t(`audit.${event.origin}`),
+          action: event.action,
+          user:(event.user ?? event.user_id),
+          message:event.description,
           result: String(event.result).toUpperCase(),
         };
       });
