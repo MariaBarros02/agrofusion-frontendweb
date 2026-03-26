@@ -22,6 +22,7 @@ import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { CreateProjectRequest, CreateModuleRequest } from "../../dto/request/createProject-request.dto";
+import { ProjectEndpointRegistrationSection } from "../../components/administration/ProjectEndpointRegistrationSection";
 
 const MODULES_COUNT = 3;
 const defaultModule: CreateModuleRequest = {
@@ -449,6 +450,8 @@ const AddProject = () => {
                 <p className="mt-1 text-sm text-red-500">{formik.errors.modules}</p>
               )}
             </div>
+
+            <ProjectEndpointRegistrationSection apiUrlBase={formik.values.api_url_base} />
 
             <div className="flex justify-end gap-3">
               <Button
