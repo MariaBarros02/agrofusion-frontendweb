@@ -71,7 +71,7 @@ const ListPermissions = () => {
 
   const columns: Column<ListPermissionsResponse>[] = [
     { key: "permission_id", label: t("permissions.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
-    { key: "name", label: t("permissions.name"), type: "text" },
+    { key: "name", label: t("permissions.name"), type: "text", width: "200px"},
     { key: "module", label: t("permissions.module"), type: "text" },
     { key: "submodule", label: t("permissions.submodule"), type: "text" },
     { key: "type", label: t("permissions.type"), type: "text" },
@@ -81,6 +81,7 @@ const ListPermissions = () => {
       key: "actions",
       label: t("permissions.functions"),
       type: "actions",
+      width: "180px",
       actions: [
         {
           label: t("permissions.view"),
@@ -119,7 +120,7 @@ const ListPermissions = () => {
       />
       {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
           <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
@@ -130,7 +131,6 @@ const ListPermissions = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -147,8 +147,7 @@ const ListPermissions = () => {
             </Select>
           </div>
         </div>
-
-        <div className="flex items-end gap-2 mt-2 ml-4 md:w-1/2 md:mt-0">
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button
             size="xs"
             onClick={() => getPermissions(1)}
@@ -156,7 +155,6 @@ const ListPermissions = () => {
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -167,13 +165,6 @@ const ListPermissions = () => {
           >
             {t("common.filterReset")}
           </Button>
-          {/* <Button
-            color="blue"
-            size="xs"
-            onClick={() => navigate("/administrator/roles")}
-          >
-            {t("roles.createRoles")}
-          </Button> */}
         </div>
       </div>
       {/* Área de contenido: mensaje inactivo o tabla */}

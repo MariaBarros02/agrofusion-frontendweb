@@ -10,6 +10,7 @@ import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
   Button,
   Checkbox,
@@ -204,10 +205,10 @@ const ProjectsList = () => {
     <AppLayoutSB>
       <TitleTarget title="project.title" description="project.description" />
 
-      {/* Filtros - siempre visibles */}
-      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
-        <div className="flex flex-nowrap items-end gap-2 overflow-x-auto">
-          <div className="flex-shrink-0 w-72">
+      {/* Filtros y acción Agregar proyecto */}
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex flex-wrap items-end gap-2 flex-1 overflow-x-auto">
+          <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -217,8 +218,7 @@ const ProjectsList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -234,24 +234,23 @@ const ProjectsList = () => {
               <option value="DELETED">{t("common.deleted")}</option>
             </Select>
           </div>
-
+        </div>
+        <div className="flex items-end justify-end gap-2 mt-2 md:mt-0 md:ml-4 flex-shrink-0">
           <Button
             size="xs"
             onClick={() => getProjects()}
             color={hasActiveFilters ? "blue" : "alternative"}
-            className="flex-shrink-0"
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
-          <Button
-            color="blue"
-            size="xs"
-            onClick={handleResetFilters}
-            className="flex-shrink-0"
-          >
+          <Button color="blue" size="xs" onClick={handleResetFilters}>
             {t("common.filterReset")}
           </Button>
+          <Link to="/administration/projects/create">
+            <Button color="blue" size="xs">
+              {t("project.create.addProject")}
+            </Button>
+          </Link>
         </div>
       </div>
 

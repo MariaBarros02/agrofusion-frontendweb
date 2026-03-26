@@ -93,21 +93,24 @@ const UsersList = () => {
       label: t("users.code"),
       type: "text",
       format: (value: string) => value?.slice(0, 7),
+      width: "80px"
     },
-    { key: "name", label: t("users.name"), type: "text" },
+    { key: "name", label: t("users.name"), type: "text", width: "250px" },
     { key: "email", label: t("users.email"), type: "text" },
     { key: "rol", label: t("users.role"), type: "text" },
-    { key: "state", label: t("common.state"), type: "status" },
+    { key: "state", label: t("common.state"), type: "status", width: "80px" },
     {
       key: "created_at",
       label: t("users.createdAt"),
       type: "text",
       format: (value: string) => value?.split("T")[0],
+      width: "150px"
     },
     {
       key: "edit",
       label: t("users.actions"),
       type: "action",
+      width: "120px",
       action: {
         label: t("users.viewDetail"),
         onClick: (user: ListUserResponse) =>
@@ -172,7 +175,7 @@ const UsersList = () => {
   return (
     <AppLayoutSB>
       <TitleTarget title="users.title" description="users.description" />
-      {/* filtros - siempre visibles */}
+      {/* filtros */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex gap-2">
           <div className="w-72">
@@ -185,7 +188,6 @@ const UsersList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -204,7 +206,6 @@ const UsersList = () => {
               <option value="BLOCKED"> {t("common.blocked")}</option>
             </Select>
           </div>
-
           <div className="max-w-md">
             <Label className="text-xs">{t("users.associateRole")}</Label>
             <Select
@@ -214,7 +215,6 @@ const UsersList = () => {
               onChange={(e) => setRol(e.target.value)}
             >
               <option value="">{t("users.roles")}</option>
-
               {basicRoles.map((role) => (
                 <option key={role.role_id} value={role.role_id}>
                   {role.name}
@@ -223,12 +223,10 @@ const UsersList = () => {
             </Select>
           </div>
         </div>
-
         <div className="flex items-end justify-end gap-2 mt-2 md:w-1/2 md:mt-0">
           <Button size="xs" onClick={() => getUsers(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -240,7 +238,6 @@ const UsersList = () => {
           >
             {t("common.filterReset")}
           </Button>
-
           <Button
             color="blue"
             size="xs"

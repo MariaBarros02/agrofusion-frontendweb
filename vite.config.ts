@@ -17,8 +17,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
-        scope: '/agrofusion/',
-        start_url: '/agrofusion/',
+        scope: '/',
+        start_url: '/',
         
         icons: [
           {
@@ -44,7 +44,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+<<<<<<< HEAD
+        navigateFallback: '/index.html',
+=======
         navigateFallback: '/agrofusion/index.html',
+>>>>>>> a6140539e98849aeb8c074376a938fb12dffcf08
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
@@ -65,7 +69,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: "/agrofusion/",
+  base: "/",
   server: {
     allowedHosts: ['inmero.co', 'www.inmero.co'] 
   },

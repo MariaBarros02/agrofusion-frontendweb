@@ -74,6 +74,7 @@ const SubmodulesList = () => {
       label: t("submodule.list.description"),
       type: "text",
       format: (value: string) => value ?? "-",
+      width: "450px"
     },
     {
       key: "status",
@@ -222,9 +223,9 @@ const SubmodulesList = () => {
       <TitleTarget title="submodule.title" description="submodule.description" />
 
       {/* Filtros - siempre visibles */}
-      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
-        <div className="flex flex-nowrap items-end gap-2 overflow-x-auto">
-          <div className="flex-shrink-0 w-72">
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
+          <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -234,8 +235,7 @@ const SubmodulesList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -250,8 +250,7 @@ const SubmodulesList = () => {
               <option value="INACTIVE">{t("common.inactive")}</option>
             </Select>
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("submodule.list.associatedModule")}</Label>
             <Select
               sizing="sm"
@@ -266,17 +265,16 @@ const SubmodulesList = () => {
               ))}
             </Select>
           </div>
-
+        </div>
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button
             size="xs"
             onClick={() => getSubmodules()}
             color={hasActiveFilters ? "blue" : "alternative"}
-            className="flex-shrink-0"
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
-          <Button color="blue" size="xs" onClick={handleResetFilters} className="flex-shrink-0">
+          <Button color="blue" size="xs" onClick={handleResetFilters}>
             {t("common.filterReset")}
           </Button>
         </div>
@@ -337,13 +335,13 @@ const SubmodulesList = () => {
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
             {pendingStatusChange?.newStatus === "INACTIVE" && (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-                <FiMinusCircle className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 rounded-lg shrink-0 bg-amber-500">
+                <FiMinusCircle className="w-6 h-6 text-white" />
               </div>
             )}
             {pendingStatusChange?.newStatus === "ACTIVE" && (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
-                <FiCheckCircle className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-lg shrink-0">
+                <FiCheckCircle className="w-6 h-6 text-white" />
               </div>
             )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -374,7 +372,7 @@ const SubmodulesList = () => {
                 />
                 <Label
                   htmlFor="confirm-status-change"
-                  className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
+                  className="text-sm font-normal text-gray-700 cursor-pointer dark:text-gray-300"
                 >
                   {pendingStatusChange.newStatus === "INACTIVE"
                     ? t("submodule.list.deactivateCheckbox")
@@ -384,7 +382,7 @@ const SubmodulesList = () => {
             </>
           )}
         </ModalBody>
-        <ModalFooter className="border-t pt-4">
+        <ModalFooter className="pt-4 border-t">
           <Button color="gray" onClick={handleCloseModal}>
             {t("common.cancel")}
           </Button>
@@ -414,7 +412,7 @@ const SubmodulesList = () => {
         />
       )}
       {/* Toasts de feedback */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="fixed z-50 flex flex-col gap-2 bottom-4 right-4">
         {toasts.map((toast) => (
           <ToastSimple
             key={toast.id}

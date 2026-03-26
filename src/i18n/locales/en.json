@@ -12,7 +12,6 @@
         "state": "Status",
         "active": "Active",
         "inactive": "Inactive",
-        "deleted": "Deleted",
         "filterActive": "Active filters",
         "filterReset": "Reset filters",
         "cancel": "Cancel",
@@ -42,7 +41,11 @@
         "create": "Create record",
         "update": "Update record",
         "delete": "Delete record",
-        "read": "View record(s)"
+        "read": "View record(s)",
+        "success": "Success",
+        "rejected": "Rejected",
+        "applyFilters": "Apply filters",
+        "resetFilters": "Reset"
     },
     "theme": {
         "dark": "Dark mode",
@@ -69,6 +72,54 @@
         "users": "Users",
         "emailGes": "Email manager",
         "roles": "Roles / Permissions"
+    },
+    "kms": {
+        "genericError": "Operation failed. Check permissions and input.",
+        "home": {
+            "title": "KMS — Keys and signatures",
+            "subtitle": "Forms wired to the audit microservice. Pick an action.",
+            "go": "Continue",
+            "cardCreateKey": "Create cryptographic key",
+            "cardCreateKeyDesc": "Generate a key pair for the given project.",
+            "cardCert": "Register X.509 certificate",
+            "cardCertDesc": "Attach a PEM certificate to an existing key.",
+            "cardVerify": "Verify digital signature",
+            "cardVerifyDesc": "Validate hash and signature against a stored key or signature."
+        },
+        "createKey": {
+            "title": "Create cryptographic key",
+            "projectId": "Project ID (UUID)",
+            "alias": "Key alias",
+            "algorithm": "Algorithm",
+            "purpose": "Purpose",
+            "validToOptional": "Valid until (optional)",
+            "submit": "Create key"
+        },
+        "cert": {
+            "title": "Register certificate",
+            "subjectDn": "Subject (DN)",
+            "issuer": "Issuing entity (Issuer)",
+            "keyKind": "Key type (reference)",
+            "keyKindHint": "Informational: the real key is the KMS key record.",
+            "serial": "Serial number",
+            "validFrom": "Valid from",
+            "validTo": "Valid to",
+            "keyId": "KMS key ID",
+            "fileOrPaste": "Certificate PEM",
+            "uploadPem": "Upload .pem / .crt file",
+            "confirm": "Confirm",
+            "success": "Certificate registered successfully."
+        },
+        "verify": {
+            "title": "Verify digital signature",
+            "documentHash": "Document hash",
+            "hashAlg": "Hash algorithm",
+            "signatureIdOptional": "Signature ID (optional)",
+            "keyIdOptional": "Key ID (optional)",
+            "signatureB64": "Signature (Base64)",
+            "uploadSig": "Upload signature file",
+            "confirm": "Confirm"
+        }
     },
     "login": {
         "login": "Login",
@@ -154,6 +205,50 @@
             "statusUpdateError": "Error updating project status",
             "noProjects": "No registered projects",
             "paginationText": "projects"
+        },
+        "create": {
+            "addProject": "Add project",
+            "title": "New project",
+            "description": "Register a new external project with its quick access modules.",
+            "descriptionInput": "Description",
+            "instanceCode": "Project code",
+            "projectUrl": "Project main URL",
+            "projectName": "Project name",
+            "apiUrlBase": "Project API URL",
+            "descriptionPlaceholder": "Brief project description",
+            "status": "Status",
+            "imageUpload": "Project image",
+            "chooseFiles": "Choose files to upload",
+            "dragAndDrop": "or drag and drop them here",
+            "quickAccessModules": "Quick access modules registration",
+            "registerEndpoint": "Register endpoints",
+            "endpointSpecDescription": "Description",
+            "endpointSpecUrl": "Endpoint path",
+            "endpointUrlPlaceholderRolesPath": "e.g. /roles/",
+            "endpointSpecMethod": "HTTP method",
+            "endpointSpecAuth": "Authentication",
+            "endpointResponseBody": "Response body",
+            "endpointResponseBodyName": "Name",
+            "endpointResponseBodyKey": "Key",
+            "endpointResponseBodyVariableType": "Variable type",
+            "endpointResponseBodyTypeString": "string",
+            "endpointResponseBodyTypeNumber": "number",
+            "endpointAuthWith": "With authentication",
+            "endpointAuthWithout": "Without authentication",
+            "endpointAgroFusionNote": "This endpoint belongs to the AgroFusion auth service, not the external project API.",
+            "module": "Module",
+            "moduleName": "Module name",
+            "moduleBaseUrl": "Route",
+            "moduleIcon": "Icon",
+            "moduleSelectIcon": "Select icon",
+            "moduleDescription": "Module description",
+            "validationRequired": "This field is required",
+            "validationExactlyThreeModules": "You must register exactly three quick access modules for the project.",
+            "success": "Project registered successfully.",
+            "errorDuplicateCode": "A project with this code is already registered.",
+            "errorModulesCount": "You must register exactly three quick access modules for the project.",
+            "errorNoPermission": "Unauthorized action. You do not have permission to register projects.",
+            "errorGeneric": "Something went wrong. The project could not be registered."
         }
     },
     "module": {
@@ -197,7 +292,7 @@
             "allModules": "All modules",
             "createdAt": "Date",
             "responsible": "Responsible",
-            "searchPlaceholder": "Search by name or code",
+            "searchPlaceholder": "Search by name, code, or description",
             "loading": "Loading submodules...",
             "loadError": "Error loading submodules",
             "deactivateTitle": "Deactivate submodule",
@@ -574,7 +669,24 @@
         "PERMISSION_NAME_ALREADY_EXISTS": "A permission with this name already exists",
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
         "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
-        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system."
+        "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system.",
+        "KEY_NOT_FOUND": "The specified key was not found.",
+        "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
+        "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
+        "DUPLICATE_KEY_FINGERPRINT": "A key with the same fingerprint already exists.",
+        "INVALID_STATUS": "The status filter is not valid.",
+        "INVALID_PURPOSE": "The key purpose is not valid.",
+        "CERTIFICATE_ALREADY_EXISTS": "A certificate with the same fingerprint already exists.",
+        "CERTIFICATE_CREATION_FAILED": "Could not register the certificate. Check the PEM and fields.",
+        "SIGNATURE_CREATION_FAILED": "Could not create the digital signature.",
+        "SIGNATURE_VERIFICATION_FAILED": "Could not verify the signature. Check hash, signature, and key.",
+        "SIGNATURE_NOT_FOUND": "The specified signature was not found.",
+        "KEY_ROTATION_FAILED": "Could not rotate the key.",
+        "KEY_NOT_ACTIVE": "The key is not active.",
+        "KEY_EXPIRED": "The key has expired.",
+        "KEY_PURPOSE_INVALID": "The key does not have the right purpose for this operation.",
+        "INVALID_HASH_FORMAT": "Invalid format or incorrect hash.",
+        "KEY_ID_REQUIRED": "You must provide a key ID."
     },
     "moduleRouteGuard": {
         "preparing": "Preparing content..."
@@ -586,5 +698,101 @@
     "submoduleInactive": {
         "title": "Submodule inactive",
         "message": "This submodule is deactivated. If you need access, contact the system administrator."
-    }
+    },
+
+    "audit": {
+  "title": "Audit",
+  "description": "Consult and validate records generated by system integrations",
+
+  "loading": "Updating audit data...",
+  "error": "Error loading audit data",
+  "noData": "No audit records found",
+  "pagination": "Audit",
+
+  "columns": {
+    "id": "Event ID",
+    "origin": "Origin",
+    "result": "Result",
+    "date": "Date/Time",
+    "action": "Action",
+    "user": "User",
+    "message": "Message"
+  },
+
+  "messages": {
+    "tokenRefreshed": "Token refreshed",
+    "sessionCreated": "Session started",
+    "loginSuccess": "Login successful",
+    "passwordResetCompleted": "Password reset completed",
+    "passwordResetRequested": "Password reset request",
+    "userCreated": "User created",
+    "userUpdated": "User updated",
+    "userDeleted": "User deleted",
+    "default": "Event recorded"
+  },
+
+  "filters": {
+  "search": "Search",
+  "searchPlaceholder": "Search by ID",
+  "date": "Date",
+  "dateRange": "Range",
+  "user": "User",
+  "userPlaceholder": "Search user...",
+  "origin": "Origin",
+  "result": "Result",
+  "event": "Event",
+  "all": "All"
+},
+    "switch": {
+    "audit": "AgroFusion Audit",
+    "errors": "External project errors"
+  }
+},
+
+    "externalErrors": {
+  "title": "External Project Errors",
+  "description": "View errors recorded in external integrations",
+
+  "loading": "Updating error data...",
+  "error": "Error loading errors",
+  "noData": "No error records found",
+  "pagination": "Errors",
+
+  "columns": {
+    "id": "Error ID",
+    "project": "Project",
+    "severity": "Severity",
+    "component": "Component",
+    "code": "Code",
+    "date": "Date/Time",
+    "message": "Message"
+  },
+
+  "severity": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+
+  "messages": {
+    "ssoTokenError": "SSO token generation failed",
+    "passwordChangeError": "Password change failed",
+    "loginError": "Login failed"
+  },
+  "filters": {
+  "search": "Search",
+  "searchPlaceholder": "Search...",
+  "date": "Date",
+  "dateRange": "Range",
+  "project": "Project",
+  "projectPlaceholder": "Project...",
+  "severity": "Severity",
+  "component": "Component",
+  "code": "Code",
+  "all": "All"
+}
+
+
+}
+
 }
