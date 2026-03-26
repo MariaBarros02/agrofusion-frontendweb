@@ -175,6 +175,7 @@
             "endpointSpecDescription": "Descripción",
             "endpointSpecUrl": "Path del endpoint",
             "endpointUrlPlaceholderRolesPath": "Ej. /roles/",
+            "endpointUrlPlaceholderTypeDocumentsPath": "Ej. /users/type-documents",
             "endpointSpecMethod": "Método HTTP",
             "endpointSpecAuth": "Autenticación",
             "endpointResponseBody": "Modelo de respuesta",

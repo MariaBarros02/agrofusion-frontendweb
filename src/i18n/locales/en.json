@@ -173,6 +173,7 @@
             "endpointSpecDescription": "Description",
             "endpointSpecUrl": "Endpoint path",
             "endpointUrlPlaceholderRolesPath": "e.g. /roles/",
+            "endpointUrlPlaceholderTypeDocumentsPath": "e.g. /users/type-documents",
             "endpointSpecMethod": "HTTP method",
             "endpointSpecAuth": "Authentication",
             "endpointResponseBody": "Response body",
