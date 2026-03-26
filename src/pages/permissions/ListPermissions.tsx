@@ -15,6 +15,10 @@ import type {
 import { useNavigate } from "react-router-dom";
 import type { listPermissionsRequest } from "../../dto/request/listPermissions-request.dto";
 import { listPermissionsService } from "../../services/agrofusion/auth.service";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const ListPermissions = () => {
   const { t } = useTranslation();
@@ -67,7 +71,7 @@ const ListPermissions = () => {
 
   const columns: Column<ListPermissionsResponse>[] = [
     { key: "permission_id", label: t("permissions.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
-    { key: "name", label: t("permissions.name"), type: "text" },
+    { key: "name", label: t("permissions.name"), type: "text", width: "200px"},
     { key: "module", label: t("permissions.module"), type: "text" },
     { key: "submodule", label: t("permissions.submodule"), type: "text" },
     { key: "type", label: t("permissions.type"), type: "text" },
@@ -77,6 +81,7 @@ const ListPermissions = () => {
       key: "actions",
       label: t("permissions.functions"),
       type: "actions",
+      width: "180px",
       actions: [
         {
           label: t("permissions.view"),
@@ -93,29 +98,29 @@ const ListPermissions = () => {
     },
   ];
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PERMISSIONS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("PERMISSIONS");
+
+  const permissionsTabs = [
+    { id: "roles", label: "common.roles", icon: BiCube, to: "/administration/roles" },
+    { id: "permissions", label: "common.permissions", icon: FiInfo, to: "/administration/permissions" },
+  ];
+
   return (
     <AppLayoutSB>
       <TitleTarget
         title="permissions.title"
         description="permissions.description"
         activeTab="permissions"
-        tabs={[
-          {
-            id: "roles",
-            label: "common.roles",
-            icon: BiCube,
-            to: "/administration/roles",
-          },
-          {
-            id: "permissions",
-            label: "common.permissions",
-            icon: FiInfo,
-            to: "/administration/permissions",
-          },
-        ]}
+        tabs={permissionsTabs}
       />
+      {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
           <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
@@ -126,7 +131,6 @@ const ListPermissions = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
           <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
@@ -143,8 +147,7 @@ const ListPermissions = () => {
             </Select>
           </div>
         </div>
-
-        <div className="flex items-end gap-2 mt-2 ml-4 md:w-1/2 md:mt-0">
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button
             size="xs"
             onClick={() => getPermissions(1)}
@@ -152,7 +155,6 @@ const ListPermissions = () => {
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
           <Button
             color="blue"
             size="xs"
@@ -163,50 +165,44 @@ const ListPermissions = () => {
           >
             {t("common.filterReset")}
           </Button>
-          {/* <Button
-            color="blue"
-            size="xs"
-            onClick={() => navigate("/administrator/roles")}
-          >
-            {t("roles.createRoles")}
-          </Button> */}
         </div>
       </div>
-      {/* tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("permissions.loading")}</p>{" "}
-        </div>
-      )}{" "}
-      {notListPerm && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>{" "}
-        </div>
-      )}{" "}
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-          {" "}
-          <p className="text-3xl font-bold">{t("permissions.error")}</p>{" "}
-        </div>
-      )}{" "}
-      {!loading && !error && paginatedPerm?.items.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          {" "}
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {" "}
-            {t("permissions.noPermissions")}{" "}
-          </p>{" "}
-        </div>
-      )}
-      {!loading && paginatedPerm && paginatedPerm.items.length !== 0  && (
-              <DataTable
-                data={paginatedPerm}
-                columns={columns}
-                onPageChange={handlePageChange}
-                paginationText={t("permissions.permissions")} 
-              />
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("permissions.loading")}</p>
+            </div>
+          )}
+          {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t(`errors.${notListPerm}`, { defaultValue: t('errors.unknown') })}</p>
+            </div>
+          )}
+          {!loading && !notListPerm && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("permissions.error")}</p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedPerm?.items.length === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("permissions.noPermissions")}
+              </p>
+            </div>
+          )}
+          {!loading && !error && !notListPerm && paginatedPerm && paginatedPerm.items.length !== 0 && (
+            <DataTable
+              data={paginatedPerm}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("permissions.permissions")}
+            />
+          )}
+        </>
       )}
     </AppLayoutSB>
   );

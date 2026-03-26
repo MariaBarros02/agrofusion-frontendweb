@@ -27,6 +27,8 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple from "../../components/layout/ToastSimple";
 import ModalChangePassword from "./ModalChangePassword";
 import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 const documentTypes = {
   DISRIEGO: {
@@ -529,10 +531,17 @@ setModalChangePass(false);
 
   }, [userDetails, externalUsers]);
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  const showModuleInactive = !canAccessModule("PROFILE");
+  const showContent = canAccessModule("PROFILE");
+
   return (
     <>
       <AppLayoutSB>
         <TitleTarget title="profile.title" description="profile.description" />
+        {showModuleInactive && <ModuleInactive />}
+        {showContent && (
+        <>
         {loading && (
           <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
             {" "}
@@ -607,6 +616,8 @@ setModalChangePass(false);
     }}
   />
 )}
+        </>
+        )}
       </AppLayoutSB>
     </>
   );

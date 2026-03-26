@@ -17,7 +17,7 @@ export default function AppLayoutSB({ children }: AppLayoutProps) {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 min-h-screen p-3">
+      <div className="flex-1 min-h-screen p-3 h-[calc(100vh-130px)] overflow-auto">
         {/* botón mobile */}
         <button
           className="mb-4 md:hidden"

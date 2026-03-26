@@ -2,14 +2,12 @@
 import  { useState } from "react";
 import ToastSimple from "../components/layout/ToastSimple";
 import { type ToastData } from "../components/layout/ToastSimple";
-import { projectsLinks } from "../services/orchestrator/authOrchestrator.service";
 import Header from "../components/layout/Header";
 import { Label, TextInput, Card, Button } from "flowbite-react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  getExternalProjects,
   resetPasswordService,
 } from "../services/agrofusion/auth.service";
 import { type AuthErrorCode } from "../scope/auth/authError.scope";
@@ -18,7 +16,6 @@ import { Link } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import type { AlertState } from "../components/layout/AlertSimple";
 import AlertSimple from "../components/layout/AlertSimple";
-import { handleResPasswordEP } from "../services/orchestrator/authOrchestrator.service";
 
 /**
  * Componente para el establecimiento de una nueva contraseña.
@@ -33,10 +30,6 @@ const ResetPassword = () => {
   // --- HELPERS DE URL ---
   /** Extrae el token principal de AgroFusion */
   const getTokenFromUrl = () => new URLSearchParams(window.location.search).get("token") || "";
-  /** Extrae el token específico para la instancia Disriego */
-  const gettDisriegoFromUrl = () => new URLSearchParams(window.location.search).get("tDisriego") || "";
-  /** Extrae el token específico para la instancia Sigma */
-  const gettSigmaFromUrl = () => new URLSearchParams(window.location.search).get("tSigma") || "";
   
   const [globalError, setGlobalError] = useState<string | null>(null);
   
@@ -82,17 +75,6 @@ const ResetPassword = () => {
           values.confirmPassword,
         );
 
-        // 2. Identificar proyectos externos vinculados
-        const externalProjects = await getExternalProjects();
-
-        // 3. Orquestar la actualización en proyectos externos
-        const { errors } = await handleResPasswordEP(
-          gettDisriegoFromUrl(),
-          gettSigmaFromUrl(),
-          values.newPassword,
-          values.confirmPassword,
-          externalProjects,
-        );
 
         // 4. Notificar éxito al usuario
         setAlert({
@@ -101,21 +83,6 @@ const ResetPassword = () => {
           to: "/login",
         });
 
-        // 5. Si hubo errores en proyectos secundarios, mostrar notificaciones tipo Toast
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
-
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: "error",
-              ...(link ?? {}),
-            },
-          ]);
-        });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -198,13 +165,14 @@ const ResetPassword = () => {
                       >
                         {showNewPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
-                      {formik.touched.newPassword &&
+
+                    </div>
+                        {formik.touched.newPassword &&
                         formik.errors.newPassword && (
                           <p className="mt-1 text-sm text-red-600">
                             {t(formik.errors.newPassword)}
                           </p>
                         )}
-                    </div>
                   </div>
 
                   <div className="mb-4">
@@ -240,13 +208,14 @@ const ResetPassword = () => {
                         {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                       </Button>
 
-                      {formik.touched.confirmPassword &&
+
+                    </div>
+                                          {formik.touched.confirmPassword &&
                         formik.errors.confirmPassword && (
                           <p className="mt-1 text-sm text-red-600">
                             {t(formik.errors.confirmPassword)}
                           </p>
                         )}
-                    </div>
                   </div>
                   {globalError && (
                     <p className="p-6 py-4 mt-1 text-sm font-bold text-center text-red-600 bg-red-200 mx-7 rounded-xl">

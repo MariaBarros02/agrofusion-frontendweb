@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { jwtDecode } from 'jwt-decode';
-import {create} from 'zustand';
-import {persist} from 'zustand/middleware';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { useModuleAccessStore } from './moduleAccess.store';
+import { useSubmoduleAccessStore } from './submoduleAccess.store';
 
 
 /**
@@ -58,16 +60,19 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: true,
                     email: email,
                     id: decoded.sub
-                })},
-            logout: () =>
+                });
+            },
+            logout: () => {
+                useModuleAccessStore.getState().clearModuleAccess();
+                useSubmoduleAccessStore.getState().clearSubmoduleAccess();
                 set({
                     accessToken: null,
                     refreshToken: null,
                     isAuthenticated: false,
                     email: null,
-                    id:null
-                }),
-                
+                    id: null,
+                });
+            },
         }),
         {
             name: 'auth-storage',

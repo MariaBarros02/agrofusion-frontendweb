@@ -16,6 +16,7 @@ import ListRoles from "../pages/roles/ListRoles";
 import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
+import AddProject from "../pages/administration/AddProject";
 import ModulesList from "../pages/administration/ModulesList";
 import SubmodulesList from "../pages/administration/SubmodulesList";
 
@@ -25,6 +26,14 @@ import ViewRole from "../pages/roles/ViewRole";
 import RoutesWrapper from "./RoutesWrapper";
 import EditRole from "../pages/roles/EditRole";
 import CreateRole from "../pages/roles/CreateRole";
+import { ModuleRouteGuard } from "./ModuleRouteGuard";
+
+import AuditList from "../pages/audit/AuditList";
+import ErrorList from "../pages/audit/ErrorList";
+import KmsHome from "../pages/kms/KmsHome";
+import RegisterCertificate from "../pages/kms/RegisterCertificate";
+import VerifySignature from "../pages/kms/VerifySignature";
+import CreateKey from "../pages/kms/CreateKey";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -32,9 +41,11 @@ import CreateRole from "../pages/roles/CreateRole";
  * 1. Rutas Protegidas: Requieren un token de sesión válido.
  * 2. Rutas Públicas: Solo accesibles si el usuario NO está autenticado (Login, Recobro).
  */
+const basename = import.meta.env.VITE_BASENAME || ""
+
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
@@ -87,18 +98,20 @@ export function AppRouter() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ModuleRouteGuard moduleCode="DASHBOARD">
+                <Dashboard />
+              </ModuleRouteGuard>
             </ProtectedRoute>
           }
         />
 
-      
-        {/* Ruta Raíz: Protegida. Si no hay login, rebota a /login */}
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <ModuleRouteGuard moduleCode="PROFILE">
+                <Profile />
+              </ModuleRouteGuard>
             </ProtectedRoute>
           }
         />
@@ -114,28 +127,38 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
+          <Route path="/dashboard" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
+          <Route path="/profile" element={<ModuleRouteGuard moduleCode="PROFILE"><Profile /></ModuleRouteGuard>} />
+          <Route path="/audit" element={<ModuleRouteGuard moduleCode="AUDIT"><AuditList /></ModuleRouteGuard>}/>
+          <Route path="audit/errors" element={<ModuleRouteGuard moduleCode="AUDIT"><ErrorList /></ModuleRouteGuard>}/>
 
           {/* ADMINISTRATION */}
-          <Route path="/administration/users" element={<UsersList />} />
-          <Route path="/administration/users/create-user" element={<CreateUser />} />
-          <Route path="/administration/users/:userId" element={<ViewUser />} />
-          <Route path="/administration/users/edit-user/:userId" element={<EditUser />} />
+          <Route path="/administration/users" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><UsersList /></ModuleRouteGuard>} />
+          <Route path="/administration/users/create-user" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><CreateUser /></ModuleRouteGuard>} />
+          <Route path="/administration/users/:userId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ViewUser /></ModuleRouteGuard>} />
+          <Route path="/administration/users/edit-user/:userId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditUser /></ModuleRouteGuard>} />
 
-          <Route path="/administration/projects" element={<ProjectsList />} />
-          <Route path="/administration/modules" element={<ModulesList />} />
-          <Route path="/administration/submodules" element={<SubmodulesList />} />
+          <Route path="/administration/projects" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectsList /></ModuleRouteGuard>} />
+          <Route path="/administration/projects/create" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AddProject /></ModuleRouteGuard>} />
+          <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
+          <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 
-          <Route path="/administration/permissions" element={<ListPermissions />} />
-          <Route path="/administration/permissions/:permId" element={<PermissionsView />} />
-          <Route path="/administration/permissions/edit-perm/:permId" element={<EditPermissions />} />
+          <Route path="/administration/permissions" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ListPermissions /></ModuleRouteGuard>} />
+          <Route path="/administration/permissions/:permId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><PermissionsView /></ModuleRouteGuard>} />
+          <Route path="/administration/permissions/edit-perm/:permId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditPermissions /></ModuleRouteGuard>} />
 
-          <Route path="/administration/roles" element={<ListRoles />} />
-          <Route path="/administration/role/:roleId" element={<ViewRole />} />
-          <Route path="/administration/roles/edit-role/:roleId" element={<EditRole/>}/>
-          <Route path="/administration/roles/create-role" element={<CreateRole/>}/>
+          <Route path="/administration/roles" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ListRoles /></ModuleRouteGuard>} />
+          <Route path="/administration/role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ViewRole /></ModuleRouteGuard>} />
+          <Route path="/administration/roles/edit-role/:roleId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditRole /></ModuleRouteGuard>} />
+          <Route path="/administration/roles/create-role" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><CreateRole /></ModuleRouteGuard>} />
+
+          {/* KMS / Firma digital (API auditoría) — mismo patrón de carga que el resto */}
+          <Route path="/kms" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
+          <Route path="/kms/crear-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><CreateKey /></ModuleRouteGuard>} />
+          <Route path="/kms/certificado" element={<ModuleRouteGuard moduleCode="AUDIT"><RegisterCertificate /></ModuleRouteGuard>} />
+          <Route path="/kms/verificar-firma" element={<ModuleRouteGuard moduleCode="AUDIT"><VerifySignature /></ModuleRouteGuard>} />
+          <Route path="/digitalSignature" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
         </Route>
 
       </Routes>

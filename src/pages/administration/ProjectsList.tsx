@@ -1,8 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
-import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
-import { useEffect, useState, useMemo } from "react";
+import ToastSimple, {
+  type ToastData,
+} from "../../components/layout/ToastSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
   Button,
   Checkbox,
@@ -15,32 +23,36 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiFilter,
+  FiFlag,
+  FiMinusCircle,
+  FiTrash2,
+} from "react-icons/fi";
 import {
   listProjectsService,
   updateProjectStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { ProjectListResponse } from "../../dto/response/projectList-response.dto";
+import type {
+  PaginatedProjectsResponse,
+  ProjectListResponse,
+} from "../../dto/response/projectList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
-
-interface PaginatedProjectsResponse {
-  items: ProjectListResponse[];
-  total: number;
-  page: number;
-  size: number;
-  total_pages: number;
-}
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 const ProjectsList = () => {
   const { t } = useTranslation();
 
-  const [projects, setProjects] = useState<ProjectListResponse[]>([]);
+  const [paginatedData, setPaginatedData] = useState<PaginatedProjectsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [size] = useState(6);
+  const [size] = useState(5);
+  const [notListPerm, setNotListPerm] = useState(null);
+  const [alert, setAlert] = useState<AlertState>(null);
 
-  // Filtros (mismo diseño que gestión de usuarios)
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [toasts, setToasts] = useState<ToastData[]>([]);
@@ -67,7 +79,7 @@ const ProjectsList = () => {
       key: "status",
       label: t("common.state"),
       type: "statusEditable",
-      allowedStatuses: ["ACTIVE", "INACTIVE"],
+      allowedStatuses: ["ACTIVE", "INACTIVE", "DELETED"],
       onChange: (project, newStatus) => {
         setPendingStatusChange({ project, newStatus });
       },
@@ -86,46 +98,25 @@ const ProjectsList = () => {
     },
   ];
 
-  // Filtrar por búsqueda (nombre o código) y estado
-  const filteredProjects = useMemo(() => {
-    let result = [...projects];
-    const searchLower = search.trim().toLowerCase();
-    if (searchLower) {
-      result = result.filter(
-        (p) =>
-          (p.project_name?.toLowerCase().includes(searchLower)) ||
-          (p.instance_code?.toLowerCase().includes(searchLower))
-      );
-    }
-    if (state) {
-      result = result.filter((p) => (p.status ?? "").toUpperCase() === state);
-    }
-    return result;
-  }, [projects, search, state]);
-
-  const paginatedData: PaginatedProjectsResponse = useMemo(() => {
-    const start = (page - 1) * size;
-    const items = filteredProjects.slice(start, start + size);
-    const total = filteredProjects.length;
-    const total_pages = Math.max(1, Math.ceil(total / size));
-    return {
-      items,
-      total,
-      page,
-      size,
-      total_pages,
-    };
-  }, [filteredProjects, page, size]);
-
   const getProjects = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listProjectsService();
-      setProjects(data);
-      setPage(1);
-    } catch (err) {
+      const data = await listProjectsService({
+        page_index: page,
+        page_size: size,
+        search: search.trim() || undefined,
+        state: state.trim() || undefined,
+      });
+      setPaginatedData(data);
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError(t("project.list.loadError"));
     } finally {
       setLoading(false);
@@ -134,9 +125,8 @@ const ProjectsList = () => {
 
   useEffect(() => {
     getProjects();
-  }, []);
+  }, [page, size, search, state]);
 
-  // Al cambiar filtros, volver a página 1
   useEffect(() => {
     setPage(1);
   }, [search, state]);
@@ -163,13 +153,7 @@ const ProjectsList = () => {
     const { project, newStatus } = pendingStatusChange;
     try {
       await updateProjectStatusService(project.external_project_id, newStatus);
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.external_project_id === project.external_project_id
-            ? { ...p, status: newStatus }
-            : p
-        )
-      );
+      await getProjects();
       setToasts((prev) => [
         ...prev,
         {
@@ -178,8 +162,20 @@ const ProjectsList = () => {
           type: "success",
         },
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setAlert({
+          message: t(`errors.${errorMessage}`),
+          type:
+            errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
+              ? "warning"
+              : "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -188,19 +184,31 @@ const ProjectsList = () => {
           type: "error",
         },
       ]);
-    } finally {
+    }finally{
+      
       handleCloseModal();
     }
   };
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore(
+    (s) => s.canAccessSubmodule,
+  );
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive =
+    canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PROJECTS");
+  const showContent =
+    canAccessModule("ADMINISTRATION") && canAccessSubmodule("PROJECTS");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="project.title" description="project.description" />
 
-      {/* Filtros en una sola línea */}
-      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
-        <div className="flex flex-nowrap items-end gap-2 overflow-x-auto">
-          <div className="flex-shrink-0 w-72">
+      {/* Filtros y acción Agregar proyecto */}
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex flex-wrap items-end gap-2 flex-1 overflow-x-auto">
+          <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -210,8 +218,7 @@ const ProjectsList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -220,73 +227,110 @@ const ProjectsList = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">
-                {t("common.active")} / {t("common.inactive")}
+                {t("common.active")} / {t("common.inactive")} / {t("common.deleted")}
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
+              <option value="DELETED">{t("common.deleted")}</option>
             </Select>
           </div>
-
+        </div>
+        <div className="flex items-end justify-end gap-2 mt-2 md:mt-0 md:ml-4 flex-shrink-0">
           <Button
             size="xs"
             onClick={() => getProjects()}
             color={hasActiveFilters ? "blue" : "alternative"}
-            className="flex-shrink-0"
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
-          <Button color="blue" size="xs" onClick={handleResetFilters} className="flex-shrink-0">
+          <Button color="blue" size="xs" onClick={handleResetFilters}>
             {t("common.filterReset")}
           </Button>
+          <Link to="/administration/projects/create">
+            <Button color="blue" size="xs">
+              {t("project.create.addProject")}
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold">{t("project.list.loading")}</p>
-        </div>
-      )}
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("project.list.loading")}</p>
+            </div>
+          )}
 
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
+          {!loading && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            </div>
+          )}
 
-      {!loading && !error && filteredProjects.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {t("project.list.noProjects")}
-          </p>
-        </div>
-      )}
+          {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">
+                {t(`errors.${notListPerm}`, {
+                  defaultValue: t("errors.unknown"),
+                })}
+              </p>
+            </div>
+          )}
 
-      {!loading && !error && filteredProjects.length > 0 && (
-        <DataTable
-          data={paginatedData}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("project.list.paginationText")}
-        />
+          {!loading &&
+            !error &&
+            !notListPerm &&
+            paginatedData !== null &&
+            paginatedData.total === 0 && (
+              <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+                <p className="text-3xl font-bold text-black dark:text-gray-200">
+                  {t("project.list.noProjects")}
+                </p>
+              </div>
+            )}
+
+          {!loading && !error && paginatedData !== null && paginatedData.total > 0 && (
+            <DataTable
+              data={paginatedData}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("project.list.paginationText")}
+            />
+          )}
+        </>
       )}
 
       {/* Modal de confirmación de cambio de estado */}
-      <Modal
-        show={!!pendingStatusChange}
-        onClose={handleCloseModal}
-        size="md"
-      >
+      <Modal show={!!pendingStatusChange} onClose={handleCloseModal} size="md">
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "DELETED" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-red-500">
+                <FiTrash2 className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
+                <FiMinusCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
+                <FiCheckCircle className="h-6 w-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              {pendingStatusChange?.newStatus === "INACTIVE"
-                ? t("project.list.deactivateTitle")
-                : t("project.list.activateTitle")}
+              {pendingStatusChange?.newStatus === "DELETED"
+                ? t("project.list.deleteTitle")
+                : pendingStatusChange?.newStatus === "INACTIVE"
+                  ? t("project.list.deactivateTitle")
+                  : t("project.list.activateTitle")}
             </h3>
           </div>
         </ModalHeader>
@@ -294,14 +338,18 @@ const ProjectsList = () => {
           {pendingStatusChange && (
             <>
               <p className="mb-2 font-bold text-gray-900 dark:text-white">
-                {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateQuestion")
-                  : t("project.list.activateQuestion")}
+                {pendingStatusChange.newStatus === "DELETED"
+                  ? t("project.list.deleteQuestion")
+                  : pendingStatusChange.newStatus === "INACTIVE"
+                    ? t("project.list.deactivateQuestion")
+                    : t("project.list.activateQuestion")}
               </p>
               <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                {pendingStatusChange.newStatus === "INACTIVE"
-                  ? t("project.list.deactivateDescription")
-                  : t("project.list.activateDescription")}
+                {pendingStatusChange.newStatus === "DELETED"
+                  ? t("project.list.deleteDescription")
+                  : pendingStatusChange.newStatus === "INACTIVE"
+                    ? t("project.list.deactivateDescription")
+                    : t("project.list.activateDescription")}
               </p>
               <div className="flex items-center gap-2">
                 <Checkbox
@@ -313,9 +361,11 @@ const ProjectsList = () => {
                   htmlFor="confirm-status-change"
                   className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
                 >
-                  {pendingStatusChange.newStatus === "INACTIVE"
-                    ? t("project.list.deactivateCheckbox")
-                    : t("project.list.activateCheckbox")}
+                  {pendingStatusChange.newStatus === "DELETED"
+                    ? t("project.list.deleteCheckbox")
+                    : pendingStatusChange.newStatus === "INACTIVE"
+                      ? t("project.list.deactivateCheckbox")
+                      : t("project.list.activateCheckbox")}
                 </Label>
               </div>
             </>
@@ -326,17 +376,35 @@ const ProjectsList = () => {
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "DELETED"
+                ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 text-white"
+                : pendingStatusChange?.newStatus === "INACTIVE"
+                  ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                  : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >
-            {pendingStatusChange?.newStatus === "INACTIVE"
-              ? t("project.list.deactivateButton")
-              : t("project.list.activateButton")}
+            {pendingStatusChange?.newStatus === "DELETED"
+              ? t("project.list.deleteButton")
+              : pendingStatusChange?.newStatus === "INACTIVE"
+                ? t("project.list.deactivateButton")
+                : t("project.list.activateButton")}
           </Button>
         </ModalFooter>
+       
       </Modal>
-
+      {alert && (
+          <AlertSimple
+            message={t(alert.message)}
+            type={alert.type}
+            to={alert.to}
+            onClose={() => {
+              setAlert(null);
+            }}
+          />
+        )}
       {/* Toasts de feedback */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (

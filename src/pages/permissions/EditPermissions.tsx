@@ -20,6 +20,10 @@ import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
 import { FiFlag, FiSave } from "react-icons/fi";
 import AlertSimple from "../../components/layout/AlertSimple";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 interface EditValues {
   name: string;
   description: string;
@@ -59,7 +63,8 @@ const EditPermissions = () => {
       name: yup
         .string()
         .required(t("validation.completeField"))
-        .min(3, t("validation.nameMin")),
+        .min(3, t("validation.nameMin"))
+        .max(120, t("validation.nameMaxPermissions")),
 
       state: yup.string().required(t("validation.completeField")),
 
@@ -116,9 +121,21 @@ const EditPermissions = () => {
 
     return null;
   };
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("PERMISSIONS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("PERMISSIONS");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="editPermission.title" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -275,6 +292,8 @@ const EditPermissions = () => {
                 }}
               />
             )}
+        </>
+      )}
     </AppLayoutSB>
   );
 };

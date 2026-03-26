@@ -1,73 +1,87 @@
-# React + TypeScript + Vite
+# 🌐 Agrofusion - Frontend Web 🌱💧
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+¡Bienvenide al repositorio Frontend de **Agrofusion**! Esta es la interfaz principal de nuestra solución tecnológica para la gestión agrícola inteligente.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Requisitos Previos
 
-## React Compiler
+Antes de comenzar, asegúrate de tener listos los siguientes superpoderes 🦸‍♂️🦸‍♀️:
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+* **Visual Studio Code:** [Descargar aquí](https://code.visualstudio.com/)
+* **Node.js (v20.xx):** [Descargar aquí](https://nodejs.org/)
+* **Git:** Para clonar el repositorio.
+* **Conexión estable:** Sin VPN activada.
+* **Puertos Libres:** Asegúrate de que el puerto `5173` o `3000` estén disponibles.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Configuración del Ambiente
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 1. Clonar el Repositorio
+Abre tu terminal en la carpeta donde desees guardar el proyecto y ejecuta:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+git clone https://github.com/MariaBarros02/agrofusion-frontendweb.git
+cd agrofusion-frontendweb
+``` 
+## 🔐 Variables de entorno
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+El proyecto requiere un archivo **`.env`** para funcionar correctamente.
+
+📥 El archivo se encuentra en el Drive del proyecto
+
+👉 Descarga el archivo correspondiente al Frontend Web y colócalo en la raíz del proyecto.
+
+⚠️ **`Importante:`**
+
+- No modificar el nombre del archivo.
+
+- No subir el archivo .env al repositorio.
+
+## 📦 Instalación de dependencias
+
+Desde la raíz del proyecto, ejecuta:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+⏳ Este proceso puede tardar entre 10 y 15 minutos, dependiendo de tu conexión a internet.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ▶️ Ejecutar el proyecto
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Una vez instaladas las dependencias, levanta el servidor de desarrollo con:
+```bash
+npm run dev
 ```
+## 🌐 Acceso desde el navegador
+
+Abre tu navegador en una de las siguientes rutas:
+
+- http://localhost:5173/login
+
+- http://localhost:3000/login
+
+⏳ La primera carga puede tardar unos segundos.
+
+🔌 Detener el proyecto y liberar el puerto
+
+⚠️ No cierres la terminal directamente.
+
+## 🔗 Dependencia con Backends
+
+Para el correcto funcionamiento del frontend, los siguientes servicios deben estar activos:
+
+⚙️ Backend Authentication → http://localhost:8000
+
+💳 Backend Auditory → http://localhost:9000
+
+🔧 Backend Integration → http://localhost:9001
+
+## 🎉 Resultado
+
+Con el frontend y los backends levantados, Agrofusion estará funcionando completamente en tu entorno local 🌱💧
+Ya puedes iniciar sesión y probar todas las funcionalidades del sistema.
+
+Desarrollado por el equipo Agrofusion 💚
+

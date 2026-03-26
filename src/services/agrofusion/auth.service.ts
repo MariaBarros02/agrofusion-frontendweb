@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authApi } from "./api/auth.api";
-import type { ResetTokenMap } from "../orchestrator/authOrchestrator.service";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
@@ -15,6 +16,18 @@ import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto
 
 
 /**
+ * Obtiene módulos activos y rol del usuario y actualiza el store.
+ * Debe llamarse cuando el usuario ya está autenticado (p. ej. al entrar a rutas protegidas).
+ */
+export const fetchActiveModulesService = async () => {
+  const { data } = await authApi.getActiveModules();
+  useModuleAccessStore.getState().setModuleAccess(
+    data.active_modules ?? [],
+    data.role_code ?? null
+  );
+};
+
+/**
  * Obtiene la lista de proyectos externos vinculados al usuario actual.
  * @returns {Promise<string[]>} Lista de códigos de proyectos (ej: ['SIGMA', 'DISRIEGO']).
  */
@@ -24,11 +37,16 @@ export const getExternalProjects = async () => {
 }
 
 /**
- * Obtiene el listado de todos los proyectos externos (RF-GES-01).
- * Atributos: identificador, nombre, cliente, descripción, estado, fecha de creación.
+ * Obtiene el listado paginado de proyectos externos (RF-GES-01).
+ * Parámetros: page_index, page_size, search?, state?
  */
-export const listProjectsService = async () => {
-  const { data } = await authApi.getExternalProjectsList();
+export const listProjectsService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+}) => {
+  const { data } = await authApi.getExternalProjectsList(params);
   return data;
 };
 
@@ -44,10 +62,21 @@ export const updateProjectStatusService = async (
 };
 
 /**
- * Obtiene el listado de todos los módulos.
+ * Obtiene el listado paginado de módulos.
  */
-export const listModulesService = async (): Promise<ModuleListResponse[]> => {
-  const { data } = await authApi.getModulesList();
+export const listModulesService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+  project_id?: string;
+}) => {
+  const { data } = await authApi.getModulesList(params);
+  return data;
+};
+
+export const getModuleProjectOptionsService = async () => {
+  const { data } = await authApi.getModuleProjectOptions();
   return data;
 };
 
@@ -63,10 +92,21 @@ export const updateModuleStatusService = async (
 };
 
 /**
- * Obtiene el listado de todos los submódulos.
+ * Obtiene el listado paginado de submódulos.
  */
-export const listSubmodulesService = async (): Promise<SubmoduleListResponse[]> => {
-  const { data } = await authApi.getSubmodulesList();
+export const listSubmodulesService = async (params?: {
+  page_index?: number;
+  page_size?: number;
+  search?: string;
+  state?: string;
+  module_id?: string;
+}) => {
+  const { data } = await authApi.getSubmodulesList(params);
+  return data;
+};
+
+export const getSubmoduleModuleOptionsService = async () => {
+  const { data } = await authApi.getSubmoduleModuleOptions();
   return data;
 };
 
@@ -81,6 +121,17 @@ export const updateSubmoduleStatusService = async (
   return data;
 };
 
+/**
+ * Obtiene los submódulos activos y actualiza el store de acceso por submódulo.
+ * Debe llamarse cuando el usuario ya está autenticado (p. ej. en ProtectedRoute o layout).
+ */
+export const fetchActiveSubmodulesService = async () => {
+  const { data } = await authApi.getActiveSubmodules();
+  useSubmoduleAccessStore.getState().setActiveSubmodules({
+    active_submodules: data.active_submodules ?? [],
+    role_code: data.role_code ?? null,
+  });
+};
 
 /**
  * Inicia el proceso de autenticación estándar.
@@ -134,10 +185,9 @@ export const verifyMfaService = async (
  * @param tokens Mapa de tokens de proyectos externos (ResetTokenMap).
  */
 export const reqResetPasswordService = async (
-  email: string,
-  tokens: ResetTokenMap
+  email: string
 ) => {
-  const { data } = await authApi.reqResetPassword({ email, tokens });
+  const { data } = await authApi.reqResetPassword({ email});
   return data;
 }
 /**

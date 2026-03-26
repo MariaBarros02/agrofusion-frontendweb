@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
-import { useEffect, useState, useMemo } from "react";
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -15,31 +20,32 @@ import {
   TextInput,
 } from "flowbite-react";
 import { HiSearch } from "react-icons/hi";
-import { FiAlertTriangle, FiFilter, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiFilter, FiFlag, FiMinusCircle } from "react-icons/fi";
 import {
+  getSubmoduleModuleOptionsService,
   listSubmodulesService,
   updateSubmoduleStatusService,
 } from "../../services/agrofusion/auth.service";
-import type { SubmoduleListResponse } from "../../dto/response/submoduleList-response.dto";
+import type {
+  SubmoduleListResponse,
+  PaginatedSubmodulesResponse,
+} from "../../dto/response/submoduleList-response.dto";
 import DataTable, { type Column } from "../../components/DataTable";
-
-interface PaginatedSubmodulesResponse {
-  items: SubmoduleListResponse[];
-  total: number;
-  page: number;
-  size: number;
-  total_pages: number;
-}
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 const SubmodulesList = () => {
   const { t } = useTranslation();
 
-  const [submodules, setSubmodules] = useState<SubmoduleListResponse[]>([]);
+  const [paginatedData, setPaginatedData] = useState<PaginatedSubmodulesResponse | null>(null);
+  const [moduleOptions, setModuleOptions] = useState<{ id: string; code: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [size] = useState(5);
 
+  const [notListPerm, setNotListPerm] = useState(null);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
   const [moduleFilter, setModuleFilter] = useState("");
@@ -49,22 +55,6 @@ const SubmodulesList = () => {
     newStatus: string;
   } | null>(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
-
-  const moduleOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const options: { id: string; code: string; name: string }[] = [];
-    for (const s of submodules) {
-      if (s.module_id && s.module_code && !seen.has(s.module_id)) {
-        seen.add(s.module_id);
-        options.push({
-          id: s.module_id,
-          code: s.module_code ?? "",
-          name: s.module_name ?? s.module_code ?? "",
-        });
-      }
-    }
-    return options.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  }, [submodules]);
 
   const columns: Column<SubmoduleListResponse>[] = [
     {
@@ -84,6 +74,7 @@ const SubmodulesList = () => {
       label: t("submodule.list.description"),
       type: "text",
       format: (value: string) => value ?? "-",
+      width: "450px"
     },
     {
       key: "status",
@@ -100,62 +91,40 @@ const SubmodulesList = () => {
       type: "text",
       format: (value: string) => value ?? "-",
     },
-    {
-      key: "created_at",
-      label: t("submodule.list.createdAt"),
-      type: "text",
-      format: (value: string) => (value ? value.split("T")[0] : "-"),
-    },
-    {
-      key: "responsible",
-      label: t("submodule.list.responsible"),
-      type: "text",
-      format: (value: string) => value ?? "-",
-    },
+    // {
+    //   key: "created_at",
+    //   label: t("submodule.list.createdAt"),
+    //   type: "text",
+    //   format: (value: string) => (value ? value.split("T")[0] : "-"),
+    // },
+    // {
+    //   key: "responsible",
+    //   label: t("submodule.list.responsible"),
+    //   type: "text",
+    //   format: (value: string) => value ?? "-",
+    // },
   ];
-
-  const filteredSubmodules = useMemo(() => {
-    let result = [...submodules];
-    const searchLower = search.trim().toLowerCase();
-    if (searchLower) {
-      result = result.filter(
-        (s) =>
-          (s.name?.toLowerCase().includes(searchLower)) ||
-          (s.code?.toLowerCase().includes(searchLower))
-      );
-    }
-    if (state) {
-      result = result.filter((s) => (s.status ?? "").toUpperCase() === state);
-    }
-    if (moduleFilter) {
-      result = result.filter((s) => s.module_id === moduleFilter);
-    }
-    return result;
-  }, [submodules, search, state, moduleFilter]);
-
-  const paginatedData: PaginatedSubmodulesResponse = useMemo(() => {
-    const start = (page - 1) * size;
-    const items = filteredSubmodules.slice(start, start + size);
-    const total = filteredSubmodules.length;
-    const total_pages = Math.max(1, Math.ceil(total / size));
-    return {
-      items,
-      total,
-      page,
-      size,
-      total_pages,
-    };
-  }, [filteredSubmodules, page, size]);
 
   const getSubmodules = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await listSubmodulesService();
-      setSubmodules(data);
-      setPage(1);
-    } catch (err) {
+      const data = await listSubmodulesService({
+        page_index: page,
+        page_size: size,
+        search: search.trim() || undefined,
+        state: state.trim() || undefined,
+        module_id: moduleFilter || undefined,
+      });
+      setPaginatedData(data);
+    } catch (err: any) {
       console.error(err);
+      const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotListPerm(errorMessage);
+        return;
+      }
       setError(t("submodule.list.loadError"));
     } finally {
       setLoading(false);
@@ -163,8 +132,22 @@ const SubmodulesList = () => {
   };
 
   useEffect(() => {
-    getSubmodules();
+    getSubmoduleModuleOptionsService()
+      .then((list) =>
+        setModuleOptions(
+          list.map((m) => ({
+            id: m.module_id,
+            code: m.module_code ?? "",
+            name: m.module_name ?? m.module_code ?? "",
+          }))
+        )
+      )
+      .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    getSubmodules();
+  }, [page, size, search, state, moduleFilter]);
 
   useEffect(() => {
     setPage(1);
@@ -191,13 +174,7 @@ const SubmodulesList = () => {
     const { submodule, newStatus } = pendingStatusChange;
     try {
       await updateSubmoduleStatusService(submodule.af_submodule_id, newStatus);
-      setSubmodules((prev) =>
-        prev.map((s) =>
-          s.af_submodule_id === submodule.af_submodule_id
-            ? { ...s, status: newStatus }
-            : s
-        )
-      );
+      await getSubmodules();
       setToasts((prev) => [
         ...prev,
         {
@@ -206,8 +183,20 @@ const SubmodulesList = () => {
           type: "success",
         },
       ]);
-    } catch (err) {
+    } catch (err:any) {
       console.error(err);
+            const errorMessage = err.response?.data?.detail?.code;
+
+      if (errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setAlert({
+          message: t(`errors.${errorMessage}`),
+          type:
+            errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
+              ? "warning"
+              : "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -222,15 +211,21 @@ const SubmodulesList = () => {
   };
 
   const hasActiveFilters = search || state || moduleFilter;
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("SUBMODULES");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("SUBMODULES");
 
   return (
     <AppLayoutSB>
       <TitleTarget title="submodule.title" description="submodule.description" />
 
-      {/* Filtros en una sola línea */}
-      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
-        <div className="flex flex-nowrap items-end gap-2 overflow-x-auto">
-          <div className="flex-shrink-0 w-72">
+      {/* Filtros - siempre visibles */}
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
+        <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
+          <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -240,8 +235,7 @@ const SubmodulesList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -256,8 +250,7 @@ const SubmodulesList = () => {
               <option value="INACTIVE">{t("common.inactive")}</option>
             </Select>
           </div>
-
-          <div className="flex-shrink-0 w-52">
+          <div className="w-52">
             <Label className="text-xs">{t("submodule.list.associatedModule")}</Label>
             <Select
               sizing="sm"
@@ -272,50 +265,65 @@ const SubmodulesList = () => {
               ))}
             </Select>
           </div>
-
+        </div>
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button
             size="xs"
             onClick={() => getSubmodules()}
             color={hasActiveFilters ? "blue" : "alternative"}
-            className="flex-shrink-0"
           >
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>
-
-          <Button color="blue" size="xs" onClick={handleResetFilters} className="flex-shrink-0">
+          <Button color="blue" size="xs" onClick={handleResetFilters}>
             {t("common.filterReset")}
           </Button>
         </div>
       </div>
 
-      {/* Tabla */}
-      {loading && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold">{t("submodule.list.loading")}</p>
-        </div>
-      )}
+      {/* Área de contenido: mensaje inactivo o tabla */}
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
+          {loading && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("submodule.list.loading")}</p>
+            </div>
+          )}
 
-      {error && (
-        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
+          {!loading && error && (
+            <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
 
-      {!loading && !error && filteredSubmodules.length === 0 && (
-        <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-          <p className="text-3xl font-bold text-black dark:text-gray-200">
-            {t("submodule.list.noSubmodules")}
-          </p>
-        </div>
-      )}
+          {!loading && !error && !notListPerm && paginatedData !== null && paginatedData.total === 0 && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold text-black dark:text-gray-200">
+                {t("submodule.list.noSubmodules")}
+              </p>
+            </div>
+          )}
 
-      {!loading && !error && filteredSubmodules.length > 0 && (
-        <DataTable
-          data={paginatedData}
-          columns={columns}
-          onPageChange={handlePageChange}
-          paginationText={t("submodule.list.paginationText")}
-        />
+                    {!loading && notListPerm && (
+            <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">
+                {t(`errors.${notListPerm}`, {
+                  defaultValue: t("errors.unknown"),
+                })}
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && paginatedData !== null && paginatedData.total > 0 && (
+            <DataTable
+              data={paginatedData}
+              columns={columns}
+              onPageChange={handlePageChange}
+              paginationText={t("submodule.list.paginationText")}
+            />
+          )}
+        </>
       )}
 
       {/* Modal de confirmación de cambio de estado */}
@@ -326,9 +334,16 @@ const SubmodulesList = () => {
       >
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-              <FiAlertTriangle className="h-6 w-6 text-white" />
-            </div>
+            {pendingStatusChange?.newStatus === "INACTIVE" && (
+              <div className="flex items-center justify-center w-12 h-12 rounded-lg shrink-0 bg-amber-500">
+                <FiMinusCircle className="w-6 h-6 text-white" />
+              </div>
+            )}
+            {pendingStatusChange?.newStatus === "ACTIVE" && (
+              <div className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-lg shrink-0">
+                <FiCheckCircle className="w-6 h-6 text-white" />
+              </div>
+            )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               {pendingStatusChange?.newStatus === "INACTIVE"
                 ? t("submodule.list.deactivateTitle")
@@ -357,7 +372,7 @@ const SubmodulesList = () => {
                 />
                 <Label
                   htmlFor="confirm-status-change"
-                  className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
+                  className="text-sm font-normal text-gray-700 cursor-pointer dark:text-gray-300"
                 >
                   {pendingStatusChange.newStatus === "INACTIVE"
                     ? t("submodule.list.deactivateCheckbox")
@@ -367,12 +382,16 @@ const SubmodulesList = () => {
             </>
           )}
         </ModalBody>
-        <ModalFooter className="border-t pt-4">
+        <ModalFooter className="pt-4 border-t">
           <Button color="gray" onClick={handleCloseModal}>
             {t("common.cancel")}
           </Button>
           <Button
-            className="bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+            className={
+              pendingStatusChange?.newStatus === "INACTIVE"
+                ? "bg-amber-500 hover:bg-amber-600 focus:ring-amber-300 text-white"
+                : "bg-green-500 hover:bg-green-600 focus:ring-green-300 text-white"
+            }
             onClick={handleConfirmStatusChange}
             disabled={!confirmChecked}
           >
@@ -382,9 +401,18 @@ const SubmodulesList = () => {
           </Button>
         </ModalFooter>
       </Modal>
-
+     {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
       {/* Toasts de feedback */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="fixed z-50 flex flex-col gap-2 bottom-4 right-4">
         {toasts.map((toast) => (
           <ToastSimple
             key={toast.id}

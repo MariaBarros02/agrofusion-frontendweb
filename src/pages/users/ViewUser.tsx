@@ -18,7 +18,10 @@ import {
 } from "../../services/orchestrator/userOrchestrator.services";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
 import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
-
+import ModuleInactive from "../ModuleInactive";
+import { useModuleAccessStore } from "../../store/moduleAccess.store";
+import SubmoduleInactive from "../SubmoduleInactive";
+import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 
 const ViewUser = () => {
   const { t } = useTranslation();
@@ -140,9 +143,20 @@ const deleteUser = async () => {
     }
   }, [userId]);
 
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
+  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const showModuleInactive = !canAccessModule("ADMINISTRATION");
+  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
+
   return (
     <AppLayoutSB>
       <TitleTarget title="viewUser.title" description="viewUser.description" />
+      {showModuleInactive && <ModuleInactive />}
+      {showSubmoduleInactive && <SubmoduleInactive />}
+      {showContent && (
+        <>
       {loading && (
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
@@ -267,6 +281,8 @@ const deleteUser = async () => {
     />
   ))}
 </div>
+        </>
+      )}
     </AppLayoutSB>
   );
 };

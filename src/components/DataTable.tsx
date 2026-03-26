@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -17,6 +17,7 @@ interface BaseColumn<T> {
   label: string;
   type: ColumnType;
   align?: "left" | "center" | "right";
+  width?: string | number;
 }
 
 interface ActionConfig<T> {
@@ -72,6 +73,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   onPageChange: (page: number) => void;
   paginationText?: string;
+  maxVisiblePages?: number;  //Usado en Auditoria
 }
 
 // =============================
@@ -115,28 +117,53 @@ export default function DataTable<T extends Record<string, any>>({
   columns,
   onPageChange,
   paginationText,
+  maxVisiblePages, //Usado en DataTable
 }: DataTableProps<T>) {
+  const maxPages = maxVisiblePages ?? data.total_pages;
+
+  const startPage = Math.max(1, data.page - Math.floor(maxPages / 2));
+  const endPage = Math.min(data.total_pages, startPage + maxPages - 1);
+  
   const { t } = useTranslation();
 
   const [openStatusRowIndex, setOpenStatusRowIndex] = useState<number | null>(
     null,
   );
+  const statusPopoverRef = useRef<HTMLTableCellElement | null>(null);
+
+  useEffect(() => {
+    if (openStatusRowIndex === null) return;
+
+    const closeIfOutside = (event: PointerEvent) => {
+      const el = statusPopoverRef.current;
+      if (!el) return;
+      const target = event.target;
+      if (target instanceof Node && !el.contains(target)) {
+        setOpenStatusRowIndex(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeIfOutside, true);
+    return () =>
+      document.removeEventListener("pointerdown", closeIfOutside, true);
+  }, [openStatusRowIndex]);
 
   return (
     <div className="w-full space-y-4">
       <div className="relative overflow-visible border rounded-2xl">
-        <table className="w-full text-sm rounded-2xl">
+        <table className="w-full text-sm table-fixed rounded-2xl">
           <thead className="bg-gray-200 rounded-2xl dark:bg-gray-800">
             <tr className="rounded-2xl">
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
+                  style={{ width: col.width }}
                   className={`px-4 py-3 font-semibold ${
-                    col.align === "center"
-                      ? "text-center"
+                    col.align === "left"
+                      ? "text-left"
                       : col.align === "right"
                         ? "text-right"
-                        : "text-left"
+                        : "text-center"
                   }`}
                 >
                   {col.label}
@@ -157,13 +184,14 @@ export default function DataTable<T extends Record<string, any>>({
                       const textCol = col as TextColumn<T>;
                       return (
                         <td
+                          style={{ width: col.width }}
                           key={String(col.key)}
                           className={`px-4 py-3 ${
-                            col.align === "center"
-                              ? "text-center"
+                            col.align === "left"
+                              ? "text-left"
                               : col.align === "right"
                                 ? "text-right"
-                                : "text-left"
+                                : "text-center"
                           }`}
                         >
                           {textCol.format ? textCol.format(value, row) : value}
@@ -174,13 +202,15 @@ export default function DataTable<T extends Record<string, any>>({
                     // STATUS SIMPLE
                     if (col.type === "status") {
                       return (
-                        <td key={String(col.key)} className="px-3 py-3">
-                          <StatusBadge
-                            value={value}
-                            label={
-                              value ? t(`common.${value.toLowerCase()}`) : "-"
-                            }
-                          />
+                        <td key={String(col.key)} className="px-3 py-3 text-center">
+                          <span className="inline-flex justify-center">
+                            <StatusBadge
+                              value={value}
+                              label={
+                                value ? t(`common.${value.toLowerCase()}`) : "-"
+                              }
+                            />
+                          </span>
                         </td>
                       );
                     }
@@ -192,9 +222,16 @@ export default function DataTable<T extends Record<string, any>>({
                       return (
                         <td
                           key={String(col.key)}
-                          className="relative px-3 py-3"
+                          ref={
+                            openStatusRowIndex === rowIndex
+                              ? statusPopoverRef
+                              : undefined
+                          }
+                          className="relative px-3 py-3 text-center"
                         >
+                          <span className="inline-flex justify-center">
                           <button
+                            type="button"
                             onClick={() =>
                               setOpenStatusRowIndex(
                                 openStatusRowIndex === rowIndex
@@ -218,6 +255,7 @@ export default function DataTable<T extends Record<string, any>>({
                                 ?.filter((status) => status !== value)
                                 .map((status) => (
                                   <button
+                                    type="button"
                                     key={status}
                                     className="block w-full px-3 py-2 text-left rounded-lg hover:bg-gray-100"
                                     onClick={() => {
@@ -235,6 +273,7 @@ export default function DataTable<T extends Record<string, any>>({
                                 ))}
                             </div>
                           )}
+                          </span>
                         </td>
                       );
                     }
@@ -243,14 +282,16 @@ export default function DataTable<T extends Record<string, any>>({
                     if (col.type === "action") {
                       const actionCol = col as SingleActionColumn<T>;
                       return (
-                        <td key={String(col.key)} className="px-3 py-3">
+                        <td key={String(col.key)} className="px-3 py-3 text-center">
+                          <span className="inline-flex justify-center">
                           <button
-                            className={`flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50 ${actionCol.action.className ?? ""}`}
+                            className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50 ${actionCol.action.className ?? ""}`}
                             onClick={() => actionCol.action.onClick(row)}
                           >
                             {actionCol.action.icon}
                             {actionCol.action.label}
                           </button>
+                          </span>
                         </td>
                       );
                     }
@@ -261,8 +302,9 @@ export default function DataTable<T extends Record<string, any>>({
                       return (
                         <td
                           key={String(col.key)}
-                          className="flex gap-2 px-3 py-3"
+                          className="px-3 py-3 text-center"
                         >
+                          <span className="inline-flex justify-center gap-2">
                           {actionsCol.actions.map((action, i) => {
                             const isDisabled = action.disabled?.(row);
 
@@ -283,11 +325,12 @@ export default function DataTable<T extends Record<string, any>>({
                               </button>
                             );
                           })}
+                          </span>
                         </td>
                       );
                     }
 
-                    return <td key={String((col as BaseColumn<T>).key)} />;
+                    return <td key={String((col as BaseColumn<T>).key)} className="text-center" />;
                   })}
                 </tr>
               </React.Fragment>
@@ -297,23 +340,24 @@ export default function DataTable<T extends Record<string, any>>({
       </div>
 
       {/* PAGINATION */}
-      <div className="flex items-center justify-center px-2">
+      <div className="flex items-center justify-center gap-3 px-2 py-2 text-sm">
         <div className="flex items-center gap-1">
           <button
             disabled={data.page === 1}
             onClick={() => onPageChange(data.page - 1)}
-            className="flex items-center px-3 py-1 border rounded disabled:opacity-40"
+            className="flex items-center gap-1 px-3 py-1.5 border rounded disabled:opacity-40"
           >
-            <IoIosArrowBack />
+            <IoIosArrowBack className="size-4" />
             {t("common.previous")}
           </button>
+          
 
-          {Array.from({ length: data.total_pages }, (_, i) => i + 1).map(
+          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
             (pageNumber) => (
               <button
                 key={pageNumber}
                 onClick={() => onPageChange(pageNumber)}
-                className={`px-3 py-1 border rounded-xl ${
+                className={`min-w-[2rem] px-3 py-1.5 border rounded ${
                   data.page === pageNumber
                     ? "bg-blue-600 text-white border-blue-600"
                     : "hover:bg-gray-50"
@@ -327,14 +371,14 @@ export default function DataTable<T extends Record<string, any>>({
           <button
             disabled={data.page === data.total_pages}
             onClick={() => onPageChange(data.page + 1)}
-            className="flex items-center px-3 py-1 border rounded disabled:opacity-40"
+            className="flex items-center gap-1 px-3 py-1.5 border rounded disabled:opacity-40"
           >
             {t("common.next")}
-            <IoIosArrowForward />
+            <IoIosArrowForward className="size-4" />
           </button>
         </div>
 
-        <div className="ml-3 text-sm text-gray-600">
+        <div className="ml-3 text-gray-600">
           {t("common.showing")}{" "}
           <strong>{(data.page - 1) * data.size + 1}</strong> -{" "}
           <strong>{Math.min(data.page * data.size, data.total)}</strong> de{" "}
