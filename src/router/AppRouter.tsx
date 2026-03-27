@@ -31,6 +31,8 @@ import KmsHome from "../pages/kms/KmsHome";
 import RegisterCertificate from "../pages/kms/RegisterCertificate";
 import VerifySignature from "../pages/kms/VerifySignature";
 import CreateKey from "../pages/kms/CreateKey";
+import SignDocument from "../pages/kms/SignDocument";
+import RotateKey from "../pages/kms/RotateKey";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -152,7 +154,9 @@ export function AppRouter() {
           <Route path="/kms" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
           <Route path="/kms/crear-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><CreateKey /></ModuleRouteGuard>} />
           <Route path="/kms/certificado" element={<ModuleRouteGuard moduleCode="AUDIT"><RegisterCertificate /></ModuleRouteGuard>} />
+          <Route path="/kms/firmar" element={<ModuleRouteGuard moduleCode="AUDIT"><SignDocument /></ModuleRouteGuard>} />
           <Route path="/kms/verificar-firma" element={<ModuleRouteGuard moduleCode="AUDIT"><VerifySignature /></ModuleRouteGuard>} />
+          <Route path="/kms/rotar-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><RotateKey /></ModuleRouteGuard>} />
           <Route path="/digitalSignature" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
         </Route>
 

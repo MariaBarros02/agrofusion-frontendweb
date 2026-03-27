@@ -14,7 +14,7 @@ interface KmsFeedbackModalProps {
 
 /**
  * Modal de feedback para KMS: errores, advertencias y éxitos.
- * Estilo alineado con el diseño de producto (tarjeta blanca, acento rosa en error/aviso).
+ * Éxito: tarjeta blanca, icono y botón verdes; error/aviso: acento rosa.
  */
 export function KmsFeedbackModal({ open, variant, message, onAccept }: KmsFeedbackModalProps) {
   const { t } = useTranslation();
@@ -34,10 +34,13 @@ export function KmsFeedbackModal({ open, variant, message, onAccept }: KmsFeedba
   const accentClass = isSuccess ? "bg-emerald-600" : "bg-[#FF5A70]";
   const Icon = isSuccess ? Check : AlertTriangle;
   const iconInnerClass = isSuccess ? "text-white" : "text-gray-900";
+  const messageClass = isSuccess
+    ? "flex-1 pt-1 text-base font-normal text-gray-900 dark:text-white"
+    : "flex-1 pt-1 text-base font-bold text-gray-900 dark:text-white";
 
   const node = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-700/50 px-4 py-8"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-500/50 px-4 py-8"
       role="presentation"
       onClick={(e) => {
         if (e.target === e.currentTarget) onAccept();
@@ -47,7 +50,7 @@ export function KmsFeedbackModal({ open, variant, message, onAccept }: KmsFeedba
         role="dialog"
         aria-modal="true"
         aria-labelledby="kms-feedback-title"
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-4">
@@ -57,10 +60,7 @@ export function KmsFeedbackModal({ open, variant, message, onAccept }: KmsFeedba
           >
             <Icon className={`h-6 w-6 ${iconInnerClass}`} strokeWidth={2} />
           </div>
-          <p
-            id="kms-feedback-title"
-            className="flex-1 pt-1 text-base font-bold text-gray-900 dark:text-white"
-          >
+          <p id="kms-feedback-title" className={messageClass}>
             {message}
           </p>
         </div>

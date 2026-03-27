@@ -27,6 +27,12 @@ export default function VerifySignature() {
   const [keyId, setKeyId] = useState("");
   const [signatureId, setSignatureId] = useState("");
   const [hashAlgorithm, setHashAlgorithm] = useState("SHA-256");
+  const [rawDocument, setRawDocument] = useState("");
+
+  const toHex = (buffer: ArrayBuffer) =>
+    Array.from(new Uint8Array(buffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
   const onSigFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -35,6 +41,22 @@ export default function VerifySignature() {
     reader.onload = () => {
       const text = typeof reader.result === "string" ? reader.result : "";
       setDigitalSignature(text.replace(/\s/g, "").trim());
+    };
+    reader.readAsText(f);
+  };
+
+  const onDocumentFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      setRawDocument(text);
+      const digest = await crypto.subtle.digest(
+        hashAlgorithm as "SHA-256" | "SHA-384" | "SHA-512",
+        new TextEncoder().encode(text),
+      );
+      setDocumentHash(toHex(digest));
     };
     reader.readAsText(f);
   };
@@ -53,6 +75,10 @@ export default function VerifySignature() {
         hash_algorithm: hashAlgorithm,
       });
       setResult(data as Record<string, unknown>);
+      setFeedback({
+        variant: "success",
+        message: t("kms.verify.success"),
+      });
     } catch (err: unknown) {
       setFeedback({
         variant: "error",
@@ -115,6 +141,23 @@ export default function VerifySignature() {
           </div>
 
           <div className="mt-6">
+            <Label>{t("kms.verify.sourceDocumentOptional")}</Label>
+            <div className="mt-2 flex flex-col gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/80 p-4 dark:border-slate-500 dark:bg-slate-800/50">
+              <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-700">
+                <span>{t("kms.verify.uploadDocument")}</span>
+                <Plus className="h-5 w-5 text-blue-600" />
+                <input type="file" accept=".txt,.json,.xml,.csv,.log,.md" className="hidden" onChange={onDocumentFile} />
+              </label>
+              <textarea
+                className="min-h-[90px] w-full rounded-lg border border-gray-200 p-3 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
+                placeholder={t("kms.verify.documentPlaceholder")}
+                value={rawDocument}
+                onChange={(e) => setRawDocument(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
             <Label>{t("kms.verify.signatureB64")}</Label>
             <div className="mt-2 flex flex-col gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/80 p-4 dark:border-slate-500 dark:bg-slate-800/50">
               <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-700">
@@ -124,7 +167,7 @@ export default function VerifySignature() {
               </label>
               <textarea
                 className="min-h-[120px] w-full rounded-lg border border-gray-200 p-3 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
-                placeholder="Base64..."
+                placeholder={t("kms.verify.signaturePlaceholder")}
                 value={digitalSignature}
                 onChange={(e) => setDigitalSignature(e.target.value)}
                 required

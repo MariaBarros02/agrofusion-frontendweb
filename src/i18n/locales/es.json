@@ -81,7 +81,11 @@
             "cardCert": "Registrar certificado X.509",
             "cardCertDesc": "Asocia un certificado PEM a una clave existente.",
             "cardVerify": "Verificar firma digital",
-            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada."
+            "cardVerifyDesc": "Valida hash y firma contra una clave o una firma almacenada.",
+            "cardSign": "Firmar documento",
+            "cardSignDesc": "Genera firma digital con formato y metadatos completos.",
+            "cardRotate": "Rotar clave e historial",
+            "cardRotateDesc": "Ejecuta rotación de clave y consulta historial de rotaciones."
         },
         "createKey": {
             "title": "Crear clave criptográfica",
@@ -90,7 +94,8 @@
             "algorithm": "Algoritmo",
             "purpose": "Propósito",
             "validToOptional": "Válida hasta (opcional)",
-            "submit": "Crear clave"
+            "submit": "Crear clave",
+            "success": "Clave creada correctamente."
         },
         "cert": {
             "title": "Registrar certificado",
@@ -115,7 +120,43 @@
             "keyIdOptional": "ID de clave (opcional)",
             "signatureB64": "Firma en Base64",
             "uploadSig": "Subir archivo de firma",
+            "sourceDocumentOptional": "Documento fuente (opcional, recalcula hash)",
+            "uploadDocument": "Subir archivo de documento",
+            "documentPlaceholder": "Pegá el contenido del documento para calcular el hash...",
+            "signaturePlaceholder": "Pegá la firma en Base64...",
+            "success": "Verificación completada correctamente.",
             "confirm": "Confirmar"
+        },
+        "sign": {
+            "title": "Firmar documento",
+            "keyId": "ID de clave KMS",
+            "hashAlg": "Algoritmo de hash",
+            "signatureFormat": "Formato de firma",
+            "includeTimestamp": "Incluir timestamp RFC 3161",
+            "documentIdOptional": "ID de documento (opcional)",
+            "documentTypeOptional": "Tipo de documento (opcional)",
+            "signerUserIdOptional": "ID usuario firmante (opcional)",
+            "signingReasonOptional": "Razón de firma (opcional)",
+            "uploadDocumentOptional": "Documento fuente (opcional para calcular hash)",
+            "uploadFile": "Subir archivo de documento",
+            "rawDocumentPlaceholder": "Contenido del documento para calcular hash...",
+            "calculateHash": "Calcular hash desde contenido",
+            "documentHash": "Hash del documento",
+            "confirm": "Firmar",
+            "success": "Documento Firmado exitosamente."
+        },
+        "rotate": {
+            "title": "Rotar clave",
+            "keyId": "ID de clave a rotar",
+            "reason": "Razón de rotación",
+            "graceDays": "Período de gracia (días)",
+            "confirm": "Rotar clave",
+            "loadHistory": "Ver historial",
+            "historyTitle": "Historial de rotaciones",
+            "noHistory": "No hay rotaciones para esta clave.",
+            "success": "Rotación ejecutada correctamente.",
+            "historyLoadedSuccess": "Historial de rotaciones cargado correctamente.",
+            "keyIdRequiredForHistory": "Debes indicar el ID de clave para cargar el historial."
         }
     },
     "login":{

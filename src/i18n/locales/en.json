@@ -80,7 +80,11 @@
             "cardCert": "Register X.509 certificate",
             "cardCertDesc": "Attach a PEM certificate to an existing key.",
             "cardVerify": "Verify digital signature",
-            "cardVerifyDesc": "Validate hash and signature against a stored key or signature."
+            "cardVerifyDesc": "Validate hash and signature against a stored key or signature.",
+            "cardSign": "Sign document",
+            "cardSignDesc": "Create digital signatures with format and metadata.",
+            "cardRotate": "Rotate key and history",
+            "cardRotateDesc": "Run key rotation and check rotation history."
         },
         "createKey": {
             "title": "Create cryptographic key",
@@ -89,7 +93,8 @@
             "algorithm": "Algorithm",
             "purpose": "Purpose",
             "validToOptional": "Valid until (optional)",
-            "submit": "Create key"
+            "submit": "Create key",
+            "success": "Key created successfully."
         },
         "cert": {
             "title": "Register certificate",
@@ -114,7 +119,43 @@
             "keyIdOptional": "Key ID (optional)",
             "signatureB64": "Signature (Base64)",
             "uploadSig": "Upload signature file",
+            "sourceDocumentOptional": "Source document (optional, recomputes hash)",
+            "uploadDocument": "Upload document file",
+            "documentPlaceholder": "Paste document content to calculate hash...",
+            "signaturePlaceholder": "Paste Base64 signature...",
+            "success": "Verification completed successfully.",
             "confirm": "Confirm"
+        },
+        "sign": {
+            "title": "Sign document",
+            "keyId": "KMS key ID",
+            "hashAlg": "Hash algorithm",
+            "signatureFormat": "Signature format",
+            "includeTimestamp": "Include RFC 3161 timestamp",
+            "documentIdOptional": "Document ID (optional)",
+            "documentTypeOptional": "Document type (optional)",
+            "signerUserIdOptional": "Signer user ID (optional)",
+            "signingReasonOptional": "Signing reason (optional)",
+            "uploadDocumentOptional": "Source document (optional to calculate hash)",
+            "uploadFile": "Upload document file",
+            "rawDocumentPlaceholder": "Document content to calculate hash...",
+            "calculateHash": "Calculate hash from content",
+            "documentHash": "Document hash",
+            "confirm": "Sign",
+            "success": "Document signed successfully."
+        },
+        "rotate": {
+            "title": "Rotate key",
+            "keyId": "Key ID to rotate",
+            "reason": "Rotation reason",
+            "graceDays": "Grace period (days)",
+            "confirm": "Rotate key",
+            "loadHistory": "Load history",
+            "historyTitle": "Rotation history",
+            "noHistory": "No rotations found for this key.",
+            "success": "Rotation completed successfully.",
+            "historyLoadedSuccess": "Rotation history loaded successfully.",
+            "keyIdRequiredForHistory": "Key ID is required to load history."
         }
     },
     "login": {

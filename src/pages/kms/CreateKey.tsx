@@ -21,7 +21,6 @@ export default function CreateKey() {
   } | null>(null);
   const [created, setCreated] = useState<Record<string, unknown> | null>(null);
 
-  const [projectId, setProjectId] = useState("");
   const [keyAlias, setKeyAlias] = useState("");
   const [algorithm, setAlgorithm] = useState("RSA-2048");
   const [keyPurpose, setKeyPurpose] = useState("signing");
@@ -34,13 +33,16 @@ export default function CreateKey() {
     setLoading(true);
     try {
       const { data } = await kmsApi.createKey({
-        project_id: projectId.trim(),
         key_alias: keyAlias.trim(),
         algorithm,
         key_purpose: keyPurpose,
         valid_to: validTo ? new Date(validTo).toISOString() : null,
       });
       setCreated(data as Record<string, unknown>);
+      setFeedback({
+        variant: "success",
+        message: t("kms.createKey.success"),
+      });
     } catch (err: unknown) {
       setFeedback({
         variant: "error",
@@ -63,16 +65,6 @@ export default function CreateKey() {
         />
         <form onSubmit={submit} className="max-w-4xl mx-auto">
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="pid">{t("kms.createKey.projectId")}</Label>
-              <TextInput
-                id="pid"
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                required
-                className="mt-1 font-mono text-sm"
-              />
-            </div>
             <div>
               <Label htmlFor="alias">{t("kms.createKey.alias")}</Label>
               <TextInput id="alias" value={keyAlias} onChange={(e) => setKeyAlias(e.target.value)} required />
