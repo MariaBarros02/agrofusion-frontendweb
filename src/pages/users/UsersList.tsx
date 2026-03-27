@@ -93,21 +93,24 @@ const UsersList = () => {
       label: t("users.code"),
       type: "text",
       format: (value: string) => value?.slice(0, 7),
+      width: "80px"
     },
-    { key: "name", label: t("users.name"), type: "text" },
+    { key: "name", label: t("users.name"), type: "text", width: "250px" },
     { key: "email", label: t("users.email"), type: "text" },
     { key: "rol", label: t("users.role"), type: "text" },
-    { key: "state", label: t("common.state"), type: "status" },
+    { key: "state", label: t("common.state"), type: "status", width: "80px" },
     {
       key: "created_at",
       label: t("users.createdAt"),
       type: "text",
       format: (value: string) => value?.split("T")[0],
+      width: "150px"
     },
     {
       key: "edit",
       label: t("users.actions"),
       type: "action",
+      width: "120px",
       action: {
         label: t("users.viewDetail"),
         onClick: (user: ListUserResponse) =>
