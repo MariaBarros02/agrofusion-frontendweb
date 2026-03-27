@@ -44,11 +44,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-<<<<<<< HEAD
         navigateFallback: '/index.html',
-=======
-        navigateFallback: '/agrofusion/index.html',
->>>>>>> a6140539e98849aeb8c074376a938fb12dffcf08
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
