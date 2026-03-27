@@ -57,6 +57,11 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/type-documents",
     method: "GET",
     requiresAuth: false,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderTypeDocumentsPath",
+    responseBodyFields: [
+      { displayName: "Tipo de documento Id", typeSelectable: true },
+      { displayName: "Nombre del tipo de documento", typeSelectable: false },
+    ],
   },
   {
     title: "Buscar usuario por correo electrónico",
