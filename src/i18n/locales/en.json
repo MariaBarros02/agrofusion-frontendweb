@@ -41,7 +41,11 @@
         "create": "Create record",
         "update": "Update record",
         "delete": "Delete record",
-        "read": "View record(s)"
+        "read": "View record(s)",
+        "success": "Success",
+        "rejected": "Rejected",
+        "applyFilters": "Apply filters",
+        "resetFilters": "Reset"
     },
     "theme": {
         "dark": "Dark mode",
@@ -258,6 +262,55 @@
             "chooseFiles": "Choose files to upload",
             "dragAndDrop": "or drag and drop them here",
             "quickAccessModules": "Quick access modules registration",
+            "registerEndpoint": "Register endpoints",
+            "endpointSpecDescription": "Description",
+            "endpointSpecUrl": "Endpoint path",
+            "endpointUrlPlaceholderRolesPath": "e.g. /roles/",
+            "endpointUrlPlaceholderTypeDocumentsPath": "e.g. /users/type-documents",
+            "endpointSpecMethod": "HTTP method",
+            "endpointSpecAuth": "Authentication",
+            "endpointResponseBody": "Response body",
+            "endpointResponseBodyName": "Name",
+            "endpointResponseBodyKey": "Key",
+            "endpointResponseBodyVariableType": "Variable type",
+            "endpointResponseBodyTypeString": "String",
+            "endpointResponseBodyTypeNumber": "Number",
+            "endpointResponseBodyTypeArray": "List",
+            "endpointResponseBodyTypeDatetime": "Date",
+            "endpointAuthWith": "With authentication",
+            "endpointAuthWithout": "Without authentication",
+            "endpointAgroFusionNote": "This endpoint belongs to the AgroFusion auth service, not the external project API.",
+            "endpointTitleRoles": "Query roles",
+            "endpointDescRoles": "The endpoint retrieves the list of available roles in the system, which are used to assign permissions and access levels to users. Results must be returned within an object with a data property containing an array of roles.",
+            "endpointFieldRoleId": "Role Id",
+            "endpointFieldRoleName": "Role name",
+            "endpointTitleTypeDocs": "Query document types",
+            "endpointDescTypeDocs": "The endpoint retrieves the list of document types available in the system, which are used when registering or updating users. Results must be returned within an object with a data property containing an array of document types.",
+            "endpointFieldTypeDocId": "Document type Id",
+            "endpointFieldTypeDocName": "Document type name",
+            "endpointTitleSearchUser": "Search user by email",
+            "endpointDescSearchUser": "The endpoint allows querying user information in the system using their email address.",
+            "endpointFieldUserName": "User name",
+            "endpointFieldUserRoles": "User role Id(s)",
+            "endpointFieldUserBirthday": "Date of birth",
+            "endpointFieldUserGenderId": "Gender Id",
+            "endpointFieldUserFirstLastName": "User's first last name",
+            "endpointFieldUserSecondLastName": "User's second last name",
+            "endpointFieldUserTypeDocId": "Identity document type Id",
+            "endpointFieldUserDocNumber": "Identity number",
+            "endpointFieldUserDateIssuance": "Identity document issue date",
+            "endpointTitleCreateUser": "Create user",
+            "endpointDescCreateUser": "The endpoint allows an administrator to create a new user in the system. When creating the user, the system generates an activation token so the user can activate their account.",
+            "endpointTitleActivateAccount": "Activate account",
+            "endpointDescActivateAccount": "The endpoint allows activating a user account in the system through an activation token.",
+            "endpointTitleServiceAuth": "External service authentication",
+            "endpointDescServiceAuth": "Allows making requests to protected endpoints from an external service using client credentials and the user's email, returns an access token. This endpoint must not be protected.",
+            "endpointTitleChangeStatus": "Change user status",
+            "endpointDescChangeStatus": "The endpoint allows modifying a user's status in the system, for example to activate or deactivate their access.",
+            "endpointTitleEditUser": "Edit user",
+            "endpointDescEditUser": "The endpoint allows an administrator to update an existing user's information in the system.",
+            "endpointTitleSso": "SSO Login (Users not required)",
+            "endpointDescSso": "The endpoint allows a user with an active account to log in through AgroFusion.",
             "module": "Module",
             "moduleName": "Module name",
             "moduleBaseUrl": "Route",
@@ -720,5 +773,101 @@
     "submoduleInactive": {
         "title": "Submodule inactive",
         "message": "This submodule is deactivated. If you need access, contact the system administrator."
-    }
+    },
+
+    "audit": {
+  "title": "Audit",
+  "description": "Consult and validate records generated by system integrations",
+
+  "loading": "Updating audit data...",
+  "error": "Error loading audit data",
+  "noData": "No audit records found",
+  "pagination": "Audit",
+
+  "columns": {
+    "id": "Event ID",
+    "origin": "Origin",
+    "result": "Result",
+    "date": "Date/Time",
+    "action": "Action",
+    "user": "User",
+    "message": "Message"
+  },
+
+  "messages": {
+    "tokenRefreshed": "Token refreshed",
+    "sessionCreated": "Session started",
+    "loginSuccess": "Login successful",
+    "passwordResetCompleted": "Password reset completed",
+    "passwordResetRequested": "Password reset request",
+    "userCreated": "User created",
+    "userUpdated": "User updated",
+    "userDeleted": "User deleted",
+    "default": "Event recorded"
+  },
+
+  "filters": {
+  "search": "Search",
+  "searchPlaceholder": "Search by ID",
+  "date": "Date",
+  "dateRange": "Range",
+  "user": "User",
+  "userPlaceholder": "Search user...",
+  "origin": "Origin",
+  "result": "Result",
+  "event": "Event",
+  "all": "All"
+},
+    "switch": {
+    "audit": "AgroFusion Audit",
+    "errors": "External project errors"
+  }
+},
+
+    "externalErrors": {
+  "title": "External Project Errors",
+  "description": "View errors recorded in external integrations",
+
+  "loading": "Updating error data...",
+  "error": "Error loading errors",
+  "noData": "No error records found",
+  "pagination": "Errors",
+
+  "columns": {
+    "id": "Error ID",
+    "project": "Project",
+    "severity": "Severity",
+    "component": "Component",
+    "code": "Code",
+    "date": "Date/Time",
+    "message": "Message"
+  },
+
+  "severity": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+
+  "messages": {
+    "ssoTokenError": "SSO token generation failed",
+    "passwordChangeError": "Password change failed",
+    "loginError": "Login failed"
+  },
+  "filters": {
+  "search": "Search",
+  "searchPlaceholder": "Search...",
+  "date": "Date",
+  "dateRange": "Range",
+  "project": "Project",
+  "projectPlaceholder": "Project...",
+  "severity": "Severity",
+  "component": "Component",
+  "code": "Code",
+  "all": "All"
+}
+
+
+}
+
 }

@@ -123,6 +123,7 @@ const ListRoles = () => {
       key: "actions",
       label: t("roles.functions"),
       type: "actions",
+      width: "300px",
       actions: [
         {
           label: t("roles.view"),
