@@ -16,6 +16,7 @@ import {
   joinProjectApiUrl,
   PROJECT_EXTERNAL_ENDPOINT_SPECS,
 } from "../../data/projectEndpointRegistrationSpec";
+import type { VariableType } from "../../data/projectEndpointRegistrationSpec";
 
 type EndpointRowState = {
   url: string;
@@ -25,8 +26,14 @@ type EndpointRowState = {
 
 type ResponseBodyRowValues = {
   key: string;
-  /** Solo filas con typeSelectable en el spec. */
-  variableType?: "string" | "number";
+  variableType?: VariableType;
+};
+
+const VARIABLE_TYPE_I18N_KEY: Record<VariableType, string> = {
+  string: "project.create.endpointResponseBodyTypeString",
+  number: "project.create.endpointResponseBodyTypeNumber",
+  array: "project.create.endpointResponseBodyTypeArray",
+  datetime: "project.create.endpointResponseBodyTypeDatetime",
 };
 
 function buildInitialResponseBodyByIndex(): Record<number, ResponseBodyRowValues[]> {
@@ -34,8 +41,8 @@ function buildInitialResponseBodyByIndex(): Record<number, ResponseBodyRowValues
   PROJECT_EXTERNAL_ENDPOINT_SPECS.forEach((spec, index) => {
     if (!spec.responseBodyFields) return;
     out[index] = spec.responseBodyFields.map((row) =>
-      row.typeSelectable
-        ? { key: "", variableType: "string" }
+      row.allowedTypes.length > 1
+        ? { key: "", variableType: row.allowedTypes[0] }
         : { key: "" },
     );
   });
@@ -71,7 +78,7 @@ function buildSsoInitialRow(): EndpointRowState {
 
 /**
  * Bloque de referencia: endpoints que el proyecto externo debe registrar / exponer.
- * Debajo de “módulos de acceso rápido” en alta de proyecto.
+ * Debajo de "módulos de acceso rápido" en alta de proyecto.
  */
 export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
   const { t } = useTranslation();
@@ -118,7 +125,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
           ...PROJECT_EXTERNAL_ENDPOINT_SPECS.map((spec, index) => (
             <AccordionPanel key={spec.title}>
               <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
-                {spec.title}
+                {t(`project.create.${spec.title}`)}
               </AccordionTitle>
               <AccordionContent>
                 <div className="grid grid-cols-1 gap-3 pt-1 pb-3 text-sm md:grid-cols-2">
@@ -127,7 +134,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                       {t("project.create.endpointSpecDescription")}
                     </Label>
                     <p className="mt-1 leading-relaxed text-gray-600 dark:text-gray-400">
-                      {spec.description}
+                      {t(`project.create.${spec.description}`)}
                     </p>
                   </div>
                   <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">
@@ -223,15 +230,16 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                                 const rowState =
                                   responseBodyByIndex[index]?.[rowIdx] ?? {
                                     key: "",
-                                    variableType: "string" as const,
+                                    variableType: field.allowedTypes[0],
                                   };
+                                const isFixed = field.allowedTypes.length <= 1;
                                 return (
                                   <tr
                                     key={`${field.displayName}-${rowIdx}`}
                                     className="bg-white dark:bg-gray-800"
                                   >
                                     <td className="px-3 py-2 text-gray-900 dark:text-white">
-                                      {field.displayName}
+                                      {t(`project.create.${field.displayName}`)}
                                     </td>
                                     <td className="px-3 py-2">
                                       <TextInput
@@ -246,44 +254,30 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                                       />
                                     </td>
                                     <td className="px-3 py-2">
-                                      {field.typeSelectable ? (
-                                        <Select
-                                          sizing="sm"
-                                          value={
-                                            rowState.variableType ?? "string"
-                                          }
-                                          onChange={(e) =>
-                                            updateResponseBodyRow(
-                                              index,
-                                              rowIdx,
-                                              {
-                                                variableType: e.target.value as
-                                                  | "string"
-                                                  | "number",
-                                              },
-                                            )
-                                          }
-                                        >
-                                          <option value="string">
-                                            {t(
-                                              "project.create.endpointResponseBodyTypeString",
-                                            )}
+                                      <Select
+                                        sizing="sm"
+                                        disabled={isFixed}
+                                        value={
+                                          rowState.variableType ??
+                                          field.allowedTypes[0]
+                                        }
+                                        onChange={(e) =>
+                                          updateResponseBodyRow(
+                                            index,
+                                            rowIdx,
+                                            {
+                                              variableType:
+                                                e.target.value as VariableType,
+                                            },
+                                          )
+                                        }
+                                      >
+                                        {field.allowedTypes.map((vt) => (
+                                          <option key={vt} value={vt}>
+                                            {t(VARIABLE_TYPE_I18N_KEY[vt])}
                                           </option>
-                                          <option value="number">
-                                            {t(
-                                              "project.create.endpointResponseBodyTypeNumber",
-                                            )}
-                                          </option>
-                                        </Select>
-                                      ) : (
-                                        <Select sizing="sm" disabled value="string">
-                                          <option value="string">
-                                            {t(
-                                              "project.create.endpointResponseBodyTypeString",
-                                            )}
-                                          </option>
-                                        </Select>
-                                      )}
+                                        ))}
+                                      </Select>
                                     </td>
                                   </tr>
                                 );
@@ -299,7 +293,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
           )),
           <AccordionPanel key="sso-login-agrofusion">
             <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
-              {AGROFUSION_SSO_ENDPOINT_SPEC.title}
+              {t(`project.create.${AGROFUSION_SSO_ENDPOINT_SPEC.title}`)}
             </AccordionTitle>
             <AccordionContent>
               <div className="grid grid-cols-1 gap-3 pt-1 pb-3 text-sm md:grid-cols-2">
@@ -311,7 +305,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                     {t("project.create.endpointSpecDescription")}
                   </Label>
                   <p className="mt-1 leading-relaxed text-gray-600 dark:text-gray-400">
-                    {AGROFUSION_SSO_ENDPOINT_SPEC.description}
+                    {t(`project.create.${AGROFUSION_SSO_ENDPOINT_SPEC.description}`)}
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">

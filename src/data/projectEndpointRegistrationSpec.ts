@@ -1,17 +1,23 @@
 /**
  * Especificación de endpoints que un proyecto externo debe exponer para integrarse con AgroFusion.
- * Textos de nombre y descripción según requerimiento funcional.
+ * Los campos title, description y displayName almacenan claves parciales de i18n
+ * bajo el namespace "project.create" (se usan como t(`project.create.${key}`)).
  */
-/** Fila de la tabla “cuerpo de respuesta” en el registro de endpoint. */
+
+export type VariableType = "string" | "number" | "array" | "datetime";
+
+/** Fila de la tabla "cuerpo de respuesta" en el registro de endpoint. */
 export type ResponseBodyFieldSpec = {
-  /** Columna “Nombre”. */
+  /** Clave i18n parcial (project.create.<key>) para la columna "Nombre". */
   displayName: string;
-  /** Si true, “Tipo” es select string | number; si false, solo string. */
-  typeSelectable: boolean;
+  /** Tipos de variable permitidos; si solo hay uno, el select queda fijo. */
+  allowedTypes: VariableType[];
 };
 
 export type ProjectEndpointRegistrationItem = {
+  /** Clave i18n parcial para el título del acordeón. */
   title: string;
+  /** Clave i18n parcial para la descripción del endpoint. */
   description: string;
   /** Ruta relativa a la URL API del proyecto (campo api_url_base). */
   pathSuffix: string;
@@ -28,7 +34,9 @@ export type ProjectEndpointRegistrationItem = {
 };
 
 export type AgroFusionAuthEndpointItem = {
+  /** Clave i18n parcial para el título del acordeón. */
   title: string;
+  /** Clave i18n parcial para la descripción del endpoint. */
   description: string;
   method: "GET" | "POST" | "PUT" | "PATCH";
   requiresAuth: boolean;
@@ -38,75 +46,78 @@ export type AgroFusionAuthEndpointItem = {
 
 export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] = [
   {
-    title: "Consultar roles",
-    description:
-      "El endpoint permite obtener la lista de roles disponibles en el sistema, los cuales se utilizan para asignar permisos y niveles de acceso a los usuarios. Los resultados deben devolverse dentro de un objeto con la propiedad data que contenga un arreglo de roles.",
+    title: "endpointTitleRoles",
+    description: "endpointDescRoles",
     pathSuffix: "/roles/",
     method: "GET",
     requiresAuth: false,
     urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderRolesPath",
     responseBodyFields: [
-      { displayName: "Rol Id", typeSelectable: true },
-      { displayName: "Nombre del rol", typeSelectable: false },
+      { displayName: "endpointFieldRoleId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldRoleName", allowedTypes: ["string"] },
     ],
   },
   {
-    title: "Consultar tipos de documentos",
-    description:
-      "El endpoint permite obtener la lista de tipos de documento disponibles en el sistema, los cuales se utilizan al momento de registrar o actualizar usuarios. Los resultados deben devolverse dentro de un objeto con la propiedad data que contenga un arreglo de tipos de documentos.",
+    title: "endpointTitleTypeDocs",
+    description: "endpointDescTypeDocs",
     pathSuffix: "/users/type-documents",
     method: "GET",
     requiresAuth: false,
     urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderTypeDocumentsPath",
     responseBodyFields: [
-      { displayName: "Tipo de documento Id", typeSelectable: true },
-      { displayName: "Nombre del tipo de documento", typeSelectable: false },
+      { displayName: "endpointFieldTypeDocId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldTypeDocName", allowedTypes: ["string"] },
     ],
   },
   {
-    title: "Buscar usuario por correo electrónico",
-    description:
-      "El endpoint permite consultar la información de un usuario en el sistema utilizando su correo electrónico.",
+    title: "endpointTitleSearchUser",
+    description: "endpointDescSearchUser",
     pathSuffix: "/users/get-user-by-email/{email}",
     method: "GET",
     requiresAuth: true,
+    responseBodyFields: [
+      { displayName: "endpointFieldUserName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldUserRoles", allowedTypes: ["array", "string", "number"] },
+      { displayName: "endpointFieldUserBirthday", allowedTypes: ["string", "datetime"] },
+      { displayName: "endpointFieldUserGenderId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldUserFirstLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldUserSecondLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldUserTypeDocId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldUserDocNumber", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldUserDateIssuance", allowedTypes: ["string", "datetime"] },
+    ],
   },
   {
-    title: "Crear usuario",
-    description:
-      "El endpoint permite a un administrador crear un nuevo usuario en el sistema. Al crear el usuario, el sistema genera un token de activación para que el usuario pueda activar su cuenta.",
+    title: "endpointTitleCreateUser",
+    description: "endpointDescCreateUser",
     pathSuffix: "/users/admin/create-agrofusion",
     method: "POST",
     requiresAuth: true,
   },
   {
-    title: "Activar cuenta",
-    description:
-      "El endpoint permite activar la cuenta de un usuario en el sistema mediante un token de activación.",
+    title: "endpointTitleActivateAccount",
+    description: "endpointDescActivateAccount",
     pathSuffix: "/users/activate-account/{token_activacion}",
     method: "GET",
     requiresAuth: false,
   },
   {
-    title: "Autenticación para servicio externo",
-    description:
-      "Permite hacer peticiones a endpoints protegidos desde un servicio externo mediante credenciales del cliente y el correo del usuario, devuelve un token de acceso. Este endpoint no debe estar protegido.",
+    title: "endpointTitleServiceAuth",
+    description: "endpointDescServiceAuth",
     pathSuffix: "/auth/service-token",
     method: "POST",
     requiresAuth: false,
   },
   {
-    title: "Cambiar el estado de un usuario",
-    description:
-      "El endpoint permite modificar el estado de un usuario en el sistema, por ejemplo para activar o desactivar su acceso.",
+    title: "endpointTitleChangeStatus",
+    description: "endpointDescChangeStatus",
     pathSuffix: "/users/change-user-status/",
     method: "POST",
     requiresAuth: true,
   },
   {
-    title: "Editar usuario",
-    description:
-      "El endpoint permite a un administrador actualizar la información de un usuario existente en el sistema.",
+    title: "endpointTitleEditUser",
+    description: "endpointDescEditUser",
     pathSuffix: "/users/admin/edit/{id_usuario}",
     method: "PUT",
     requiresAuth: true,
@@ -114,9 +125,8 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
 ];
 
 export const AGROFUSION_SSO_ENDPOINT_SPEC: AgroFusionAuthEndpointItem = {
-  title: "SSO Login (No necesario usuarios)",
-  description:
-    "El endpoint permite que un usuario con cuenta activa inicie sesión mediante AgroFusion.",
+  title: "endpointTitleSso",
+  description: "endpointDescSso",
   method: "POST",
   requiresAuth: false,
   agroFusionPath: "/auth/login",
