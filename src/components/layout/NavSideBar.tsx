@@ -213,7 +213,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             href="/dashboard"
             onClick={() => navigate("/dashboard")}
 
-            img="/logoAgrofusion-removebg2.png"
+            img={logoAgrofusionRemovebg2}
             imgAlt="AgroFusion logo"
           >
             <div className=" !rounded-xl flex items-center justify-between w-full">
@@ -350,7 +350,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               >
                 {t("nav.digitalSig")}
               </SidebarItem>
-
+              <SidebarItem
+                onClick={() => navigate("/audit")}
                 icon={FiBookOpen}
                 className={`${baseItem} ${isActive("/audit") ? activeItem : ""}`}
               >
