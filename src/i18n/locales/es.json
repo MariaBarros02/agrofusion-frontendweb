@@ -263,7 +263,6 @@
             "endpointDescCreateUser": "El endpoint permite a un administrador crear un nuevo usuario en el sistema. Al crear el usuario, el sistema genera un token de activación para que el usuario pueda activar su cuenta.",
             "endpointTitleActivateAccount": "Activar cuenta",
             "endpointDescActivateAccount": "El endpoint permite activar la cuenta de un usuario en el sistema mediante un token de activación.",
-            "endpointFieldServiceAuthAccessToken": "Token de acceso",
             "endpointTitleServiceAuth": "Autenticación para servicio externo",
             "endpointDescServiceAuth": "Permite hacer peticiones a endpoints protegidos desde un servicio externo mediante credenciales del cliente y el correo del usuario, devuelve un token de acceso. Este endpoint no debe estar protegido.",
             "endpointTitleChangeStatus": "Cambiar el estado de un usuario",

@@ -9,7 +9,10 @@ import {
   TextInput,
 } from "flowbite-react";
 import { useTranslation } from "react-i18next";
+import { env } from "../../config/env";
 import {
+  AGROFUSION_SSO_ENDPOINT_SPEC,
+  joinAgroFusionAuthUrl,
   joinProjectApiUrl,
   PROJECT_EXTERNAL_ENDPOINT_SPECS,
 } from "../../data/projectEndpointRegistrationSpec";
@@ -62,6 +65,17 @@ function buildExternalInitialRows(apiUrlBase: string): EndpointRowState[] {
   }));
 }
 
+function buildSsoInitialRow(): EndpointRowState {
+  return {
+    url: joinAgroFusionAuthUrl(
+      env.VITE_API_AUTH_AF_URL,
+      AGROFUSION_SSO_ENDPOINT_SPEC.agroFusionPath,
+    ),
+    method: AGROFUSION_SSO_ENDPOINT_SPEC.method,
+    authWith: AGROFUSION_SSO_ENDPOINT_SPEC.requiresAuth,
+  };
+}
+
 /**
  * Bloque de referencia: endpoints que el proyecto externo debe registrar / exponer.
  * Debajo de "módulos de acceso rápido" en alta de proyecto.
@@ -72,6 +86,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
   const [externalRows, setExternalRows] = useState<EndpointRowState[]>(() =>
     buildExternalInitialRows(apiUrlBase),
   );
+  const [ssoRow, setSsoRow] = useState<EndpointRowState>(buildSsoInitialRow);
   const [responseBodyByIndex, setResponseBodyByIndex] = useState<
     Record<number, ResponseBodyRowValues[]>
   >(buildInitialResponseBodyByIndex);
@@ -106,7 +121,8 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
         collapseAll
         className="border border-gray-200 divide-y rounded-lg dark:border-gray-600 dark:divide-gray-600"
       >
-        {PROJECT_EXTERNAL_ENDPOINT_SPECS.map((spec, index) => (
+        {[
+          ...PROJECT_EXTERNAL_ENDPOINT_SPECS.map((spec, index) => (
             <AccordionPanel key={spec.title}>
               <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
                 {t(`project.create.${spec.title}`)}
@@ -274,7 +290,85 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                 </div>
               </AccordionContent>
             </AccordionPanel>
-          ))}
+          )),
+          <AccordionPanel key="sso-login-agrofusion">
+            <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
+              {t(`project.create.${AGROFUSION_SSO_ENDPOINT_SPEC.title}`)}
+            </AccordionTitle>
+            <AccordionContent>
+              <div className="grid grid-cols-1 gap-3 pt-1 pb-3 text-sm md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <p className="mb-2 text-xs text-amber-800 dark:text-amber-200/90">
+                    {t("project.create.endpointAgroFusionNote")}
+                  </p>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    {t("project.create.endpointSpecDescription")}
+                  </Label>
+                  <p className="mt-1 leading-relaxed text-gray-600 dark:text-gray-400">
+                    {t(`project.create.${AGROFUSION_SSO_ENDPOINT_SPEC.description}`)}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">
+                  <div className="min-w-0 flex-1">
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      {t("project.create.endpointSpecUrl")}
+                    </Label>
+                    <TextInput
+                      sizing="sm"
+                      className="mt-1 font-mono text-xs"
+                      value={ssoRow.url}
+                      onChange={(e) =>
+                        setSsoRow((r) => ({ ...r, url: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="w-full shrink-0 md:w-32">
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      {t("project.create.endpointSpecMethod")}
+                    </Label>
+                    <Select
+                      sizing="sm"
+                      className="mt-1"
+                      value={ssoRow.method}
+                      onChange={(e) =>
+                        setSsoRow((r) => ({ ...r, method: e.target.value }))
+                      }
+                    >
+                      {HTTP_METHODS.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="w-full shrink-0 md:w-52">
+                    <Label className="text-gray-700 dark:text-gray-300">
+                      {t("project.create.endpointSpecAuth")}
+                    </Label>
+                    <Select
+                      sizing="sm"
+                      className="mt-1"
+                      value={ssoRow.authWith ? "with" : "without"}
+                      onChange={(e) =>
+                        setSsoRow((r) => ({
+                          ...r,
+                          authWith: e.target.value === "with",
+                        }))
+                      }
+                    >
+                      <option value="with">
+                        {t("project.create.endpointAuthWith")}
+                      </option>
+                      <option value="without">
+                        {t("project.create.endpointAuthWithout")}
+                      </option>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionPanel>,
+        ]}
       </Accordion>
     </div>
   );
