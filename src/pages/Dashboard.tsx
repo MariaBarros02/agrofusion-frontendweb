@@ -56,8 +56,9 @@ const Dashboard = () => {
     // CASO ÉXITO: Redirección externa con token de intercambio
     if ("sso_token" in result && result.sso_token) {
       setSSOLogged(project.instance_code);
+      const base = project.client_url?.replace(/\/$/, "") ?? "";
       window.open(
-        `${project.client_name}sso?token=${result.sso_token}`,
+        `${base}/sso?token=${result.sso_token}`,
         "_blank",
       );
       return;
