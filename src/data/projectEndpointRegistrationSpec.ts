@@ -129,6 +129,10 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/change-user-status/",
     method: "POST",
     requiresAuth: true,
+    requestBodyFields: [
+      { displayName: "endpointFieldChangeStatusUserId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldChangeStatusNewStatus", allowedTypes: ["string", "number"] },
+    ],
   },
   {
     title: "endpointTitleEditUser",
