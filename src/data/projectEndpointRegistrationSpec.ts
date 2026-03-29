@@ -31,6 +31,8 @@ export type ProjectEndpointRegistrationItem = {
   urlEmptyWithPlaceholderKey?: string;
   /** Si existe, se muestra la tabla de parámetros de petición. */
   requestParamFields?: ResponseBodyFieldSpec[];
+  /** Si existe, se muestra la tabla de cuerpo de petición. */
+  requestBodyFields?: ResponseBodyFieldSpec[];
   /** Si existe, se muestra la tabla de modelo de respuesta. */
   responseBodyFields?: ResponseBodyFieldSpec[];
 };
@@ -87,6 +89,19 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/admin/create-agrofusion",
     method: "POST",
     requiresAuth: true,
+    requestBodyFields: [
+      { displayName: "endpointFieldCreateUserName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldCreateUserEmail", allowedTypes: ["string"] },
+      { displayName: "endpointFieldCreateUserRoles", allowedTypes: ["array", "string", "number"] },
+      { displayName: "endpointFieldCreateUserBirthday", allowedTypes: ["string", "datetime"] },
+      { displayName: "endpointFieldCreateUserPassword", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldCreateUserGenderId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldCreateUserFirstLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldCreateUserSecondLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldCreateUserTypeDocId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldCreateUserDocNumber", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldCreateUserDateIssuance", allowedTypes: ["string", "datetime"] },
+    ],
   },
   {
     title: "endpointTitleActivateAccount",
