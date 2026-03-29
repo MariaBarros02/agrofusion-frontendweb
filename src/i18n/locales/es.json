@@ -399,6 +399,7 @@
             "endpointFieldChangeStatusNewStatus": "Nuevo estado del usuario",
             "endpointTitleChangeStatus": "Cambiar el estado de un usuario",
             "endpointDescChangeStatus": "El endpoint permite modificar el estado de un usuario en el sistema, por ejemplo para activar o desactivar su acceso.",
+            "endpointParamEditUserId": "Id del usuario",
             "endpointFieldEditUserName": "Nombre del usuario",
             "endpointFieldEditUserRoles": "Id(s) del rol del usuario",
             "endpointFieldEditUserBirthday": "Fecha de nacimiento",
