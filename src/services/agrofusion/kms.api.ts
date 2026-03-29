@@ -48,11 +48,36 @@ export type RotateKeyPayload = {
   grace_period_days?: number;
 };
 
+export type SignatureListItem = {
+  signature_id: string;
+  key_id: string;
+  document_hash: string;
+  hash_algorithm: string;
+  digital_signature: string;
+  signed_at: string;
+  signer_user_id?: string | null;
+};
+
 export const kmsApi = {
-  listKeys: (projectId: string, statusFilter?: string) =>
+  listKeys: (params?: { projectId?: string; statusFilter?: string }) =>
     auditAgrofusionAxios.get("/kms/keys", {
-      params: { project_id: projectId, ...(statusFilter ? { status_filter: statusFilter } : {}) },
+      params: {
+        ...(params?.projectId ? { project_id: params.projectId } : {}),
+        ...(params?.statusFilter ? { status_filter: params.statusFilter } : {}),
+      },
     }),
+
+  listSignatures: (params?: { projectId?: string; limit?: number; offset?: number }) =>
+    auditAgrofusionAxios.get<{ signatures: SignatureListItem[]; total: number }>("/kms/signatures", {
+      params: {
+        ...(params?.projectId ? { project_id: params.projectId } : {}),
+        ...(params?.limit != null ? { limit: params.limit } : {}),
+        ...(params?.offset != null ? { offset: params.offset } : {}),
+      },
+    }),
+
+  getSignature: (signatureId: string) =>
+    auditAgrofusionAxios.get<SignatureListItem>(`/kms/signatures/${signatureId}`),
 
   createKey: (body: CreateKeyPayload) =>
     auditAgrofusionAxios.post("/kms/keys", body),

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Checkbox, Label, Select, TextInput } from "flowbite-react";
 import { Plus } from "lucide-react";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { kmsApi } from "../../services/agrofusion/kms.api";
 import { KmsFeedbackModal, type KmsFeedbackVariant } from "../../components/kms/KmsFeedbackModal";
 import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
+import { useAuthStore } from "../../store/auth.store";
 
 async function digestHex(input: string, alg: "SHA-256" | "SHA-384" | "SHA-512"): Promise<string> {
   const data = new TextEncoder().encode(input);
@@ -17,12 +18,22 @@ async function digestHex(input: string, alg: "SHA-256" | "SHA-384" | "SHA-512"):
     .join("");
 }
 
+type KeyOption = { key_id: string; key_alias: string; key_purpose?: string };
+
+function isSigningKey(purpose: string | undefined): boolean {
+  const p = (purpose ?? "").toLowerCase();
+  return p === "signing" || p === "both";
+}
+
 export default function SignDocument() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ variant: KmsFeedbackVariant; message: string } | null>(null);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
+
+  const [signingKeys, setSigningKeys] = useState<KeyOption[]>([]);
+  const [selectedKeyId, setSelectedKeyId] = useState("");
 
   const [keyId, setKeyId] = useState("");
   const [hashAlgorithm, setHashAlgorithm] = useState("SHA-256");
@@ -35,17 +46,49 @@ export default function SignDocument() {
   const [signingReason, setSigningReason] = useState("");
   const [rawDocument, setRawDocument] = useState("");
 
+  useEffect(() => {
+    const id = useAuthStore.getState().id;
+    if (id) setSignerUserId(id);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await kmsApi.listKeys();
+        const keys = (data as { keys?: KeyOption[] }).keys ?? [];
+        if (!cancelled) {
+          setSigningKeys(keys.filter((k) => isSigningKey(k.key_purpose != null ? String(k.key_purpose) : undefined)));
+        }
+      } catch {
+        if (!cancelled) setSigningKeys([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const toHex = (buffer: ArrayBuffer) =>
+    Array.from(new Uint8Array(buffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
   const onDocFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
     const reader = new FileReader();
     reader.onload = async () => {
-      const text = typeof reader.result === "string" ? reader.result : "";
-      setRawDocument(text);
-      const hex = await digestHex(text, hashAlgorithm as "SHA-256" | "SHA-384" | "SHA-512");
-      setDocumentHash(hex);
+      const buf = reader.result;
+      if (!(buf instanceof ArrayBuffer)) return;
+      const digest = await crypto.subtle.digest(
+        hashAlgorithm as "SHA-256" | "SHA-384" | "SHA-512",
+        buf,
+      );
+      setDocumentHash(toHex(digest));
+      setRawDocument("");
     };
-    reader.readAsText(f);
+    reader.readAsArrayBuffer(f);
   };
 
   const recalcHash = async () => {
@@ -92,10 +135,43 @@ export default function SignDocument() {
           onAccept={() => setFeedback(null)}
         />
         <form onSubmit={submit} className="max-w-5xl mx-auto">
+          <div className="mb-6 rounded-xl border border-sky-100 bg-sky-50/80 p-4 dark:border-slate-600 dark:bg-slate-800/60">
+            <Label htmlFor="pickKey" className="text-gray-900 dark:text-white">
+              {t("kms.sign.pickSigningKey")}
+            </Label>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t("kms.sign.pickSigningKeyHint")}</p>
+            <Select
+              id="pickKey"
+              className="mt-2 max-w-xl"
+              value={selectedKeyId}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSelectedKeyId(v);
+                setKeyId(v);
+              }}
+            >
+              <option value="">{t("kms.sign.chooseSigningKeyPlaceholder")}</option>
+              {signingKeys.map((k) => (
+                <option key={k.key_id} value={k.key_id}>
+                  {k.key_alias} ({String(k.key_id).slice(0, 8)}…)
+                </option>
+              ))}
+            </Select>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <Label htmlFor="keyId">{t("kms.sign.keyId")}</Label>
-              <TextInput id="keyId" value={keyId} onChange={(e) => setKeyId(e.target.value)} required className="mt-1 font-mono text-sm" />
+              <TextInput
+                id="keyId"
+                value={keyId}
+                onChange={(e) => {
+                  setKeyId(e.target.value);
+                  setSelectedKeyId("");
+                }}
+                required
+                className="mt-1 font-mono text-sm"
+              />
             </div>
             <div>
               <Label htmlFor="hashAlg">{t("kms.sign.hashAlg")}</Label>
@@ -147,7 +223,7 @@ export default function SignDocument() {
               <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm dark:border-slate-600 dark:bg-slate-700">
                 <span>{t("kms.sign.uploadFile")}</span>
                 <Plus className="h-5 w-5 text-blue-600" />
-                <input type="file" accept=".txt,.json,.xml,.csv,.log,.md" className="hidden" onChange={onDocFile} />
+                <input type="file" className="hidden" onChange={onDocFile} />
               </label>
               <textarea
                 className="min-h-[110px] w-full rounded-lg border border-gray-200 p-3 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
