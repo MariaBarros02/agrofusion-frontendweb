@@ -29,7 +29,9 @@ export type ProjectEndpointRegistrationItem = {
    * `project.create.<clave>` en i18n (en lugar de prefijar api_url_base + pathSuffix).
    */
   urlEmptyWithPlaceholderKey?: string;
-  /** Si existe, se muestra la tabla bajo URL / método / autenticación. */
+  /** Si existe, se muestra la tabla de parámetros de petición. */
+  requestParamFields?: ResponseBodyFieldSpec[];
+  /** Si existe, se muestra la tabla de modelo de respuesta. */
   responseBodyFields?: ResponseBodyFieldSpec[];
 };
 
@@ -64,6 +66,9 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/get-user-by-email/{email}",
     method: "GET",
     requiresAuth: true,
+    requestParamFields: [
+      { displayName: "endpointParamSearchUserEmail", allowedTypes: ["string"] },
+    ],
     responseBodyFields: [
       { displayName: "endpointFieldUserName", allowedTypes: ["string"] },
       { displayName: "endpointFieldUserRoles", allowedTypes: ["array", "string", "number"] },

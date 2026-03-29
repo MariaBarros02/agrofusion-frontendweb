@@ -33,11 +33,14 @@ const VARIABLE_TYPE_I18N_KEY: Record<VariableType, string> = {
   datetime: "project.create.endpointResponseBodyTypeDatetime",
 };
 
-function buildInitialResponseBodyByIndex(): Record<number, ResponseBodyRowValues[]> {
+function buildInitialFieldsByIndex(
+  fieldKey: "responseBodyFields" | "requestParamFields",
+): Record<number, ResponseBodyRowValues[]> {
   const out: Record<number, ResponseBodyRowValues[]> = {};
   PROJECT_EXTERNAL_ENDPOINT_SPECS.forEach((spec, index) => {
-    if (!spec.responseBodyFields) return;
-    out[index] = spec.responseBodyFields.map((row) =>
+    const fields = spec[fieldKey];
+    if (!fields) return;
+    out[index] = fields.map((row) =>
       row.allowedTypes.length > 1
         ? { key: "", variableType: row.allowedTypes[0] }
         : { key: "" },
@@ -72,15 +75,30 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
   const [externalRows, setExternalRows] = useState<EndpointRowState[]>(() =>
     buildExternalInitialRows(apiUrlBase),
   );
+  const [requestParamByIndex, setRequestParamByIndex] = useState<
+    Record<number, ResponseBodyRowValues[]>
+  >(() => buildInitialFieldsByIndex("requestParamFields"));
   const [responseBodyByIndex, setResponseBodyByIndex] = useState<
     Record<number, ResponseBodyRowValues[]>
-  >(buildInitialResponseBodyByIndex);
+  >(() => buildInitialFieldsByIndex("responseBodyFields"));
 
   const updateExternalRow = (index: number, patch: Partial<EndpointRowState>) => {
     setExternalRows((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], ...patch };
       return next;
+    });
+  };
+
+  const updateRequestParamRow = (
+    specIndex: number,
+    rowIndex: number,
+    patch: Partial<ResponseBodyRowValues>,
+  ) => {
+    setRequestParamByIndex((prev) => {
+      const rows = [...(prev[specIndex] ?? [])];
+      rows[rowIndex] = { ...rows[rowIndex], ...patch };
+      return { ...prev, [specIndex]: rows };
     });
   };
 
@@ -186,6 +204,91 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                       </Select>
                     </div>
                   </div>
+                  {spec.requestParamFields &&
+                    spec.requestParamFields.length > 0 && (
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-700 dark:text-gray-300">
+                          {t("project.create.endpointRequestParams")}
+                        </Label>
+                        <div className="mt-2 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+                          <table className="w-full min-w-[420px] table-fixed text-left text-sm">
+                            <thead className="bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                              <tr>
+                                <th className="w-[30%] px-3 py-2">
+                                  {t("project.create.endpointResponseBodyName")}
+                                </th>
+                                <th className="w-[45%] px-3 py-2">
+                                  {t("project.create.endpointResponseBodyKey")}
+                                </th>
+                                <th className="w-[25%] px-3 py-2">
+                                  {t(
+                                    "project.create.endpointResponseBodyVariableType",
+                                  )}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                              {spec.requestParamFields.map((field, rowIdx) => {
+                                const rowState =
+                                  requestParamByIndex[index]?.[rowIdx] ?? {
+                                    key: "",
+                                    variableType: field.allowedTypes[0],
+                                  };
+                                const isFixed = field.allowedTypes.length <= 1;
+                                return (
+                                  <tr
+                                    key={`${field.displayName}-${rowIdx}`}
+                                    className="bg-white dark:bg-gray-800"
+                                  >
+                                    <td className="px-3 py-2 text-gray-900 dark:text-white">
+                                      {t(`project.create.${field.displayName}`)}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <TextInput
+                                        sizing="sm"
+                                        className="font-mono text-xs"
+                                        value={rowState.key}
+                                        onChange={(e) =>
+                                          updateRequestParamRow(index, rowIdx, {
+                                            key: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <Select
+                                        sizing="sm"
+                                        disabled={isFixed}
+                                        value={
+                                          rowState.variableType ??
+                                          field.allowedTypes[0]
+                                        }
+                                        onChange={(e) =>
+                                          updateRequestParamRow(
+                                            index,
+                                            rowIdx,
+                                            {
+                                              variableType:
+                                                e.target.value as VariableType,
+                                            },
+                                          )
+                                        }
+                                      >
+                                        {field.allowedTypes.map((vt) => (
+                                          <option key={vt} value={vt}>
+                                            {t(VARIABLE_TYPE_I18N_KEY[vt])}
+                                          </option>
+                                        ))}
+                                      </Select>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                   {spec.responseBodyFields &&
                     spec.responseBodyFields.length > 0 && (
                       <div className="md:col-span-2">
@@ -193,16 +296,16 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                           {t("project.create.endpointResponseBody")}
                         </Label>
                         <div className="mt-2 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
-                          <table className="w-full min-w-[320px] text-left text-sm">
+                          <table className="w-full min-w-[420px] table-fixed text-left text-sm">
                             <thead className="bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                               <tr>
-                                <th className="px-3 py-2">
+                                <th className="w-[30%] px-3 py-2">
                                   {t("project.create.endpointResponseBodyName")}
                                 </th>
-                                <th className="px-3 py-2">
+                                <th className="w-[45%] px-3 py-2">
                                   {t("project.create.endpointResponseBodyKey")}
                                 </th>
-                                <th className="px-3 py-2">
+                                <th className="w-[25%] px-3 py-2">
                                   {t(
                                     "project.create.endpointResponseBodyVariableType",
                                   )}
