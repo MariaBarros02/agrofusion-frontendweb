@@ -389,6 +389,7 @@
             "endpointFieldCreateUserDateIssuance": "Fecha de expedición del documento de identidad",
             "endpointTitleCreateUser": "Crear usuario",
             "endpointDescCreateUser": "El endpoint permite a un administrador crear un nuevo usuario en el sistema. Al crear el usuario, el sistema genera un token de activación para que el usuario pueda activar su cuenta.",
+            "endpointParamActivateToken": "Token de activación de cuenta",
             "endpointTitleActivateAccount": "Activar cuenta",
             "endpointDescActivateAccount": "El endpoint permite activar la cuenta de un usuario en el sistema mediante un token de activación.",
             "endpointFieldServiceAuthAccessToken": "Token de acceso",
