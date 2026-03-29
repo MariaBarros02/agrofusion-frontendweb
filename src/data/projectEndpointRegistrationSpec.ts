@@ -33,17 +33,6 @@ export type ProjectEndpointRegistrationItem = {
   responseBodyFields?: ResponseBodyFieldSpec[];
 };
 
-export type AgroFusionAuthEndpointItem = {
-  /** Clave i18n parcial para el título del acordeón. */
-  title: string;
-  /** Clave i18n parcial para la descripción del endpoint. */
-  description: string;
-  method: "GET" | "POST" | "PUT" | "PATCH";
-  requiresAuth: boolean;
-  /** Ruta relativa a la URL base de auth de AgroFusion. */
-  agroFusionPath: string;
-};
-
 export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] = [
   {
     title: "endpointTitleRoles",
@@ -107,6 +96,9 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/auth/service-token",
     method: "POST",
     requiresAuth: false,
+    responseBodyFields: [
+      { displayName: "endpointFieldServiceAuthAccessToken", allowedTypes: ["string"] },
+    ],
   },
   {
     title: "endpointTitleChangeStatus",
@@ -124,14 +116,6 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
   },
 ];
 
-export const AGROFUSION_SSO_ENDPOINT_SPEC: AgroFusionAuthEndpointItem = {
-  title: "endpointTitleSso",
-  description: "endpointDescSso",
-  method: "POST",
-  requiresAuth: false,
-  agroFusionPath: "/auth/login",
-};
-
 export function joinProjectApiUrl(base: string, pathSuffix: string): string {
   const trimmed = base.trim();
   const placeholder = "{api_url_base}";
@@ -141,9 +125,3 @@ export function joinProjectApiUrl(base: string, pathSuffix: string): string {
   return `${noTrailing}${path}`;
 }
 
-export function joinAgroFusionAuthUrl(authBase: string | undefined, path: string): string {
-  const root = (authBase ?? "").trim() || "{VITE_API_AUTH_AF_URL}";
-  const noTrailing = root.replace(/\/+$/, "");
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${noTrailing}${p}`;
-}
