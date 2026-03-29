@@ -109,6 +109,9 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/activate-account/{token_activacion}",
     method: "GET",
     requiresAuth: false,
+    requestParamFields: [
+      { displayName: "endpointParamActivateToken", allowedTypes: ["string"] },
+    ],
   },
   {
     title: "endpointTitleServiceAuth",
