@@ -249,6 +249,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               <SidebarItem
                 icon={FaRegUser}
                 className={`${baseItem} ${isActive("/profile") ? activeItem : ""}`}
+                onClick={() => navigate("/profile")}
 
               >
                 {t("nav.profile")}
@@ -283,6 +284,8 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/projects") ? activeItem : ""
                     }`}
+                    onClick={() => navigate("/administration/projects")}
+
                   >
                     {t("nav.projects")}
                   </SidebarItem>
@@ -292,7 +295,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/modules") ? activeItem : ""
                     }`}
-
+                    onClick={() => navigate("/administration/modules")}
                   >
                     {t("nav.modules")}
                   </SidebarItem>
@@ -303,7 +306,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/submodules") ? activeItem : ""
                     }`}
-
+                    onClick={() => navigate("/administration/submodules")}  
                   >
                     {t("nav.submodules")}
                   </SidebarItem>
@@ -314,7 +317,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/roles") ? activeItem : ""
                     }`}
-
+                    onClick={() => navigate("/administration/roles")}
                   >
                     {t("nav.roles")}
                   </SidebarItem>
@@ -325,7 +328,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/users") ? activeItem : ""
                     }`}
-
+                    onClick={() => navigate("/administration/users")}
                   >
                     {t("nav.users")}
                   </SidebarItem>
@@ -336,9 +339,9 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
               <SidebarItem
                 icon={FiClipboard}
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
-
+                onClick={() => navigate("/check")}
               >
-                {t("nav.check")}
+                {t("nav.check")}  
               </SidebarItem>
               
               <SidebarItem
