@@ -394,6 +394,8 @@
             "endpointFieldServiceAuthAccessToken": "Access token",
             "endpointTitleServiceAuth": "External service authentication",
             "endpointDescServiceAuth": "Allows making requests to protected endpoints from an external service using client credentials and the user's email, returns an access token. This endpoint must not be protected.",
+            "endpointFieldChangeStatusUserId": "User Id",
+            "endpointFieldChangeStatusNewStatus": "New user status",
             "endpointTitleChangeStatus": "Change user status",
             "endpointDescChangeStatus": "The endpoint allows modifying a user's status in the system, for example to activate or deactivate their access.",
             "endpointTitleEditUser": "Edit user",
