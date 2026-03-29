@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
-import { KeyRound, FileBadge, ShieldCheck, ArrowRight } from "lucide-react";
+import { KeyRound, FileBadge, ShieldCheck, ArrowRight, PenSquare, RefreshCcw } from "lucide-react";
 
 /**
  * Punto de entrada KMS: enlaces a formularios reales contra el backend de auditoría.
@@ -32,13 +32,27 @@ export default function KmsHome() {
       icon: ShieldCheck,
       accent: "from-violet-500 to-indigo-600",
     },
+    {
+      to: "/kms/firmar",
+      title: t("kms.home.cardSign"),
+      desc: t("kms.home.cardSignDesc"),
+      icon: PenSquare,
+      accent: "from-amber-500 to-orange-600",
+    },
+    {
+      to: "/kms/rotar-clave",
+      title: t("kms.home.cardRotate"),
+      desc: t("kms.home.cardRotateDesc"),
+      icon: RefreshCcw,
+      accent: "from-fuchsia-500 to-pink-600",
+    },
   ];
 
   return (
     <AppLayoutSB>
       <TitleTarget title="kms.home.title" description="kms.home.subtitle" />
       <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {cards.map(({ to, title, desc, icon: Icon, accent }) => (
             <Link
               key={to}
