@@ -140,6 +140,17 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/admin/edit/{id_usuario}",
     method: "PUT",
     requiresAuth: true,
+    requestBodyFields: [
+      { displayName: "endpointFieldEditUserName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldEditUserRoles", allowedTypes: ["array", "string", "number"] },
+      { displayName: "endpointFieldEditUserBirthday", allowedTypes: ["string", "datetime"] },
+      { displayName: "endpointFieldEditUserGenderId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldEditUserFirstLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldEditUserSecondLastName", allowedTypes: ["string"] },
+      { displayName: "endpointFieldEditUserTypeDocId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldEditUserDocNumber", allowedTypes: ["string", "number"] },
+      { displayName: "endpointFieldEditUserDateIssuance", allowedTypes: ["string", "datetime"] },
+    ],
   },
 ];
 
