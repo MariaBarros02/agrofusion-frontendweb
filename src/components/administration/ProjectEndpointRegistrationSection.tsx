@@ -78,6 +78,9 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
   const [requestParamByIndex, setRequestParamByIndex] = useState<
     Record<number, ResponseBodyRowValues[]>
   >(() => buildInitialFieldsByIndex("requestParamFields"));
+  const [requestBodyByIndex, setRequestBodyByIndex] = useState<
+    Record<number, ResponseBodyRowValues[]>
+  >(() => buildInitialFieldsByIndex("requestBodyFields"));
   const [responseBodyByIndex, setResponseBodyByIndex] = useState<
     Record<number, ResponseBodyRowValues[]>
   >(() => buildInitialFieldsByIndex("responseBodyFields"));
@@ -96,6 +99,18 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
     patch: Partial<ResponseBodyRowValues>,
   ) => {
     setRequestParamByIndex((prev) => {
+      const rows = [...(prev[specIndex] ?? [])];
+      rows[rowIndex] = { ...rows[rowIndex], ...patch };
+      return { ...prev, [specIndex]: rows };
+    });
+  };
+
+  const updateRequestBodyRow = (
+    specIndex: number,
+    rowIndex: number,
+    patch: Partial<ResponseBodyRowValues>,
+  ) => {
+    setRequestBodyByIndex((prev) => {
       const rows = [...(prev[specIndex] ?? [])];
       rows[rowIndex] = { ...rows[rowIndex], ...patch };
       return { ...prev, [specIndex]: rows };
@@ -265,6 +280,91 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                                         }
                                         onChange={(e) =>
                                           updateRequestParamRow(
+                                            index,
+                                            rowIdx,
+                                            {
+                                              variableType:
+                                                e.target.value as VariableType,
+                                            },
+                                          )
+                                        }
+                                      >
+                                        {field.allowedTypes.map((vt) => (
+                                          <option key={vt} value={vt}>
+                                            {t(VARIABLE_TYPE_I18N_KEY[vt])}
+                                          </option>
+                                        ))}
+                                      </Select>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  {spec.requestBodyFields &&
+                    spec.requestBodyFields.length > 0 && (
+                      <div className="md:col-span-2">
+                        <Label className="text-gray-700 dark:text-gray-300">
+                          {t("project.create.endpointRequestBody")}
+                        </Label>
+                        <div className="mt-2 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+                          <table className="w-full min-w-[420px] table-fixed text-left text-sm">
+                            <thead className="bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                              <tr>
+                                <th className="w-[30%] px-3 py-2">
+                                  {t("project.create.endpointResponseBodyName")}
+                                </th>
+                                <th className="w-[45%] px-3 py-2">
+                                  {t("project.create.endpointResponseBodyKey")}
+                                </th>
+                                <th className="w-[25%] px-3 py-2">
+                                  {t(
+                                    "project.create.endpointResponseBodyVariableType",
+                                  )}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                              {spec.requestBodyFields.map((field, rowIdx) => {
+                                const rowState =
+                                  requestBodyByIndex[index]?.[rowIdx] ?? {
+                                    key: "",
+                                    variableType: field.allowedTypes[0],
+                                  };
+                                const isFixed = field.allowedTypes.length <= 1;
+                                return (
+                                  <tr
+                                    key={`${field.displayName}-${rowIdx}`}
+                                    className="bg-white dark:bg-gray-800"
+                                  >
+                                    <td className="px-3 py-2 text-gray-900 dark:text-white">
+                                      {t(`project.create.${field.displayName}`)}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <TextInput
+                                        sizing="sm"
+                                        className="font-mono text-xs"
+                                        value={rowState.key}
+                                        onChange={(e) =>
+                                          updateRequestBodyRow(index, rowIdx, {
+                                            key: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <Select
+                                        sizing="sm"
+                                        disabled={isFixed}
+                                        value={
+                                          rowState.variableType ??
+                                          field.allowedTypes[0]
+                                        }
+                                        onChange={(e) =>
+                                          updateRequestBodyRow(
                                             index,
                                             rowIdx,
                                             {
