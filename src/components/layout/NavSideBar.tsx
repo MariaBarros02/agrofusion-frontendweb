@@ -24,7 +24,7 @@ import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
 import { useNavigate } from "react-router-dom";
-
+import logoAgrofusionRemovebg2 from "/logoAgrofusion-removebg2.png"
 /**
  * Módulo de componentes de navegación lateral.
  * Contiene el sidebar principal de la aplicación con menús y submenús.
@@ -213,7 +213,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             href="/dashboard"
             onClick={() => navigate("/dashboard")}
 
-            img="/logoAgrofusion-removebg2.png"
+            img={logoAgrofusionRemovebg2}
             imgAlt="AgroFusion logo"
           >
             <div className=" !rounded-xl flex items-center justify-between w-full">
@@ -285,6 +285,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                       isActive("/administration/projects") ? activeItem : ""
                     }`}
                     onClick={() => navigate("/administration/projects")}
+
                   >
                     {t("nav.projects")}
                   </SidebarItem>
@@ -295,7 +296,6 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                       isActive("/administration/modules") ? activeItem : ""
                     }`}
                     onClick={() => navigate("/administration/modules")}
-
                   >
                     {t("nav.modules")}
                   </SidebarItem>
@@ -306,8 +306,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                     className={`${subItem} ${
                       isActive("/administration/submodules") ? activeItem : ""
                     }`}
-                    onClick={() => navigate("/administration/submodules")}
-
+                    onClick={() => navigate("/administration/submodules")}  
                   >
                     {t("nav.submodules")}
                   </SidebarItem>
@@ -319,7 +318,6 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                       isActive("/administration/roles") ? activeItem : ""
                     }`}
                     onClick={() => navigate("/administration/roles")}
-
                   >
                     {t("nav.roles")}
                   </SidebarItem>
@@ -331,7 +329,6 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                       isActive("/administration/users") ? activeItem : ""
                     }`}
                     onClick={() => navigate("/administration/users")}
-
                   >
                     {t("nav.users")}
                   </SidebarItem>
@@ -343,24 +340,21 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                 icon={FiClipboard}
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
                 onClick={() => navigate("/check")}
-
               >
-                {t("nav.check")}
+                {t("nav.check")}  
               </SidebarItem>
               
               <SidebarItem
-                onClick={() => navigate("/digitalSignature")}
+                onClick={() => navigate("/kms")}
                 icon={GoPencil}
                 className={`${baseItem} ${
-                  isActive("/digitalSignature") ? activeItem : ""
+                  isActive("/kms") || isActive("/digitalSignature") ? activeItem : ""
                 }`}
               >
                 {t("nav.digitalSig")}
               </SidebarItem>
-              
-               <SidebarItem
+              <SidebarItem
                 onClick={() => navigate("/audit")}
-
                 icon={FiBookOpen}
                 className={`${baseItem} ${isActive("/audit") ? activeItem : ""}`}
               >
