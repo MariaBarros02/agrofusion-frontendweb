@@ -19,6 +19,8 @@ export interface EditUserRequest {
     /** Fecha de expedición del documento en formato yyyy-MM-dd */
     date_issuance_document?: string;
     identity_number?: string;
+    /** Rol AgroFusion (af_role_id) */
+    role_id?: string;
     /** Datos por proyecto externo, clave = instance_code */
     external_data?: Record<string, ExternalProjectData>;
 }

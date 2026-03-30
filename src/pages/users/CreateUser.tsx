@@ -432,7 +432,9 @@ const CreateUser = () => {
       // Mapear response.results al formato Record<string, ProjectRole[]>
       const rolesMap: Record<string, ProjectRole[]> = {};
       for (const [instanceCode, value] of Object.entries(response.results)) {
-        const items: any[] = value.data ?? value.roles ?? [];
+        const items: any[] = Array.isArray(value)
+          ? value
+          : (value as any).data ?? (value as any).roles ?? [];
         rolesMap[instanceCode] = items.map((r: any) => ({
           role_id: r.role_id ?? r.id,
           role_name: r.role_name ?? r.name,
@@ -473,7 +475,9 @@ const CreateUser = () => {
       // Mapear response.results al formato Record<string, ProjectTypeDocument[]>
       const typeDocsMap: Record<string, ProjectTypeDocument[]> = {};
       for (const [instanceCode, value] of Object.entries(response.results)) {
-        const items: any[] = value.data ?? value.types ?? [];
+        const items: any[] = Array.isArray(value)
+          ? value
+          : (value as any).data ?? (value as any).types ?? [];
         typeDocsMap[instanceCode] = items.map((t: any) => ({
           id: t.id,
           name: t.name,

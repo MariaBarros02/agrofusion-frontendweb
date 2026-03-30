@@ -182,7 +182,7 @@ const EditUser = () => {
 
       return {
         name: firstUser.name || "",
-        rol: String(userDetails.rol_id || ""), // Asegurar que coincida con los values del Select
+        rol: String(userDetails.role_id || ""), // Asegurar que coincida con los values del Select
         document_number: userDetails.identity_number || "",
         state: agrofusionState,
         birthday: firstUser.birthday?.split("T")[0] || "",
@@ -196,7 +196,7 @@ const EditUser = () => {
 
     return {
       name: userDetails.name || "",
-      rol: String(userDetails.rol || ""),
+      rol: String(userDetails.role_id || ""),
       document_number: userDetails.identity_number || "",
       birthday: "",
       state: agrofusionState,
@@ -290,6 +290,7 @@ const EditUser = () => {
         birthday: values.birthday || undefined,
         date_issuance_document: values.date_issuance_document || undefined,
         gender_id: values.gender_id ? Number(values.gender_id) : undefined,
+        role_id: values.rol || undefined,
       };
 
       const editResponse = await editUserService(userId, editPayload);
