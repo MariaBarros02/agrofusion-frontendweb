@@ -68,6 +68,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/get-user-by-email/{email}",
     method: "GET",
     requiresAuth: true,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderSearchUserPath",
     requestParamFields: [
       { displayName: "endpointParamSearchUserEmail", allowedTypes: ["string"] },
     ],
@@ -89,6 +90,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/admin/create-agrofusion",
     method: "POST",
     requiresAuth: true,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderCreateUserPath",
     requestBodyFields: [
       { displayName: "endpointFieldCreateUserName", allowedTypes: ["string"] },
       { displayName: "endpointFieldCreateUserEmail", allowedTypes: ["string"] },
@@ -109,6 +111,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/activate-account/{token_activacion}",
     method: "GET",
     requiresAuth: false,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderActivateAccountPath",
     requestParamFields: [
       { displayName: "endpointParamActivateToken", allowedTypes: ["string"] },
     ],
@@ -119,6 +122,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/auth/service-token",
     method: "POST",
     requiresAuth: false,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderServiceAuthPath",
     responseBodyFields: [
       { displayName: "endpointFieldServiceAuthAccessToken", allowedTypes: ["string"] },
     ],
@@ -129,6 +133,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/change-user-status/",
     method: "POST",
     requiresAuth: true,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderChangeStatusPath",
     requestBodyFields: [
       { displayName: "endpointFieldChangeStatusUserId", allowedTypes: ["string", "number"] },
       { displayName: "endpointFieldChangeStatusNewStatus", allowedTypes: ["string", "number"] },
@@ -140,6 +145,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     pathSuffix: "/users/admin/edit/{id_usuario}",
     method: "PUT",
     requiresAuth: true,
+    urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderEditUserPath",
     requestParamFields: [
       { displayName: "endpointParamEditUserId", allowedTypes: ["string", "number"] },
     ],
