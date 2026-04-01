@@ -8,10 +8,10 @@ export type VariableType = "string" | "number" | "array" | "datetime";
 
 /** Fila de la tabla "cuerpo de respuesta" en el registro de endpoint. */
 export type ResponseBodyFieldSpec = {
-  /** Clave i18n parcial (project.create.<key>) para la columna "Nombre". */
   displayName: string;
-  /** Tipos de variable permitidos; si solo hay uno, el select queda fijo. */
   allowedTypes: VariableType[];
+  disabled?: boolean;
+  placeholderKey?: string;
 };
 
 export type ProjectEndpointRegistrationItem = {
@@ -70,7 +70,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     requiresAuth: true,
     urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderSearchUserPath",
     requestParamFields: [
-      { displayName: "endpointParamSearchUserEmail", allowedTypes: ["string"] },
+      { displayName: "endpointParamSearchUserEmail", allowedTypes: ["string"], disabled: true, placeholderKey: "endpointParamSearchUserEmailPlaceholder" },
     ],
     responseBodyFields: [
       { displayName: "endpointFieldUserName", allowedTypes: ["string"] },
@@ -113,7 +113,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     requiresAuth: false,
     urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderActivateAccountPath",
     requestParamFields: [
-      { displayName: "endpointParamActivateToken", allowedTypes: ["string"] },
+      { displayName: "endpointParamActivateToken", allowedTypes: ["string"], disabled: true, placeholderKey: "endpointParamActivateTokenPlaceholder" },
     ],
   },
   {
@@ -147,7 +147,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
     requiresAuth: true,
     urlEmptyWithPlaceholderKey: "endpointUrlPlaceholderEditUserPath",
     requestParamFields: [
-      { displayName: "endpointParamEditUserId", allowedTypes: ["string", "number"] },
+      { displayName: "endpointParamEditUserId", allowedTypes: ["string"], disabled: true, placeholderKey: "endpointParamEditUserIdPlaceholder" },
     ],
     requestBodyFields: [
       { displayName: "endpointFieldEditUserName", allowedTypes: ["string"] },
