@@ -34,7 +34,7 @@ const VARIABLE_TYPE_I18N_KEY: Record<VariableType, string> = {
 };
 
 function buildInitialFieldsByIndex(
-  fieldKey: "responseBodyFields" | "requestParamFields",
+  fieldKey: "responseBodyFields" | "requestParamFields" | "requestBodyFields",
 ): Record<number, ResponseBodyRowValues[]> {
   const out: Record<number, ResponseBodyRowValues[]> = {};
   PROJECT_EXTERNAL_ENDPOINT_SPECS.forEach((spec, index) => {
@@ -65,10 +65,6 @@ function buildExternalInitialRows(apiUrlBase: string): EndpointRowState[] {
   }));
 }
 
-/**
- * Bloque de referencia: endpoints que el proyecto externo debe registrar / exponer.
- * Debajo de "módulos de acceso rápido" en alta de proyecto.
- */
 export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
   const { t } = useTranslation();
 
@@ -263,6 +259,14 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                                         sizing="sm"
                                         className="font-mono text-xs"
                                         value={rowState.key}
+                                        disabled={field.disabled}
+                                        placeholder={
+                                          field.placeholderKey
+                                            ? t(
+                                                `project.create.${field.placeholderKey}`,
+                                              )
+                                            : undefined
+                                        }
                                         onChange={(e) =>
                                           updateRequestParamRow(index, rowIdx, {
                                             key: e.target.value,
@@ -273,7 +277,7 @@ export function ProjectEndpointRegistrationSection({ apiUrlBase }: Props) {
                                     <td className="px-3 py-2">
                                       <Select
                                         sizing="sm"
-                                        disabled={isFixed}
+                                        disabled={isFixed || field.disabled}
                                         value={
                                           rowState.variableType ??
                                           field.allowedTypes[0]
