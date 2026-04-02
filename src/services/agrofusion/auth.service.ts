@@ -3,6 +3,7 @@ import { authApi } from "./api/auth.api";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
+import type { EditUserRequest, EditProfileRequest, ChangeUserStatusRequest } from "../../dto/request/editUser-request.dto";
 import type { AccountActivateRequest } from "../../dto/request/accountActivate-request.dto";
 import type { listUsersRequest } from "../../dto/request/listUsers-request.dto";
 import type { ChangePasswordRequest } from "../../dto/request/changePassword-request.dto";
@@ -29,12 +30,37 @@ export const fetchActiveModulesService = async () => {
 
 /**
  * Obtiene la lista de proyectos externos vinculados al usuario actual.
- * @returns {Promise<string[]>} Lista de códigos de proyectos (ej: ['SIGMA', 'DISRIEGO']).
  */
 export const getExternalProjects = async () => {
-  const {data} = await authApi.getExternalProjects();
-  return data
-}
+  const { data } = await authApi.getExternalProjects();
+  return data;
+};
+
+/**
+ * Obtiene los roles disponibles de todos los proyectos externos activos.
+ * El backend orquesta las llamadas en paralelo a SIGMA, DISRIEGO, etc.
+ */
+export const getExternalProjectRolesService = async () => {
+  const { data } = await authApi.getExternalProjectRoles();
+  return data;
+};
+
+/**
+ * Obtiene los tipos de documento de todos los proyectos externos activos.
+ */
+export const getExternalProjectTypeDocsService = async () => {
+  const { data } = await authApi.getExternalProjectTypeDocs();
+  return data;
+};
+
+/**
+ * Obtiene los datos del usuario en proyectos externos por email.
+ * @param email - Email del usuario a consultar
+ */
+export const getExternalProjectUsersService = async (email: string) => {
+  const { data } = await authApi.getExternalProjectUsers(email);
+  return data;
+};
 
 /**
  * Obtiene el listado paginado de proyectos externos (RF-GES-01).
@@ -301,34 +327,39 @@ export const deleteUserService = async (
 }
 
 /*
- * Actualizar perfil del usuario
- *
+ * Actualizar perfil propio del usuario autenticado.
+ * El backend orquesta la actualización en proyectos externos.
  */
 export const editProfileService = async (
   userId: string,
-  name: string,
-  identityNumber: string
-)=>{
-  
-  const {data} = await authApi.editProfile(userId, name, identityNumber);
+  payload: EditProfileRequest
+) => {
+  const { data } = await authApi.editProfile(userId, payload);
   return data;
-}
+};
 
 /*
- * Actualizar perfil del usuario
- *
+ * Actualizar usuario por admin.
+ * El backend orquesta UPDATE_USER en proyectos externos usando external_data.
  */
 export const editUserService = async (
   userId: string,
-  name: string,
-  identityNumber: string,
-  state: string,
-  rol?:string
-)=>{
-  
-  const {data} = await authApi.editUser(userId, name, identityNumber, state, rol);
+  payload: EditUserRequest
+) => {
+  const { data } = await authApi.editUser(userId, payload);
   return data;
-}
+};
+
+/*
+ * Cambiar estado activo/inactivo de un usuario.
+ * El backend orquesta CHANGE_USER_STATUS en proyectos externos.
+ */
+export const changeUserStatusService = async (
+  payload: ChangeUserStatusRequest
+) => {
+  const { data } = await authApi.changeUserStatus(payload);
+  return data;
+};
 
 
 /*

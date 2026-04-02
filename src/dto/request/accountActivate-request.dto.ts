@@ -35,8 +35,16 @@ export interface AccountActivateRequest {
 
     /**
      * Confirmación de la nueva contraseña.
-     * 
+     *
      * Debe coincidir exactamente con `new_password`.
      */
     confirm_password: string;
+
+    /**
+     * Tokens de activación por proyecto externo.
+     *
+     * El backend los usa para activar la cuenta en SIGMA, DISRIEGO, etc.
+     * Clave = instance_code del proyecto (ej: "DISRIEGO", "SIGMA").
+     */
+    external_tokens?: Record<string, string>;
 }

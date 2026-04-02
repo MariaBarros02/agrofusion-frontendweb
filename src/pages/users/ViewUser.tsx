@@ -7,17 +7,13 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
+  changeUserStatusService,
   deleteUserService,
-  getExternalProjects,
   getUserDetailsService,
 } from "../../services/agrofusion/auth.service";
 import type { ListUserResponse } from "../../dto/response/listUsers-response.dto";
-import {
-  handleChangeUserStatusEP,
-  handleGetUserByEmailEP,
-} from "../../services/orchestrator/userOrchestrator.services";
+import { projectsLinks } from "../../services/orchestrator/userOrchestrator.services";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
-import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
@@ -70,63 +66,30 @@ const deleteUser = async () => {
   }
   try {
     setLoading(true);
-    
-    const data = await getExternalProjects();
 
-    const { users: externalUsersResponse, errors: getUserErrors } =
-      await handleGetUserByEmailEP(
-        userDetails?.email || "",
-        data,
-      );
+    // El backend orquesta CHANGE_USER_STATUS en proyectos externos
+    if (userDetails?.email && userId) {
+      const statusResponse = await changeUserStatusService({
+        user_id: userId,
+        email: userDetails.email,
+        new_status: 3, // DELETED
+      });
 
-    // Mostrar errores de búsqueda externa
-    getUserErrors.forEach((err) => {
-      const link = projectsLinks[err.project];
-
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: err.messageKey,
-          messageParams: err.messageParams,
-          type: err.type ?? "error",
-          ...(link ?? {}),
-        },
-      ]);
-    });
-
-    // Cambiar estado externo
-    const changeResults = await Promise.all(
-      Object.entries(externalUsersResponse).map(([service, user]) =>
-        handleChangeUserStatusEP(
-          {
-            user_id: user.id,
-            new_status: 3,
-          },
-          data.filter((p) => p.instance_code === service),
-        ),
-      ),
-    );
-
-    // Mostrar errores de cambio de estado
-    changeResults.forEach(({ errors }) => {
-      errors.forEach((err) => {
-        const link = projectsLinks[err.project];
-
+      const syncErrors = (statusResponse as any)?.sync_errors ?? [];
+      syncErrors.forEach((err: { instance_code: string; error: string }) => {
         setToasts((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
+            messageKey: "viewUser.externalStatusSyncError",
+            messageParams: { service: err.instance_code },
+            type: "warning" as const,
+            to: projectsLinks[err.instance_code]?.to,
+            linkText: projectsLinks[err.instance_code]?.linkText ?? "",
           },
         ]);
       });
-    });
-
-    
+    }
 
     getUserDetails();
   } catch (error) {

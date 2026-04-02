@@ -14,15 +14,12 @@ import { useMemo } from "react";
 import {
   createUserService,
   getBasicListRolesService,
+  getExternalProjectRolesService,
+  getExternalProjectTypeDocsService,
   getExternalProjects,
   userExistsService,
 } from "../../services/agrofusion/auth.service";
-import {
-  handleCreateUserEP,
-  handleGetRolesEP,
-  handleGetTypeDocumentsEP,
-  projectsLinks,
-} from "../../services/orchestrator/userOrchestrator.services";
+import { mapBackendErrors } from "../../services/orchestrator/userOrchestrator.services";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import { useNavigate } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
@@ -335,130 +332,60 @@ const CreateUser = () => {
           return;
         }
 
-        if (projects.length === 0) {
-          // Crear usuario solo en AgroFusion (sin externos)
-
-          const createUserPayload: createUserRequest = {
-            name:
-              values.name +
-              " " +
-              values.firstLastName +
-              " " +
-              values.secondLastName,
-            email: values.email,
-            password: values.password,
-            role_id: values.roles || "",
-            confirm_password: values.confirmPassword,
-            identity_number: values.documentNumber.toString(),
-            tokens: {},
-          };
-
-          const user = await createUserService(createUserPayload);
-
-          setToast((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "success",
-              messageKey: "createUser.userCreatedSuccessfully",
-            },
-          ]);
-          setUserCreate(user);
-
-          return;
-        }
+        /* =========================================================
+       CONSTRUIR external_data POR PROYECTO
+    ========================================================== */
+        const external_data = projects.length > 0
+          ? projects.reduce((acc, project) => {
+              acc[project.instance_code] = {
+                type_document_id: Number(
+                  values.typeDocumentByProject[project.instance_code],
+                ),
+                roles: values.rolesByProject[project.instance_code] ?? [],
+              };
+              return acc;
+            }, {} as Record<string, { type_document_id: number; roles: number[] }>)
+          : undefined;
 
         /* =========================================================
-       CONSTRUIR USUARIO BASE
+       CREAR USUARIO (BACKEND ORQUESTA A EXTERNOS)
     ========================================================== */
-        const baseUser = {
-          name: values.name,
-          first_last_name: values.firstLastName,
-          second_last_name: values.secondLastName,
-          document_number: String(values.documentNumber),
-          date_issuance_document: new Date(values.dateIssuanceDoc),
-          birthday: new Date(values.birthday),
-          gender_id: Number(values.genderId),
-          email: values.email,
-          password: values.password,
-        };
-
-        /* =========================================================
-       CONSTRUIR USUARIOS POR PROYECTO
-    ========================================================== */
-        const usersByProject = projects.reduce((acc, project) => {
-          acc[project.instance_code] = {
-            ...baseUser,
-            type_document_id: Number(
-              values.typeDocumentByProject[project.instance_code],
-            ),
-            roles: values.rolesByProject[project.instance_code] ?? [],
-          };
-
-          return acc;
-        }, {} as any);
-
-        /* =========================================================
-       CREAR USUARIO EN SISTEMAS EXTERNOS
-    ========================================================== */
-        const result = await handleCreateUserEP(usersByProject, projects);
-
-        /* =========================================================
-       MOSTRAR ERRORES POR SERVICIO (NEGOCIO)
-    ========================================================== */
-        if (result.errors.length > 0) {
-          result.errors.forEach((err) => {
-            const link = projectsLinks[err.project];
-
-            setToast((prev) => [
-              ...prev,
-              {
-                id: crypto.randomUUID(),
-                type: err.type ?? "error",
-                messageKey: err.messageKey,
-                messageParams: err.messageParams,
-                ...(link ?? {}),
-              },
-            ]);
-          });
-        }
-
-        /* =========================================================
-        SI NO HUBO TOKENS → CREACIÓN FALLÓ TOTALMENTE
-    ========================================================== */
-        const hasTokens = Object.keys(result.tokens).length > 0;
-
-        if (!hasTokens) {
-          return;
-        }
-
-        /* =========================================================
-        ÉXITO → USAR TOKENS (LO QUE NECESITES)
-    ========================================================== */
-
         const createUserPayload: createUserRequest = {
-          name:
-            values.name +
-            " " +
-            values.firstLastName +
-            " " +
-            values.secondLastName,
+          name: values.name,
+          first_last_name: values.firstLastName || undefined,
+          second_last_name: values.secondLastName || undefined,
           email: values.email,
           password: values.password,
           role_id: values.roles || "",
           confirm_password: values.confirmPassword,
           identity_number: values.documentNumber.toString(),
-          tokens: result.tokens,
+          birthday: values.birthday || undefined,
+          gender_id: values.genderId ? Number(values.genderId) : undefined,
+          date_issuance_document: values.dateIssuanceDoc || undefined,
+          external_data,
         };
+
         const user = await createUserService(createUserPayload);
         setUserCreate(user);
 
         /* =========================================================
-        TOAST DE ÉXITO GENERAL
+       MOSTRAR sync_errors DEL BACKEND (NO BLOQUEAN EL ÉXITO)
     ========================================================== */
-        // if(user){
+        const syncErrors = (user as any)?.sync_errors ?? [];
+        if (syncErrors.length > 0) {
+          syncErrors.forEach((err: { instance_code: string; error: string }) => {
+            setToast((prev) => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                type: "warning" as const,
+                messageKey: "createUser.externalSyncError",
+                messageParams: { service: err.instance_code, error: err.error },
+              },
+            ]);
+          });
+        }
 
-        // }
         setToast((prev) => [
           ...prev,
           {
@@ -498,18 +425,30 @@ const CreateUser = () => {
     formik.resetForm();
   };
 
-  const fetchProjectRoles = async (projects: ExternalProject[]) => {
+  const fetchProjectRoles = async (_projects: ExternalProject[]) => {
     try {
-      const { roles, errors } = await handleGetRolesEP(projects);
+      const response = await getExternalProjectRolesService();
 
-      setRolesByProject(roles);
+      // Mapear response.results al formato Record<string, ProjectRole[]>
+      const rolesMap: Record<string, ProjectRole[]> = {};
+      for (const [instanceCode, value] of Object.entries(response.results)) {
+        const items: any[] = Array.isArray(value)
+          ? value
+          : (value as any).data ?? (value as any).roles ?? [];
+        rolesMap[instanceCode] = items.map((r: any) => ({
+          role_id: r.role_id ?? r.id,
+          role_name: r.role_name ?? r.name,
+        }));
+      }
+      setRolesByProject(rolesMap);
 
-      if (errors.length > 0) {
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "createUser");
         setToast((prev) => [
           ...prev,
-          ...errors.map((e) => ({
+          ...uiErrors.map((e) => ({
             id: crypto.randomUUID(),
-            type: e.type ?? "error",
+            type: e.type ?? ("warning" as const),
             messageKey: e.messageKey,
             messageParams: e.messageParams,
             to: e.to,
@@ -529,19 +468,30 @@ const CreateUser = () => {
     }
   };
 
-  const fetchProjectTypeDocs = async (projects: ExternalProject[]) => {
+  const fetchProjectTypeDocs = async (_projects: ExternalProject[]) => {
     try {
-      const { typeDocuments, errors } =
-        await handleGetTypeDocumentsEP(projects);
+      const response = await getExternalProjectTypeDocsService();
 
-      setTypeDocsByProject(typeDocuments);
+      // Mapear response.results al formato Record<string, ProjectTypeDocument[]>
+      const typeDocsMap: Record<string, ProjectTypeDocument[]> = {};
+      for (const [instanceCode, value] of Object.entries(response.results)) {
+        const items: any[] = Array.isArray(value)
+          ? value
+          : (value as any).data ?? (value as any).types ?? [];
+        typeDocsMap[instanceCode] = items.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+        }));
+      }
+      setTypeDocsByProject(typeDocsMap);
 
-      if (errors.length > 0) {
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "createUser");
         setToast((prev) => [
           ...prev,
-          ...errors.map((e) => ({
+          ...uiErrors.map((e) => ({
             id: crypto.randomUUID(),
-            type: e.type ?? "error",
+            type: e.type ?? ("warning" as const),
             messageKey: e.messageKey,
             messageParams: e.messageParams,
           })),

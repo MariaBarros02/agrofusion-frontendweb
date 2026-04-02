@@ -12,18 +12,15 @@ import ToastSimple, {
 import { Button, Label, Select, TextInput } from "flowbite-react";
 import type { ListUserResponse } from "../../dto/response/listUsers-response.dto";
 import {
+  changeUserStatusService,
   editUserService,
   getBasicListRolesService,
   getExternalProjects,
+  getExternalProjectUsersService,
   getUserDetailsService,
 } from "../../services/agrofusion/auth.service";
 import type { ExternalProject } from "../../dto/shared/external-project.dto";
-import {
-  handleChangeUserStatusEP,
-  handleEditUserProfileEP,
-  handleGetUserByEmailEP,
-} from "../../services/orchestrator/userOrchestrator.services";
-import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
+import { mapBackendErrors, projectsLinks } from "../../services/orchestrator/userOrchestrator.services";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -185,7 +182,7 @@ const EditUser = () => {
 
       return {
         name: firstUser.name || "",
-        rol: String(userDetails.rol_id || ""), // Asegurar que coincida con los values del Select
+        rol: String(userDetails.role_id || ""), // Asegurar que coincida con los values del Select
         document_number: userDetails.identity_number || "",
         state: agrofusionState,
         birthday: firstUser.birthday?.split("T")[0] || "",
@@ -199,7 +196,7 @@ const EditUser = () => {
 
     return {
       name: userDetails.name || "",
-      rol: String(userDetails.rol || ""),
+      rol: String(userDetails.role_id || ""),
       document_number: userDetails.identity_number || "",
       birthday: "",
       state: agrofusionState,
@@ -218,35 +215,35 @@ const EditUser = () => {
     try {
       setLoading(true);
 
-      const { users: externalUsersResponse, errors: getUserErrors } =
-        await handleGetUserByEmailEP(userDetails?.email || "", projects);
+      const response = await getExternalProjectUsersService(
+        userDetails?.email || "",
+      );
 
-      if (
-        externalUsersResponse &&
-        Object.keys(externalUsersResponse).length > 0
-      ) {
-        setExternalUsers(externalUsersResponse);
+      if (response.results && Object.keys(response.results).length > 0) {
+        setExternalUsers(response.results);
       } else {
         setExternalUsers(null);
       }
 
-      getUserErrors.forEach((err) => {
-        const link = projectsLinks[err.project];
-
-        setToasts((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
-          },
-        ]);
-      });
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "editUser");
+        uiErrors.forEach((err) => {
+          const link = projectsLinks[err.project];
+          setToasts((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              messageKey: err.messageKey,
+              messageParams: err.messageParams,
+              type: err.type ?? "error",
+              ...(link ?? {}),
+            },
+          ]);
+        });
+      }
     } catch (error) {
       console.log(error);
-      setError("Error al eliminar usuario");
+      setError("Error al cargar usuarios externos");
     } finally {
       setLoading(false);
       setExternalLoaded(true);
@@ -278,145 +275,70 @@ const EditUser = () => {
   });
 
   const handleSaveProfile = async (values: any) => {
-    if (!userId) return;
+    if (!userId || !userDetails?.email) return;
 
     try {
       /* ===========================
-         1️ ACTUALIZAR CORE
+         ACTUALIZAR USUARIO (BACKEND ORQUESTA A EXTERNOS)
       ============================ */
-      await editUserService(
-        userId,
-        firstExternalUser
-          ? values.name +
-              " " +
-              values.first_last_name +
-              " " +
-              values.second_last_name
-          : values.name,
-        values.document_number,
-        values.state,
-        values.rol,
-      );
-      /* ===========================
-         2️ SI NO HAY EXTERNOS
-      ============================ */
+      const editPayload = {
+        email: userDetails.email,
+        name: values.name,
+        first_last_name: values.first_last_name || undefined,
+        second_last_name: values.second_last_name || undefined,
+        identity_number: values.document_number,
+        birthday: values.birthday || undefined,
+        date_issuance_document: values.date_issuance_document || undefined,
+        gender_id: values.gender_id ? Number(values.gender_id) : undefined,
+        role_id: values.rol || undefined,
+      };
 
-      if (!projects || !userDetails?.email) {
-        showSuccessToast();
-        setAlert({
-          message: "editUser.editSuccess",
-          type: "success",
-          to: `/administration/users/${userDetails?.user_id}`,
-        });
-        return;
-      }
+      const editResponse = await editUserService(userId, editPayload);
 
-      /* ===========================
-         3️ BUSCAR USUARIOS EXTERNOS
-      ============================ */
-
-      const { users: externalUsersResponse, errors: getUserErrors } =
-        await handleGetUserByEmailEP(userDetails.email, projects);
-
-      getUserErrors.forEach((err) => {
-        const link = projectsLinks[err.project];
+      // Mostrar sync_errors no bloqueantes del backend
+      const syncErrors = (editResponse as any)?.sync_errors ?? [];
+      syncErrors.forEach((err: { instance_code: string; error: string }) => {
         setToasts((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
+            messageKey: "editUser.externalSyncError",
+            messageParams: { service: err.instance_code, error: err.error },
+            type: "warning" as const,
+            to: projectsLinks[err.instance_code]?.to,
+            linkText: projectsLinks[err.instance_code]?.linkText ?? "",
           },
         ]);
       });
 
-      if (!externalUsersResponse) {
-        showSuccessToast();
-
-        return;
-      }
-
       /* ===========================
-         4️ PAYLOAD EXTERNO
+         CAMBIAR ESTADO (BACKEND ORQUESTA A EXTERNOS)
       ============================ */
-
-      const editResults = await Promise.all(
-        Object.entries(externalUsersResponse).map(([service, user]) => {
-          const externalPayload = {
-            name: values.name,
-            first_last_name: values.first_last_name,
-            second_last_name: values.second_last_name,
-            document_number: values.document_number,
-            type_document_id: user.type_document_id,
-            date_issuance_document: values.date_issuance_document,
-            birthday: values.birthday,
-            gender_id: Number(values.gender_id),
-            roles: user.roles ?? [],
-          };
-
-          return handleEditUserProfileEP(
-            externalPayload,
-            user.id,
-            projects.filter((p) => p.instance_code === service),
-          );
-        }),
-      );
-
-      console.log(editResults);
-
-      /* ===========================
-         6️ TOAST ERRORES
-      ============================ */
-
-      editResults.forEach(({ errors }) => {
-        console.log(errors);
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: err.type ?? "error",
-              ...(link ?? {}),
-            },
-          ]);
-        });
-      });
-
       const newStatusNumber = getStatusNumber(values.state);
-
-      const changeResults = await Promise.all(
-        Object.entries(externalUsersResponse).map(([service, user]) =>
-          handleChangeUserStatusEP(
-            {
-              user_id: user.id,
-              new_status: newStatusNumber || 1,
-            },
-            projects.filter((p) => p.instance_code === service),
-          ),
-        ),
-      );
-      // Mostrar errores de cambio de estado
-      changeResults.forEach(({ errors }) => {
-        errors.forEach((err) => {
-          const link = projectsLinks[err.project];
-
-          setToasts((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              messageKey: err.messageKey,
-              messageParams: err.messageParams,
-              type: err.type ?? "error",
-              ...(link ?? {}),
-            },
-          ]);
+      if (newStatusNumber !== undefined) {
+        const statusResponse = await changeUserStatusService({
+          user_id: userId,
+          email: userDetails.email,
+          new_status: newStatusNumber,
         });
-      });
+
+        const statusSyncErrors = (statusResponse as any)?.sync_errors ?? [];
+        statusSyncErrors.forEach(
+          (err: { instance_code: string; error: string }) => {
+            setToasts((prev) => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                messageKey: "editUser.externalStatusSyncError",
+                messageParams: { service: err.instance_code, error: err.error },
+                type: "warning" as const,
+                to: projectsLinks[err.instance_code]?.to,
+                linkText: projectsLinks[err.instance_code]?.linkText ?? "",
+              },
+            ]);
+          },
+        );
+      }
 
       showSuccessToast();
       setAlert({
