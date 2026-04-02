@@ -10,7 +10,7 @@ import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
   Checkbox,
@@ -25,6 +25,7 @@ import {
 import { HiSearch } from "react-icons/hi";
 import {
   FiCheckCircle,
+  FiEdit2,
   FiFilter,
   FiFlag,
   FiMinusCircle,
@@ -44,6 +45,7 @@ import AlertSimple from "../../components/layout/AlertSimple";
 
 const ProjectsList = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [paginatedData, setPaginatedData] = useState<PaginatedProjectsResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -95,6 +97,20 @@ const ProjectsList = () => {
       label: t("project.list.responsible"),
       type: "text",
       format: (value: string) => value ?? "-",
+    },
+    {
+      key: "actions",
+      label: t("project.list.action"),
+      type: "actions",
+      actions: [
+        {
+          label: t("project.list.edit"),
+          icon: <FiEdit2 />,
+          className: "bg-blue-600 text-white hover:bg-blue-500",
+          onClick: (project) =>
+            navigate(`/administration/projects/edit/${project.external_project_id}`),
+        },
+      ],
     },
   ];
 
