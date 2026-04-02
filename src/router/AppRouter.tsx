@@ -17,6 +17,7 @@ import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
 import AddProject from "../pages/administration/AddProject";
+import EditProject from "../pages/administration/EditProject";
 import ModulesList from "../pages/administration/ModulesList";
 import SubmodulesList from "../pages/administration/SubmodulesList";
 
@@ -143,6 +144,7 @@ export function AppRouter() {
 
           <Route path="/administration/projects" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectsList /></ModuleRouteGuard>} />
           <Route path="/administration/projects/create" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AddProject /></ModuleRouteGuard>} />
+          <Route path="/administration/projects/edit/:projectId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditProject /></ModuleRouteGuard>} />
           <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
           <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 

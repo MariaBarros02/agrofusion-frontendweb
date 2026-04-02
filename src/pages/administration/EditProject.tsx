@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { createProjectService } from "../../services/agrofusion/auth.service";
+//import { getProjectDetailsService, updateProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -78,7 +78,7 @@ const endpointFieldMappingSchema = (msg: string) =>
     variable_type: yup.string().required(msg),
   });
 
-const CreateSchema = (t: (key: string) => string) => {
+const EditSchema = (t: (key: string) => string) => {
   const msg = t("project.create.validationRequired");
   return yup.object({
     instance_code: yup.string().required(msg).trim(),
@@ -116,10 +116,12 @@ const CreateSchema = (t: (key: string) => string) => {
 
 type FormValues = CreateProjectRequest;
 
-const AddProject = () => {
+const EditProject = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { projectId } = useParams<{ projectId: string }>();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [alert, setAlert] = useState<AlertState>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -137,16 +139,16 @@ const AddProject = () => {
       modules: Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
       endpoints: buildEndpointInitialValues(),
     },
-    validationSchema: CreateSchema(t),
+    validationSchema: EditSchema(t),
     onSubmit: async (values) => {
       setLoading(true);
       setAlert(null);
       try {
-        // await createProjectService({
+        // await updateProjectService(projectId || "", {
         //   ...values,
         // });
         // setAlert({
-        //   message: "project.create.success",
+        //   message: "project.edit.success",
         //   type: "success",
         //   to: "/administration/projects",
         // });
@@ -170,6 +172,40 @@ const AddProject = () => {
       }
     },
   });
+
+  useEffect(() => {
+    const loadProject = async () => {
+      try {
+        setLoadingData(true);
+        // const data = await getProjectDetailsService(projectId || "");
+        // formik.setValues({
+        //   instance_code: data.instance_code ?? "",
+        //   project_name: data.project_name ?? "",
+        //   project_url: data.project_url ?? "",
+        //   description: data.description ?? "",
+        //   is_active: data.is_active ?? true,
+        //   project_image: data.project_image ?? "",
+        //   project_image_mime_type: data.project_image_mime_type ?? "",
+        //   api_url_base: data.api_url_base ?? "",
+        //   users_api_path: data.users_api_path ?? "",
+        //   modules: data.modules ?? Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
+        //   endpoints: data.endpoints ?? buildEndpointInitialValues(),
+        // });
+        // if (data.project_image) {
+        //   setImagePreview(data.project_image);
+        // }
+      } catch (err: any) {
+        console.error(err);
+        setAlert({ message: "project.edit.loadError", type: "error" });
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    if (projectId) {
+      loadProject();
+    }
+  }, [projectId]);
 
   const imageSectionTouched =
     formik.touched.project_image || formik.touched.project_image_mime_type;
@@ -305,13 +341,20 @@ const AddProject = () => {
   return (
     <AppLayoutSB>
       <TitleTarget
-        title="project.create.title"
-        description="project.create.description"
+        title="project.edit.title"
+        description="project.edit.description"
       />
       {showModuleInactive && <ModuleInactive />}
       {showSubmoduleInactive && <SubmoduleInactive />}
       {showContent && (
         <>
+          {loadingData && (
+            <div className="flex items-center justify-center p-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+              <p className="text-3xl font-bold">{t("project.edit.loading")}</p>
+            </div>
+          )}
+
+          {!loadingData && (
           <form
             onSubmit={formik.handleSubmit}
             className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700"
@@ -438,10 +481,10 @@ const AddProject = () => {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  id="project_image_file"
+                  id="project_image_file_edit"
                   onChange={handleFileChange}
                 />
-                <label htmlFor="project_image_file">
+                <label htmlFor="project_image_file_edit">
                   <Button color="green" size="sm" as="span">
                     {t("project.create.chooseFiles")}
                   </Button>
@@ -704,10 +747,11 @@ const AddProject = () => {
                 disabled={loading || !formik.isValid}
               >
                 <FiSave className="inline mr-2" size={18} />
-                {t("example.save")}
+                {t("common.update")}
               </Button>
             </div>
           </form>
+          )}
 
           {alert && (
             <AlertSimple
@@ -723,4 +767,4 @@ const AddProject = () => {
   );
 };
 
-export default AddProject;
+export default EditProject;
