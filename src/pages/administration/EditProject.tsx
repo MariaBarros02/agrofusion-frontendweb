@@ -178,6 +178,14 @@ const EditProject = () => {
       try {
         setLoadingData(true);
         // const data = await getProjectDetailsService(projectId || "");
+        // if (data.status === "DELETED") {
+        //   setAlert({
+        //     message: "project.edit.deletedProject",
+        //     type: "warning",
+        //     to: "/administration/projects",
+        //   });
+        //   return;
+        // }
         // formik.setValues({
         //   instance_code: data.instance_code ?? "",
         //   project_name: data.project_name ?? "",

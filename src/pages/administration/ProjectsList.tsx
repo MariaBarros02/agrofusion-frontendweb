@@ -107,6 +107,7 @@ const ProjectsList = () => {
           label: t("project.list.edit"),
           icon: <FiEdit2 />,
           className: "bg-blue-600 text-white hover:bg-blue-500",
+          disabled: (project) => project.status === "DELETED",
           onClick: (project) =>
             navigate(`/administration/projects/edit/${project.external_project_id}`),
         },
@@ -243,7 +244,7 @@ const ProjectsList = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">
-                {t("common.active")} / {t("common.inactive")} / {t("common.deleted")}
+                {t("common.all")}
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>

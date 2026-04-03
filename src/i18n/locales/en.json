@@ -12,6 +12,8 @@
         "state": "Status",
         "active": "Active",
         "inactive": "Inactive",
+        "deleted": "Deleted",
+        "all": "All",
         "filterActive": "Active filters",
         "filterReset": "Reset filters",
         "cancel": "Cancel",
