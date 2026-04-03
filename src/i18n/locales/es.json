@@ -13,6 +13,7 @@
         "active": "Activo",
         "inactive": "Inactivo",
         "deleted": "Eliminado",
+        "all": "Todos",
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
