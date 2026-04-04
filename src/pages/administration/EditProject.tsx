@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { getProjectDetailsService, updateProjectService } from "../../services/agrofusion/auth.service";
+import { getProjectFormDataService, updateProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -144,14 +144,12 @@ const EditProject = () => {
       setLoading(true);
       setAlert(null);
       try {
-        // await updateProjectService(projectId || "", {
-        //   ...values,
-        // });
-        // setAlert({
-        //   message: "project.edit.success",
-        //   type: "success",
-        //   to: "/administration/projects",
-        // });
+        await updateProjectService(projectId || "", values);
+        setAlert({
+          message: "project.edit.success",
+          type: "success",
+          to: "/administration/projects",
+        });
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
@@ -177,31 +175,27 @@ const EditProject = () => {
     const loadProject = async () => {
       try {
         setLoadingData(true);
-        // const data = await getProjectDetailsService(projectId || "");
-        // if (data.status === "DELETED") {
-        //   setAlert({
-        //     message: "project.edit.deletedProject",
-        //     type: "warning",
-        //     to: "/administration/projects",
-        //   });
-        //   return;
-        // }
-        // formik.setValues({
-        //   instance_code: data.instance_code ?? "",
-        //   project_name: data.project_name ?? "",
-        //   project_url: data.project_url ?? "",
-        //   description: data.description ?? "",
-        //   is_active: data.is_active ?? true,
-        //   project_image: data.project_image ?? "",
-        //   project_image_mime_type: data.project_image_mime_type ?? "",
-        //   api_url_base: data.api_url_base ?? "",
-        //   users_api_path: data.users_api_path ?? "",
-        //   modules: data.modules ?? Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
-        //   endpoints: data.endpoints ?? buildEndpointInitialValues(),
-        // });
-        // if (data.project_image) {
-        //   setImagePreview(data.project_image);
-        // }
+        const data = await getProjectFormDataService(projectId || "");
+        formik.setValues({
+          instance_code: data.instance_code ?? "",
+          project_name: data.project_name ?? "",
+          project_url: data.project_url ?? "",
+          description: data.description ?? "",
+          is_active: data.is_active ?? true,
+          project_image: data.project_image ?? "",
+          project_image_mime_type: data.project_image_mime_type ?? "",
+          api_url_base: data.api_url_base ?? "",
+          users_api_path: data.users_api_path ?? "",
+          modules: data.modules?.length
+            ? data.modules
+            : Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
+          endpoints: data.endpoints?.length
+            ? data.endpoints
+            : buildEndpointInitialValues(),
+        });
+        if (data.project_image) {
+          setImagePreview(data.project_image);
+        }
       } catch (err: any) {
         console.error(err);
         setAlert({ message: "project.edit.loadError", type: "error" });

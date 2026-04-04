@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { createProjectService } from "../../services/agrofusion/auth.service";
+import { createProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -142,14 +142,12 @@ const AddProject = () => {
       setLoading(true);
       setAlert(null);
       try {
-        // await createProjectService({
-        //   ...values,
-        // });
-        // setAlert({
-        //   message: "project.create.success",
-        //   type: "success",
-        //   to: "/administration/projects",
-        // });
+        await createProjectService(values);
+        setAlert({
+          message: "project.create.success",
+          type: "success",
+          to: "/administration/projects",
+        });
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {

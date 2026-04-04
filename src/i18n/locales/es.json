@@ -441,6 +441,7 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         },
         "edit": {
@@ -448,7 +449,12 @@
             "description": "Modifica la información del proyecto externo.",
             "loading": "Cargando datos del proyecto...",
             "loadError": "Error al cargar los datos del proyecto.",
-            "success": "Proyecto actualizado correctamente."
+            "success": "Proyecto actualizado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para editar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo actualizar el proyecto."
         }
     },
     "module": {
