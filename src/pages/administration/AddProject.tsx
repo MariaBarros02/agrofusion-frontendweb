@@ -162,6 +162,10 @@ const AddProject = () => {
           setAlert({ message: "project.create.errorNoPermission", type: "warning" });
           return;
         }
+        if (code === "EXT_URL_NOT_REACHABLE") {
+          setAlert({ message: "project.create.errorUrlNotReachable", type: "error" });
+          return;
+        }
         setAlert({ message: "project.create.errorGeneric", type: "error" });
       } finally {
         setLoading(false);

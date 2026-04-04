@@ -153,18 +153,22 @@ const EditProject = () => {
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
-          setAlert({ message: "project.create.errorDuplicateCode", type: "error" });
+          setAlert({ message: "project.edit.errorDuplicateCode", type: "error" });
           return;
         }
         if (code === "EXTERNAL_PROJECT_MODULES_COUNT") {
-          setAlert({ message: "project.create.errorModulesCount", type: "error" });
+          setAlert({ message: "project.edit.errorModulesCount", type: "error" });
           return;
         }
         if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
-          setAlert({ message: "project.create.errorNoPermission", type: "warning" });
+          setAlert({ message: "project.edit.errorNoPermission", type: "warning" });
           return;
         }
-        setAlert({ message: "project.create.errorGeneric", type: "error" });
+        if (code === "EXT_URL_NOT_REACHABLE") {
+          setAlert({ message: "project.edit.errorUrlNotReachable", type: "error" });
+          return;
+        }
+        setAlert({ message: "project.edit.errorGeneric", type: "error" });
       } finally {
         setLoading(false);
       }
