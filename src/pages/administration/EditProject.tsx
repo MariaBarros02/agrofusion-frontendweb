@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { getProjectDetailsService, updateProjectService } from "../../services/agrofusion/auth.service";
+import { getProjectDetailsService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -120,7 +120,6 @@ const EditProject = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
-  const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [alert, setAlert] = useState<AlertState>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -140,68 +139,50 @@ const EditProject = () => {
       endpoints: buildEndpointInitialValues(),
     },
     validationSchema: EditSchema(t),
-    onSubmit: async (values) => {
-      setLoading(true);
-      setAlert(null);
-      try {
-        // await updateProjectService(projectId || "", {
-        //   ...values,
-        // });
-        // setAlert({
-        //   message: "project.edit.success",
-        //   type: "success",
-        //   to: "/administration/projects",
-        // });
-      } catch (err: any) {
-        const code = err.response?.data?.detail?.code;
-        if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
-          setAlert({ message: "project.create.errorDuplicateCode", type: "error" });
-          return;
-        }
-        if (code === "EXTERNAL_PROJECT_MODULES_COUNT") {
-          setAlert({ message: "project.create.errorModulesCount", type: "error" });
-          return;
-        }
-        if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
-          setAlert({ message: "project.create.errorNoPermission", type: "warning" });
-          return;
-        }
-        setAlert({ message: "project.create.errorGeneric", type: "error" });
-      } finally {
-        setLoading(false);
-      }
-    },
+    onSubmit: () => {},
+    enableReinitialize: true,
   });
 
   useEffect(() => {
     const loadProject = async () => {
       try {
         setLoadingData(true);
-        // const data = await getProjectDetailsService(projectId || "");
-        // if (data.status === "DELETED") {
-        //   setAlert({
-        //     message: "project.edit.deletedProject",
-        //     type: "warning",
-        //     to: "/administration/projects",
-        //   });
-        //   return;
-        // }
-        // formik.setValues({
-        //   instance_code: data.instance_code ?? "",
-        //   project_name: data.project_name ?? "",
-        //   project_url: data.project_url ?? "",
-        //   description: data.description ?? "",
-        //   is_active: data.is_active ?? true,
-        //   project_image: data.project_image ?? "",
-        //   project_image_mime_type: data.project_image_mime_type ?? "",
-        //   api_url_base: data.api_url_base ?? "",
-        //   users_api_path: data.users_api_path ?? "",
-        //   modules: data.modules ?? Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
-        //   endpoints: data.endpoints ?? buildEndpointInitialValues(),
-        // });
-        // if (data.project_image) {
-        //   setImagePreview(data.project_image);
-        // }
+        const data = await getProjectDetailsService(projectId || "");
+        const firstUrl = data.urls?.[0];
+        const backendSystems = data.systems ?? [];
+        const modules: CreateModuleRequest[] = Array.from(
+          { length: MODULES_COUNT },
+          (_, i) => {
+            const sys = backendSystems[i];
+            if (sys) {
+              return {
+                ext_id: sys.ext_id,
+                name: sys.name ?? "",
+                base_url: sys.base_url ?? "",
+                module_icon: sys.module_icon ?? "",
+                description: sys.description ?? "",
+              };
+            }
+            return { ...defaultModule };
+          }
+        );
+
+        formik.setValues({
+          instance_code: data.instance_code ?? "",
+          project_name: data.project_name ?? "",
+          project_url: data.client_name ?? "",
+          description: data.description ?? "",
+          is_active: data.is_active ?? true,
+          project_image: "",
+          project_image_mime_type: "",
+          api_url_base: firstUrl?.client_url ?? "",
+          users_api_path: firstUrl?.base_url ?? "",
+          modules,
+          endpoints: buildEndpointInitialValues(),
+        });
+        if (data.project_image_url) {
+          setImagePreview(data.project_image_url);
+        }
       } catch (err: any) {
         console.error(err);
         setAlert({ message: "project.edit.loadError", type: "error" });
@@ -226,7 +207,7 @@ const EditProject = () => {
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-  
+
       if (!file) {
         formik.setFieldValue("project_image", "");
         formik.setFieldValue("project_image_mime_type", "");
@@ -235,7 +216,7 @@ const EditProject = () => {
         setImagePreview(null);
         return;
       }
-  
+
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
@@ -469,13 +450,12 @@ const EditProject = () => {
                 <ToggleSwitch
                   checked={formik.values.is_active}
                   label={formik.values.is_active ? t("common.active") : t("common.inactive")}
-                  disabled={loading}
                   onChange={handleToggleActive}
                   color="success"
                 />
               </div>
             </div>
-            
+
             {/* Imagen */}
             <div className="mb-6">
               <Label className="block">
@@ -752,7 +732,7 @@ const EditProject = () => {
               <Button
                 type="submit"
                 color="blue"
-                disabled={loading || !formik.isValid}
+                disabled
               >
                 <FiSave className="inline mr-2" size={18} />
                 {t("common.update")}
