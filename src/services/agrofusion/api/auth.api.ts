@@ -24,6 +24,7 @@ import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/res
 import type { EditRoleRequest } from "../../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../../dto/request/createRole-request-dto";
 import type { ListBasicRole } from "../../../dto/response/listBasicRoles-response.dto";
+import type { ExternalProjectDetailResponse } from "../../../dto/response/externalProjectDetail-response.dto";
 
 /**
  * Servicio encargado de las operaciones de autenticación y gestión de usuarios.
@@ -384,6 +385,12 @@ export const authApi = {
   changeF2AUser: (user_id: string, mfa_active: boolean) =>
     authAgrofusionAxios.post("users/change-fa2-user", null, {params: {user_id, mfa_active} }),
 
+  /**
+   * Obtiene el detalle completo de un proyecto externo con URLs y endpoints.
+   * @param projectId - UUID del proyecto externo
+   */
+  getProjectDetail: (projectId: string) =>
+    authAgrofusionAxios.get<ExternalProjectDetailResponse>(`/external-projects/${projectId}`),
 
 };
 

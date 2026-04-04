@@ -2,6 +2,7 @@
  * Módulo de acceso rápido para crear proyecto externo (RF-GES-14).
  */
 export interface CreateModuleRequest {
+  ext_id?: string;
   name: string;
   base_url: string;
   module_icon: string;
