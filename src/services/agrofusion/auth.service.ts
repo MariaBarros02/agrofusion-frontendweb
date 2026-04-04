@@ -500,6 +500,14 @@ export const getBasicListRolesService = async (
 /*
  * Cambiar el f2a de usuario
  */
+/**
+ * Obtiene el detalle completo de un proyecto externo (URLs, endpoints, etc.).
+ */
+export const getProjectDetailsService = async (projectId: string) => {
+  const { data } = await authApi.getProjectDetail(projectId);
+  return data;
+};
+
 export const changeFDoubleAService = async (
  userId: string,
  mfaActive: boolean
