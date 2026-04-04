@@ -70,7 +70,7 @@ const ListPermissions = () => {
 
 
   const columns: Column<ListPermissionsResponse>[] = [
-    { key: "permission_id", label: t("permissions.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
+    { key: "code", label: t("permissions.code"), type: "text", format: (value: string) => value?.slice(0, 7), },
     { key: "name", label: t("permissions.name"), type: "text", width: "200px"},
     { key: "module", label: t("permissions.module"), type: "text" },
     { key: "submodule", label: t("permissions.submodule"), type: "text" },
