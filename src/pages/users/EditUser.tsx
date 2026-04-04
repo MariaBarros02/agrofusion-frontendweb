@@ -117,6 +117,7 @@ const EditUser = () => {
   userId === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
   const [basicRoles, setBasicRoles] = useState<ListBasicRole[]>([]);
   
+  const [notPerm, setNotPerm] = useState(false);
 
   const [alert, setAlert] = useState<AlertState>(null);
 
@@ -137,8 +138,13 @@ const EditUser = () => {
       setUserDetails(response);
       const data = await getExternalProjects();
       setProjects(data);
-    } catch (error) {
-      console.log(error);
+    } catch (error:any) {
+       const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotPerm(true);
+        return;
+      }
+      setError("Error al cargar detalles de usuario");
       setError("Error al cargar detalles de usuario");
     }
   };
@@ -346,8 +352,19 @@ const EditUser = () => {
         type: "success",
         to: `/administration/users/${userDetails?.user_id}`,
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error:any) {
+        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+        if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          console.log("Error de permisos insuficientes");
+          setAlert({
+            message: t(`errors.${errorCode}`),
+            type:
+              errorCode === "AUTH_INSUFFICIENT_PERMISSIONS"
+                ? "warning"
+                : "error",
+          });
+          return
+        }
       setToasts((prev) => [
         ...prev,
         {
@@ -404,6 +421,12 @@ const EditUser = () => {
         <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
           {" "}
           <p className="text-3xl font-bold">{t("editUser.loading")}</p>{" "}
+        </div>
+      )}{" "}
+      {notPerm && !error && !loading && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm rounded-xl dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("viewUser.notPerm")}</p>{" "}
         </div>
       )}{" "}
       {error && (

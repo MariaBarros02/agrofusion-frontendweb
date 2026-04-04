@@ -289,7 +289,8 @@
         "dateIssuanceDoc": "Fecha de expedición",
         "editFailed": "Hubo un error al actualizar el usuario.",
         "noChanges": "No hay cambios por guardar",
-        "editSuccess": "El usuario fue actualizado correctamente"
+        "editSuccess": "El usuario fue actualizado correctamente",
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo."
     },
     "project": {
         "title": "Gestion de proyectos",
@@ -564,7 +565,8 @@
         "createdAt": "Fecha de creación",
         "actions": "Acciones",
         "viewDetail": "Ver detalle",
-        "users": "usuarios"
+        "users": "usuarios",
+        "notPerm": "No tienes permisos para listar usuarios."
     },
     "createUser": {
         "title": "Registro de usuario",
@@ -636,7 +638,8 @@
         "factorDoubleAuth": "Factor de doble autenticación",
         "updating": "Actualizando...",
         "mfaUpdateSuccess": "Se ha actualizado el estado de doble factor de autenticación del usuario correctamente",
-        "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario"
+        "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario",
+        "notPerm": "No tienes permisos para listar tu perfil."
     },
     "accountActivation": {
         "resetPassword": "Establece una nueva contraseña",
@@ -665,7 +668,8 @@
         "deleteFDescription": "Esta acción desactivará al usuario",
         "deleteSDescription": "Podrás reactivarlo más adelante.",
         "confirmDeleted": "Confirmar eliminación",
-        "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema."
+        "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema.",
+        "notPerm": "No tienes permisos para ver detalles de usuarios."
     },
     "permissions": {
         "title": "Gestión de permisos",

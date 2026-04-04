@@ -18,11 +18,16 @@ import {
   getExternalProjects,
   getProfileService,
 } from "../../services/agrofusion/auth.service";
-import { mapBackendErrors, projectsLinks } from "../../services/orchestrator/userOrchestrator.services";
+import {
+  mapBackendErrors,
+  projectsLinks,
+} from "../../services/orchestrator/userOrchestrator.services";
 import TitleTarget from "../../components/layout/TitleTarget";
 import ToastSimple from "../../components/layout/ToastSimple";
 import ModalChangePassword from "./ModalChangePassword";
-import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple, {
+  type AlertState,
+} from "../../components/layout/AlertSimple";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
@@ -57,8 +62,9 @@ const Profile = () => {
   const [projects, setProjects] = useState<ExternalProject[] | undefined>(
     undefined,
   );
-  
-const [alert, setAlert] = useState<AlertState>(null);
+  const [notPerm, setNotPerm] = useState(false);
+
+  const [alert, setAlert] = useState<AlertState>(null);
   const [isUpdatingMFA, setIsUpdatingMFA] = useState(false);
 
   const [externalUsers, setExternalUsers] = useState<Record<
@@ -70,12 +76,11 @@ const [alert, setAlert] = useState<AlertState>(null);
     : null;
 
   const hasExternal = !!firstExternalUser;
-useEffect(() => {
-  if (modalChangePass) {
-    formikChangePassword.setStatus(null);
-    
-  }
-}, [modalChangePass]);
+  useEffect(() => {
+    if (modalChangePass) {
+      formikChangePassword.setStatus(null);
+    }
+  }, [modalChangePass]);
   const { t } = useTranslation();
 
   const userId = useAuthStore((state) => state.id);
@@ -111,15 +116,15 @@ useEffect(() => {
   });
 
   const handleCloseChangePassword = () => {
-  formikChangePassword.resetForm()
-  formikChangePassword.setStatus(null);
-  setModalChangePass(false);
-};
+    formikChangePassword.resetForm();
+    formikChangePassword.setStatus(null);
+    setModalChangePass(false);
+  };
 
- const handleCloseModalEdit = () => {
-  formikEdit.resetForm()
-  setModalEdit(false);
-};
+  const handleCloseModalEdit = () => {
+    formikEdit.resetForm();
+    setModalEdit(false);
+  };
   const changePasswordSchema = Yup.object({
     old_password: Yup.string().required("validation.completeField"),
 
@@ -150,7 +155,6 @@ useEffect(() => {
     ]);
   };
 
-   
   const formikEdit = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -176,11 +180,10 @@ useEffect(() => {
     validationSchema: profileValidationSchema,
 
     onSubmit: async (values) => {
-        if (!formikEdit.dirty) {
-          setAlert({message: "profile.noChanges",
-          type: "warning"})
-          return;
-        }
+      if (!formikEdit.dirty) {
+        setAlert({ message: "profile.noChanges", type: "warning" });
+        return;
+      }
       await handleSaveProfile(values);
       getUserDetails();
     },
@@ -196,9 +199,9 @@ useEffect(() => {
     validationSchema: changePasswordSchema,
 
     onSubmit: async (values, { resetForm }) => {
-  const success = await handleChangePassword(values);
-  if (success) resetForm();
-}
+      const success = await handleChangePassword(values);
+      if (success) resetForm();
+    },
   });
   const handleSaveProfile = async (values: any) => {
     if (!userId || !userDetails?.email) return;
@@ -240,8 +243,18 @@ useEffect(() => {
 
       showSuccessToast();
       setModalEdit(false);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        console.log("Error de permisos insuficientes");
+        setAlert({
+          message: t(`errors.${errorCode}`),
+          type:
+            errorCode === "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning" : "error",
+        });
+        return;
+      }
+
       setToasts((prev) => [
         ...prev,
         {
@@ -255,75 +268,94 @@ useEffect(() => {
     }
   };
 
-
-  
   const handleToggleMFA = async (newValue: boolean) => {
     if (!userId || !userDetails) return;
-    
+
     setIsUpdatingMFA(true);
     try {
-      console.log(userId)
+      console.log(userId);
       await changeFDoubleAService(userId, newValue);
-      
-      setUserDetails(prev => prev ? { ...prev, mfa_active: newValue } : null);
-      
+
+      setUserDetails((prev) =>
+        prev ? { ...prev, mfa_active: newValue } : null,
+      );
+
       setAlert({
         type: "success",
-        message: "profile.mfaUpdateSuccess"
+        message: "profile.mfaUpdateSuccess",
       });
     } catch (error) {
-      console.log(error);
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        console.log("Error de permisos insuficientes");
+        setAlert({
+          message: t(`errors.${errorCode}`),
+          type:
+            errorCode === "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning" : "error",
+        });
+        return;
+      }
+
       setAlert({
         type: "error",
-        message: "profile.mfaUpdateError"
+        message: "profile.mfaUpdateError",
       });
     } finally {
       setIsUpdatingMFA(false);
     }
   };
-const handleChangePassword = async (values: {
-  old_password: string;
-  new_password: string;
-  confirm_password: string;
-}) => {
-  if (!userId) return;
+  const handleChangePassword = async (values: {
+    old_password: string;
+    new_password: string;
+    confirm_password: string;
+  }) => {
+    if (!userId) return;
 
-  try {
-    const payload = {
-      old_password: values.old_password,
-      new_password: values.new_password,
-      confirm_password: values.confirm_password,
-    };
+    try {
+      const payload = {
+        old_password: values.old_password,
+        new_password: values.new_password,
+        confirm_password: values.confirm_password,
+      };
 
-    // El backend orquesta el cambio de contraseña en SIGMA, DISRIEGO, etc.
-    await changePasswordService(userId, payload);
+      // El backend orquesta el cambio de contraseña en SIGMA, DISRIEGO, etc.
+      await changePasswordService(userId, payload);
 
-    setModalChangePass(false);
-    setAlert({
-      message: "profile.changePasswordSuccess",
-      type: "success",
-    });
+      setModalChangePass(false);
+      setAlert({
+        message: "profile.changePasswordSuccess",
+        type: "success",
+      });
 
-    return true;
-  } catch (error: any) {
-    console.log(error);
+      return true;
+    } catch (error: any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        console.log("Error de permisos insuficientes");
+        setAlert({
+          message: t(`errors.${errorCode}`),
+          type:
+            errorCode === "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning" : "error",
+        });
+        return;
+      }
 
-    const backendCode = error?.response?.data?.detail?.code;
-    if (backendCode) {
+      const backendCode = error?.response?.data?.detail?.code;
+      if (backendCode) {
+        formikChangePassword.setStatus({
+          type: "error",
+          messageKey: `errors.${backendCode}`,
+        });
+        return;
+      }
+
       formikChangePassword.setStatus({
         type: "error",
-        messageKey: `errors.${backendCode}`,
+        messageKey: "profile.passwordChangeFailed",
       });
-      return;
+      return false;
     }
-
-    formikChangePassword.setStatus({
-      type: "error",
-      messageKey: "profile.passwordChangeFailed",
-    });
-    return false;
-  }
-};
+  };
   const firstProjectKey = externalUsers ? Object.keys(externalUsers)[0] : null;
   const formatDate = (date?: string | null) => {
     if (!date) return "";
@@ -356,11 +388,16 @@ const handleChangePassword = async (values: {
       setUserDetails(response);
       const data = await getExternalProjects();
       setProjects(data);
-    } catch (error) {
+    } catch (error: any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotPerm(true);
+        return;
+      }
       console.log(error);
       setError("Error al cargar detalles de usuario");
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -415,8 +452,6 @@ const handleChangePassword = async (values: {
 
   useEffect(() => {
     if (!userDetails) return;
-
-
   }, [userDetails, externalUsers]);
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
@@ -429,82 +464,92 @@ const handleChangePassword = async (values: {
         <TitleTarget title="profile.title" description="profile.description" />
         {showModuleInactive && <ModuleInactive />}
         {showContent && (
-        <>
-        {loading && (
-          <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
-            {" "}
-            <p className="text-3xl font-bold">{t("profile.loading")}</p>{" "}
-          </div>
-        )}{" "}
-        {error && (
-          <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
-            {" "}
-            <p className="text-3xl font-bold">{t("profile.error")}</p>{" "}
-          </div>
-        )}{" "}
-        {!loading && !error && (
           <>
-            <ProfileView
-              t={t}
-              userDetails={userDetails}
-              firstExternalUser={firstExternalUser}
-              mfaActive={userDetails?.mfa_active ?? false}
-              hasExternal={hasExternal}
-              formatDate={formatDate}
-              formatGender={formatGender}
-              formatDocumentType={formatDocumentType}
-              onEdit={() => setModalEdit(true)}
-              onChangePassword={() => setModalChangePass(true)}
-              onToggleMFA={handleToggleMFA}
-              isUpdatingMFA={isUpdatingMFA}
+            {loading && (
+              <div className="flex items-center justify-center p-3 mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
+                {" "}
+                <p className="text-3xl font-bold">
+                  {t("profile.loading")}
+                </p>{" "}
+              </div>
+            )}{" "}
+            {notPerm && !error && !loading && (
+              <div className="flex items-center justify-center mt-3 bg-white border shadow-sm rounded-xl dark:border-gray-600 dark:bg-gray-700 h-1/2">
+                {" "}
+                <p className="text-3xl font-bold">
+                  {t("profile.notPerm")}
+                </p>{" "}
+              </div>
+            )}{" "}
+            {error && (
+              <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
+                {" "}
+                <p className="text-3xl font-bold">{t("profile.error")}</p>{" "}
+              </div>
+            )}{" "}
+            {!loading && !error && !notPerm && (
+              <>
+                <ProfileView
+                  t={t}
+                  userDetails={userDetails}
+                  firstExternalUser={firstExternalUser}
+                  mfaActive={userDetails?.mfa_active ?? false}
+                  hasExternal={hasExternal}
+                  formatDate={formatDate}
+                  formatGender={formatGender}
+                  formatDocumentType={formatDocumentType}
+                  onEdit={() => setModalEdit(true)}
+                  onChangePassword={() => setModalChangePass(true)}
+                  onToggleMFA={handleToggleMFA}
+                  isUpdatingMFA={isUpdatingMFA}
+                />
 
-            />
-
-            <ModalEditProfile
-              show={modalEdit}
-              onClose={handleCloseModalEdit}
-              formik={formikEdit}
-              t={t}
-              hasExternal={hasExternal}
-              firstExternalUser={firstExternalUser}
-              userDetails={userDetails}
-            />
-
-
-          </>
-        )}
-                    <ModalChangePassword
+                <ModalEditProfile
+                  show={modalEdit}
+                  onClose={handleCloseModalEdit}
+                  formik={formikEdit}
+                  t={t}
+                  hasExternal={hasExternal}
+                  firstExternalUser={firstExternalUser}
+                  userDetails={userDetails}
+                />
+              </>
+            )}
+            <ModalChangePassword
               show={modalChangePass}
               onClose={handleCloseChangePassword}
               formik={formikChangePassword}
               t={t}
             />
-        <div className="fixed z-50 flex flex-col gap-3 bottom-4 right-4">
-          {toasts.map((toast) => (
-            <ToastSimple
-              key={toast.id}
-              messageKey={toast.messageKey}
-              messageParams={toast.messageParams}
-              type={toast.type}
-              to={toast.to}
-              linkText={toast.linkText}
-              onClose={() =>
-                setToasts((prev) => prev.filter((t) => t.id !== toast.id))
-              }
-            />
-          ))}
-        </div>
-
-        {alert && (
-  <AlertSimple
-    message={t(alert.message)}
-    type={alert.type}
-    to={alert.to}
-    onClose={() => {setAlert(null)
-    }}
-  />
-)}
-        </>
+            <div className="fixed z-50 flex flex-col gap-3 bottom-4 right-4">
+              {toasts.map((toast) => (
+                <ToastSimple
+                  key={toast.id}
+                  messageKey={toast.messageKey}
+                  messageParams={toast.messageParams}
+                  type={toast.type}
+                  to={toast.to}
+                  linkText={toast.linkText}
+                  onClose={() =>
+                    setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+                  }
+                />
+              ))}
+            </div>
+            <div className="z-[999] fixed">
+              {alert && (
+              <AlertSimple
+                message={t(alert.message)}
+                type={alert.type}
+                to={alert.to}
+                onClose={() => {
+                  setAlert(null);
+                }}
+              />
+            )}
+            </div>
+            
+          </>
         )}
       </AppLayoutSB>
     </>

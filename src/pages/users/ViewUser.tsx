@@ -18,6 +18,8 @@ import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 const ViewUser = () => {
   const { t } = useTranslation();
@@ -29,7 +31,8 @@ const ViewUser = () => {
   const [deletingUser, setDeletingUser] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastData[]>([]);
-
+  const [alert, setAlert] = useState<AlertState>(null);
+  const [notPerm, setNotPerm] = useState(false);
   const formatDate = (isoDate: string) => {
     return new Date(isoDate).toLocaleDateString("es-CO");
   };
@@ -39,8 +42,12 @@ const ViewUser = () => {
       setLoading(true);
       const response = await getUserDetailsService(userId || "");
       setUserDetails(response);
-    } catch (error) {
-      console.log(error);
+    } catch (error:any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotPerm(true);
+        return;
+      }
       setError("Error al cargar detalles de usuario");
     } finally {
       setLoading(false);
@@ -51,8 +58,19 @@ const deleteUser = async () => {
 
   try {
     await deleteUserService(userId || "");
-  } catch (error) {
-    console.log(error)
+  } catch (error:any) {
+       const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+        if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          console.log("Error de permisos insuficientes");
+          setAlert({
+            message: t(`errors.${errorCode}`),
+            type:
+              errorCode === "AUTH_INSUFFICIENT_PERMISSIONS"
+                ? "warning"
+                : "error",
+          });
+          return
+        }
     setToasts((prev) => [
         ...prev,
         {
@@ -130,6 +148,12 @@ const deleteUser = async () => {
         <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
           {" "}
           <p className="text-3xl font-bold">{t("viewUser.error")}</p>{" "}
+        </div>
+      )}{" "}
+      {notPerm && !error && !loading && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm rounded-xl dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("viewUser.notPerm")}</p>{" "}
         </div>
       )}{" "}
       {!loading && !error && !deletingUser && userDetails && (
@@ -229,6 +253,7 @@ const deleteUser = async () => {
           </div>
         </div>
       )}
+       
       <div className="fixed z-50 flex flex-col gap-3 top-4 right-4">
   {toasts.map((toast) => (
     <ToastSimple
@@ -243,6 +268,17 @@ const deleteUser = async () => {
       }
     />
   ))}
+
+   {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
 </div>
         </>
       )}
