@@ -14,15 +14,12 @@ import { useMemo } from "react";
 import {
   createUserService,
   getBasicListRolesService,
+  getExternalProjectRolesService,
+  getExternalProjectTypeDocsService,
   getExternalProjects,
   userExistsService,
 } from "../../services/agrofusion/auth.service";
-import {
-  handleCreateUserEP,
-  handleGetRolesEP,
-  handleGetTypeDocumentsEP,
-  projectsLinks,
-} from "../../services/orchestrator/userOrchestrator.services";
+import { mapBackendErrors } from "../../services/orchestrator/userOrchestrator.services";
 import type { createUserRequest } from "../../dto/request/createUser-request.dto";
 import { useNavigate } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
@@ -32,6 +29,8 @@ import { useModuleAccessStore } from "../../store/moduleAccess.store";
 
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 interface ProjectRole {
   role_id: number;
@@ -69,6 +68,8 @@ const CreateUser = () => {
   const navigate = useNavigate();
   const [existUserError, setExistUserError] = useState<boolean | null>(null);
   const [userCreate, setUserCreate] = useState<any>(null);
+  const [alert, setAlert] = useState<AlertState>(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<ExternalProject[]>([]);
@@ -335,130 +336,72 @@ const CreateUser = () => {
           return;
         }
 
-        if (projects.length === 0) {
-          // Crear usuario solo en AgroFusion (sin externos)
-
-          const createUserPayload: createUserRequest = {
-            name:
-              values.name +
-              " " +
-              values.firstLastName +
-              " " +
-              values.secondLastName,
-            email: values.email,
-            password: values.password,
-            role_id: values.roles || "",
-            confirm_password: values.confirmPassword,
-            identity_number: values.documentNumber.toString(),
-            tokens: {},
-          };
-
-          const user = await createUserService(createUserPayload);
-
-          setToast((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              type: "success",
-              messageKey: "createUser.userCreatedSuccessfully",
-            },
-          ]);
-          setUserCreate(user);
-
-          return;
-        }
+        /* =========================================================
+       CONSTRUIR external_data POR PROYECTO
+    ========================================================== */
+        const external_data =
+          projects.length > 0
+            ? projects.reduce(
+                (acc, project) => {
+                  acc[project.instance_code] = {
+                    type_document_id: Number(
+                      values.typeDocumentByProject[project.instance_code],
+                    ),
+                    roles: values.rolesByProject[project.instance_code] ?? [],
+                  };
+                  return acc;
+                },
+                {} as Record<
+                  string,
+                  { type_document_id: number; roles: number[] }
+                >,
+              )
+            : undefined;
 
         /* =========================================================
-       CONSTRUIR USUARIO BASE
+       CREAR USUARIO (BACKEND ORQUESTA A EXTERNOS)
     ========================================================== */
-        const baseUser = {
-          name: values.name,
-          first_last_name: values.firstLastName,
-          second_last_name: values.secondLastName,
-          document_number: String(values.documentNumber),
-          date_issuance_document: new Date(values.dateIssuanceDoc),
-          birthday: new Date(values.birthday),
-          gender_id: Number(values.genderId),
-          email: values.email,
-          password: values.password,
-        };
-
-        /* =========================================================
-       CONSTRUIR USUARIOS POR PROYECTO
-    ========================================================== */
-        const usersByProject = projects.reduce((acc, project) => {
-          acc[project.instance_code] = {
-            ...baseUser,
-            type_document_id: Number(
-              values.typeDocumentByProject[project.instance_code],
-            ),
-            roles: values.rolesByProject[project.instance_code] ?? [],
-          };
-
-          return acc;
-        }, {} as any);
-
-        /* =========================================================
-       CREAR USUARIO EN SISTEMAS EXTERNOS
-    ========================================================== */
-        const result = await handleCreateUserEP(usersByProject, projects);
-
-        /* =========================================================
-       MOSTRAR ERRORES POR SERVICIO (NEGOCIO)
-    ========================================================== */
-        if (result.errors.length > 0) {
-          result.errors.forEach((err) => {
-            const link = projectsLinks[err.project];
-
-            setToast((prev) => [
-              ...prev,
-              {
-                id: crypto.randomUUID(),
-                type: err.type ?? "error",
-                messageKey: err.messageKey,
-                messageParams: err.messageParams,
-                ...(link ?? {}),
-              },
-            ]);
-          });
-        }
-
-        /* =========================================================
-        SI NO HUBO TOKENS → CREACIÓN FALLÓ TOTALMENTE
-    ========================================================== */
-        const hasTokens = Object.keys(result.tokens).length > 0;
-
-        if (!hasTokens) {
-          return;
-        }
-
-        /* =========================================================
-        ÉXITO → USAR TOKENS (LO QUE NECESITES)
-    ========================================================== */
-
         const createUserPayload: createUserRequest = {
-          name:
-            values.name +
-            " " +
-            values.firstLastName +
-            " " +
-            values.secondLastName,
+          name: values.name,
+          first_last_name: values.firstLastName || undefined,
+          second_last_name: values.secondLastName || undefined,
           email: values.email,
           password: values.password,
           role_id: values.roles || "",
           confirm_password: values.confirmPassword,
           identity_number: values.documentNumber.toString(),
-          tokens: result.tokens,
+          birthday: values.birthday || undefined,
+          gender_id: values.genderId ? Number(values.genderId) : undefined,
+          date_issuance_document: values.dateIssuanceDoc || undefined,
+          external_data,
         };
+
         const user = await createUserService(createUserPayload);
         setUserCreate(user);
 
         /* =========================================================
-        TOAST DE ÉXITO GENERAL
+       MOSTRAR sync_errors DEL BACKEND (NO BLOQUEAN EL ÉXITO)
     ========================================================== */
-        // if(user){
+        const syncErrors = (user as any)?.sync_errors ?? [];
+        if (syncErrors.length > 0) {
+          syncErrors.forEach(
+            (err: { instance_code: string; error: string }) => {
+              setToast((prev) => [
+                ...prev,
+                {
+                  id: crypto.randomUUID(),
+                  type: "warning" as const,
+                  messageKey: "createUser.externalSyncError",
+                  messageParams: {
+                    service: err.instance_code,
+                    error: err.error,
+                  },
+                },
+              ]);
+            },
+          );
+        }
 
-        // }
         setToast((prev) => [
           ...prev,
           {
@@ -468,6 +411,18 @@ const CreateUser = () => {
           },
         ]);
       } catch (error: any) {
+        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+        if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          console.log("Error de permisos insuficientes");
+          setAlert({
+            message: t(`errors.${errorCode}`),
+            type:
+              errorCode === "AUTH_INSUFFICIENT_PERMISSIONS"
+                ? "warning"
+                : "error",
+          });
+          return
+        }
         setToast((prev) => [
           ...prev,
           {
@@ -498,18 +453,30 @@ const CreateUser = () => {
     formik.resetForm();
   };
 
-  const fetchProjectRoles = async (projects: ExternalProject[]) => {
+  const fetchProjectRoles = async (_projects: ExternalProject[]) => {
     try {
-      const { roles, errors } = await handleGetRolesEP(projects);
+      const response = await getExternalProjectRolesService();
 
-      setRolesByProject(roles);
+      // Mapear response.results al formato Record<string, ProjectRole[]>
+      const rolesMap: Record<string, ProjectRole[]> = {};
+      for (const [instanceCode, value] of Object.entries(response.results)) {
+        const items: any[] = Array.isArray(value)
+          ? value
+          : ((value as any).data ?? (value as any).roles ?? []);
+        rolesMap[instanceCode] = items.map((r: any) => ({
+          role_id: r.role_id ?? r.id,
+          role_name: r.role_name ?? r.name,
+        }));
+      }
+      setRolesByProject(rolesMap);
 
-      if (errors.length > 0) {
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "createUser");
         setToast((prev) => [
           ...prev,
-          ...errors.map((e) => ({
+          ...uiErrors.map((e) => ({
             id: crypto.randomUUID(),
-            type: e.type ?? "error",
+            type: e.type ?? ("warning" as const),
             messageKey: e.messageKey,
             messageParams: e.messageParams,
             to: e.to,
@@ -529,19 +496,30 @@ const CreateUser = () => {
     }
   };
 
-  const fetchProjectTypeDocs = async (projects: ExternalProject[]) => {
+  const fetchProjectTypeDocs = async (_projects: ExternalProject[]) => {
     try {
-      const { typeDocuments, errors } =
-        await handleGetTypeDocumentsEP(projects);
+      const response = await getExternalProjectTypeDocsService();
 
-      setTypeDocsByProject(typeDocuments);
+      // Mapear response.results al formato Record<string, ProjectTypeDocument[]>
+      const typeDocsMap: Record<string, ProjectTypeDocument[]> = {};
+      for (const [instanceCode, value] of Object.entries(response.results)) {
+        const items: any[] = Array.isArray(value)
+          ? value
+          : ((value as any).data ?? (value as any).types ?? []);
+        typeDocsMap[instanceCode] = items.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+        }));
+      }
+      setTypeDocsByProject(typeDocsMap);
 
-      if (errors.length > 0) {
+      if (response.errors.length > 0) {
+        const uiErrors = mapBackendErrors(response.errors, "createUser");
         setToast((prev) => [
           ...prev,
-          ...errors.map((e) => ({
+          ...uiErrors.map((e) => ({
             id: crypto.randomUUID(),
-            type: e.type ?? "error",
+            type: e.type ?? ("warning" as const),
             messageKey: e.messageKey,
             messageParams: e.messageParams,
           })),
@@ -582,10 +560,14 @@ const CreateUser = () => {
 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
   useSubmoduleAccessStore((s) => s.loaded);
-  const canAccessSubmodule = useSubmoduleAccessStore((s) => s.canAccessSubmodule);
+  const canAccessSubmodule = useSubmoduleAccessStore(
+    (s) => s.canAccessSubmodule,
+  );
   const showModuleInactive = !canAccessModule("ADMINISTRATION");
-  const showSubmoduleInactive = canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
-  const showContent = canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
+  const showSubmoduleInactive =
+    canAccessModule("ADMINISTRATION") && !canAccessSubmodule("USERS");
+  const showContent =
+    canAccessModule("ADMINISTRATION") && canAccessSubmodule("USERS");
 
   return (
     <AppLayoutSB>
@@ -594,547 +576,564 @@ const CreateUser = () => {
       {showSubmoduleInactive && <SubmoduleInactive />}
       {showContent && (
         <>
-      <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
-        <div className={!userCreate ? "block mb-5" : "hidden mb-5"}>
-          <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
-          <p className="text-sm text-gray-700">{t("createUser.description")}</p>
-        </div>
-        <form className={userCreate ? "hidden" : "block"}>
-          <fieldset disabled={loading}>
-            {!hasProjects ? (
-              /* ===============================
+          <div className="p-4 m-0 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+            <div className={!userCreate ? "block mb-5" : "hidden mb-5"}>
+              <h1 className="text-xl font-bold ">{t("createUser.title")}</h1>
+              <p className="text-sm text-gray-700">
+                {t("createUser.description")}
+              </p>
+            </div>
+            <form className={userCreate ? "hidden" : "block"}>
+              <fieldset disabled={loading}>
+                {!hasProjects ? (
+                  /* ===============================
      🔹 FORMULARIO SIMPLE (sin proyectos)
      =============================== */
-              <>
-                {/* Nombre completo */}
-                <div className="gap-5 md:grid md:grid-cols-2">
-                  <div className="w-full">
-                    <Label htmlFor="name">{t("createUser.name")}*</Label>
-                    <TextInput
-                      id="name"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("name")}
-                    />
-                  </div>
+                  <>
+                    {/* Nombre completo */}
+                    <div className="gap-5 md:grid md:grid-cols-2">
+                      <div className="w-full">
+                        <Label htmlFor="name">{t("createUser.name")}*</Label>
+                        <TextInput
+                          id="name"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("name")}
+                        />
+                      </div>
 
-                  <div className="w-full">
-                    <Label htmlFor="documentNumber">
-                      {t("createUser.documentNumber")}*
-                    </Label>
-                    <TextInput
-                      id="documentNumber"
-                      type="number"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("documentNumber")}
-                    />
-                  </div>
-                </div>
-
-                {/* Email + Rol */}
-                <div className="gap-5 mt-2 md:grid md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="email">{t("createUser.email")}*</Label>
-                    <TextInput
-                      id="email"
-                      type="email"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("email")}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="roles">{t("createUser.role")}*</Label>
-                    <Select
-                      id="roles"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("roles")}
-                    >
-                      <option value="" disabled>
-                        {t("createUser.placeholderRole")}
-                      </option>
-                      {basicRoles.map((role) => (
-                        <option key={role.role_id} value={role.role_id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="gap-5 mt-2 md:grid md:grid-cols-2">
-                  <div className="w-full">
-                    <div className="block ">
-                      <Label htmlFor="password">
-                        {t("createUser.password")}*
-                      </Label>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TextInput
-                        className="w-full"
-                        id="password"
-                        type="text"
-                        sizing="sm"
-                        required
-                        {...formik.getFieldProps("password")}
-                        color={
-                          formik.touched.password && formik.errors.password
-                            ? "failure"
-                            : "gray"
-                        }
-                      />
-                      <Button
-                        type="button"
-                        color="alternative"
-                        onClick={() => {
-                          const password = generatePassword();
-
-                          formik.setFieldValue("password", password);
-                        }}
-                      >
-                        {t("createUser.regenerate")}
-                      </Button>
-                    </div>
-
-                    {displayError("password")}
-                    <p className="text-xs text-black dark:text-white">
-                      {t("createUser.helperPassword")}
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="confirmPassword">
-                      {t("createUser.confirmPassword")}*
-                    </Label>
-                    <TextInput
-                      id="confirmPassword"
-                      type="text"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("confirmPassword")}
-                      color={
-                        formik.touched.confirmPassword &&
-                        formik.errors.confirmPassword
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                  </div>
-                  {displayError("confirmPassword")}
-                </div>
-              </>
-            ) : (
-              /* ===============================
-     🔹 FORMULARIO COMPLETO (con proyectos)
-     =============================== */
-              <>
-                {" "}
-                <div className="gap-5 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="name">{t("createUser.name")}*</Label>
-                    </div>
-                    <TextInput
-                      id="name"
-                      type="text"
-                      sizing="sm"
-                      placeholder={t("createUser.namePlaceholder")}
-                      required
-                      {...formik.getFieldProps("name")}
-                      color={
-                        formik.touched.name && formik.errors.name
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("name")}
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="firstLastName">
-                        {t("createUser.first")} {t("createUser.lastName")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="firstLastName"
-                      type="text"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("firstLastName")}
-                      color={
-                        formik.touched.firstLastName &&
-                        formik.errors.firstLastName
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("firstLastName")}
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="secondLastName">
-                        {t("createUser.second")} {t("createUser.lastName")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="secondLastName"
-                      sizing="sm"
-                      type="text"
-                      required
-                      {...formik.getFieldProps("secondLastName")}
-                      color={
-                        formik.touched.secondLastName &&
-                        formik.errors.secondLastName
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("secondLastName")}
-                  </div>
-                </div>
-                <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-                  {projects.map((project) => (
-                    <div key={project.instance_code} className="w-full">
-                      <Label className="block mb-2">
-                        {t("createUser.typeDocNumber")} –{" "}
-                        {project.instance_code}*
-                      </Label>
-
-                      <Select
-                        sizing="sm"
-                        value={
-                          formik.values.typeDocumentByProject[
-                            project.instance_code
-                          ] || ""
-                        }
-                        onChange={(e) =>
-                          formik.setFieldValue(
-                            `typeDocumentByProject.${project.instance_code}`,
-                            e.target.value,
-                          )
-                        }
-                      >
-                        <option value="" disabled>
-                          {t("createUser.placeholderTypDoc")}
-                        </option>
-
-                        {(typeDocsByProject[project.instance_code] ?? []).map(
-                          (doc) => (
-                            <option key={doc.id} value={doc.id}>
-                              {doc.name}
-                            </option>
-                          ),
-                        )}
-                      </Select>
-                    </div>
-                  ))}
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="documentNumber">
-                        {t("createUser.documentNumber")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="documentNumber"
-                      type="number"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("documentNumber")}
-                      color={
-                        formik.touched.documentNumber &&
-                        formik.errors.documentNumber
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("documentNumber")}
-                  </div>
-                </div>
-                <div className="flex gap-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] mt-2">
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="dateIssuanceDoc">
-                        {t("createUser.dateIssuanceDoc")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="dateIssuanceDoc"
-                      sizing="sm"
-                      type="date"
-                      required
-                      {...formik.getFieldProps("dateIssuanceDoc")}
-                      color={
-                        formik.touched.dateIssuanceDoc &&
-                        formik.errors.dateIssuanceDoc
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("dateIssuanceDoc")}
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="birthday">
-                        {t("createUser.birthday")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="birthday"
-                      sizing="sm"
-                      type="date"
-                      required
-                      {...formik.getFieldProps("birthday")}
-                      color={
-                        formik.touched.birthday && formik.errors.birthday
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("birthday")}
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="genderId">
-                        {t("createUser.gender")}*
-                      </Label>
-                    </div>
-                    <Select
-                      id="genderId"
-                      required
-                      sizing="sm"
-                      {...formik.getFieldProps("genderId")}
-                      color={
-                        formik.touched.genderId && formik.errors.genderId
-                          ? "failure"
-                          : "gray"
-                      }
-                    >
-                      <option value="" disabled>
-                        {t("createUser.placeholderGender")}
-                      </option>
-                      <option value="1">{t("common.masculine")}</option>
-                      <option value="2">{t("common.feminine")}</option>
-                    </Select>
-                    {displayError("genderId")}
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="roles">{t("createUser.role")}*</Label>
-                    </div>
-                    <Select
-                      id="roles"
-                      required
-                      sizing="sm"
-                      {...formik.getFieldProps("roles")}
-                      color={
-                        formik.touched.roles && formik.errors.roles
-                          ? "failure"
-                          : "gray"
-                      }
-                    >
-                      <option value="" disabled>
-                        {t("createUser.placeholderRole")}
-                      </option>
-
-                      {basicRoles.map((role) => (
-                        <option key={role.role_id} value={role.role_id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </Select>
-                    {displayError("roles")}
-                  </div>
-                </div>
-                <div className="flex gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] ">
-                  {projects.map((project) => (
-                    <div key={project.external_project_id} className="w-full ">
-                      <Label className="block mb-2 font-semibold">
-                        {t("createUser.role")} – {project.instance_code}
-                      </Label>
-
-                      <div className="flex flex-col w-full h-24 gap-2 overflow-auto">
-                        {(rolesByProject[project.instance_code] ?? []).map(
-                          (role) => {
-                            const checked = formik.values.rolesByProject[
-                              project.instance_code
-                            ]?.includes(role.role_id);
-
-                            return (
-                              <label
-                                key={role.role_id}
-                                className="flex items-center gap-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  className="dark:bg-transparent"
-                                  onChange={(e) => {
-                                    const currentRoles =
-                                      formik.values.rolesByProject[
-                                        project.instance_code
-                                      ] ?? [];
-
-                                    const updatedRoles = e.target.checked
-                                      ? [...currentRoles, role.role_id]
-                                      : currentRoles.filter(
-                                          (id) => id !== role.role_id,
-                                        );
-
-                                    formik.setFieldValue(
-                                      `rolesByProject.${project.instance_code}`,
-                                      updatedRoles,
-                                    );
-                                  }}
-                                />
-                                <span className="text-sm capitalize">
-                                  {role.role_name}
-                                </span>
-                              </label>
-                            );
-                          },
-                        )}
+                      <div className="w-full">
+                        <Label htmlFor="documentNumber">
+                          {t("createUser.documentNumber")}*
+                        </Label>
+                        <TextInput
+                          id="documentNumber"
+                          type="number"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("documentNumber")}
+                        />
                       </div>
                     </div>
-                  ))}
+
+                    {/* Email + Rol */}
+                    <div className="gap-5 mt-2 md:grid md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="email">{t("createUser.email")}*</Label>
+                        <TextInput
+                          id="email"
+                          type="email"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("email")}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="roles">{t("createUser.role")}*</Label>
+                        <Select
+                          id="roles"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("roles")}
+                        >
+                          <option value="" disabled>
+                            {t("createUser.placeholderRole")}
+                          </option>
+                          {basicRoles.map((role) => (
+                            <option key={role.role_id} value={role.role_id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Password */}
+                    <div className="gap-5 mt-2 md:grid md:grid-cols-2">
+                      <div className="w-full">
+                        <div className="block ">
+                          <Label htmlFor="password">
+                            {t("createUser.password")}*
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <TextInput
+                            className="w-full"
+                            id="password"
+                            type="text"
+                            sizing="sm"
+                            required
+                            {...formik.getFieldProps("password")}
+                            color={
+                              formik.touched.password && formik.errors.password
+                                ? "failure"
+                                : "gray"
+                            }
+                          />
+                          <Button
+                            type="button"
+                            color="alternative"
+                            onClick={() => {
+                              const password = generatePassword();
+
+                              formik.setFieldValue("password", password);
+                            }}
+                          >
+                            {t("createUser.regenerate")}
+                          </Button>
+                        </div>
+
+                        {displayError("password")}
+                        <p className="text-xs text-black dark:text-white">
+                          {t("createUser.helperPassword")}
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="confirmPassword">
+                          {t("createUser.confirmPassword")}*
+                        </Label>
+                        <TextInput
+                          id="confirmPassword"
+                          type="text"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("confirmPassword")}
+                          color={
+                            formik.touched.confirmPassword &&
+                            formik.errors.confirmPassword
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                      </div>
+                      {displayError("confirmPassword")}
+                    </div>
+                  </>
+                ) : (
+                  /* ===============================
+     🔹 FORMULARIO COMPLETO (con proyectos)
+     =============================== */
+                  <>
+                    {" "}
+                    <div className="gap-5 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="name">{t("createUser.name")}*</Label>
+                        </div>
+                        <TextInput
+                          id="name"
+                          type="text"
+                          sizing="sm"
+                          placeholder={t("createUser.namePlaceholder")}
+                          required
+                          {...formik.getFieldProps("name")}
+                          color={
+                            formik.touched.name && formik.errors.name
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("name")}
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="firstLastName">
+                            {t("createUser.first")} {t("createUser.lastName")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="firstLastName"
+                          type="text"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("firstLastName")}
+                          color={
+                            formik.touched.firstLastName &&
+                            formik.errors.firstLastName
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("firstLastName")}
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="secondLastName">
+                            {t("createUser.second")} {t("createUser.lastName")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="secondLastName"
+                          sizing="sm"
+                          type="text"
+                          required
+                          {...formik.getFieldProps("secondLastName")}
+                          color={
+                            formik.touched.secondLastName &&
+                            formik.errors.secondLastName
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("secondLastName")}
+                      </div>
+                    </div>
+                    <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+                      {projects.map((project) => (
+                        <div key={project.instance_code} className="w-full">
+                          <Label className="block mb-2">
+                            {t("createUser.typeDocNumber")} –{" "}
+                            {project.instance_code}*
+                          </Label>
+
+                          <Select
+                            sizing="sm"
+                            value={
+                              formik.values.typeDocumentByProject[
+                                project.instance_code
+                              ] || ""
+                            }
+                            onChange={(e) =>
+                              formik.setFieldValue(
+                                `typeDocumentByProject.${project.instance_code}`,
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="" disabled>
+                              {t("createUser.placeholderTypDoc")}
+                            </option>
+
+                            {(
+                              typeDocsByProject[project.instance_code] ?? []
+                            ).map((doc) => (
+                              <option key={doc.id} value={doc.id}>
+                                {doc.name}
+                              </option>
+                            ))}
+                          </Select>
+                        </div>
+                      ))}
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="documentNumber">
+                            {t("createUser.documentNumber")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="documentNumber"
+                          type="number"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("documentNumber")}
+                          color={
+                            formik.touched.documentNumber &&
+                            formik.errors.documentNumber
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("documentNumber")}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] mt-2">
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="dateIssuanceDoc">
+                            {t("createUser.dateIssuanceDoc")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="dateIssuanceDoc"
+                          sizing="sm"
+                          type="date"
+                          required
+                          {...formik.getFieldProps("dateIssuanceDoc")}
+                          color={
+                            formik.touched.dateIssuanceDoc &&
+                            formik.errors.dateIssuanceDoc
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("dateIssuanceDoc")}
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="birthday">
+                            {t("createUser.birthday")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="birthday"
+                          sizing="sm"
+                          type="date"
+                          required
+                          {...formik.getFieldProps("birthday")}
+                          color={
+                            formik.touched.birthday && formik.errors.birthday
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("birthday")}
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="genderId">
+                            {t("createUser.gender")}*
+                          </Label>
+                        </div>
+                        <Select
+                          id="genderId"
+                          required
+                          sizing="sm"
+                          {...formik.getFieldProps("genderId")}
+                          color={
+                            formik.touched.genderId && formik.errors.genderId
+                              ? "failure"
+                              : "gray"
+                          }
+                        >
+                          <option value="" disabled>
+                            {t("createUser.placeholderGender")}
+                          </option>
+                          <option value="1">{t("common.masculine")}</option>
+                          <option value="2">{t("common.feminine")}</option>
+                        </Select>
+                        {displayError("genderId")}
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="roles">{t("createUser.role")}*</Label>
+                        </div>
+                        <Select
+                          id="roles"
+                          required
+                          sizing="sm"
+                          {...formik.getFieldProps("roles")}
+                          color={
+                            formik.touched.roles && formik.errors.roles
+                              ? "failure"
+                              : "gray"
+                          }
+                        >
+                          <option value="" disabled>
+                            {t("createUser.placeholderRole")}
+                          </option>
+
+                          {basicRoles.map((role) => (
+                            <option key={role.role_id} value={role.role_id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </Select>
+                        {displayError("roles")}
+                      </div>
+                    </div>
+                    <div className="flex gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] ">
+                      {projects.map((project) => (
+                        <div
+                          key={project.external_project_id}
+                          className="w-full "
+                        >
+                          <Label className="block mb-2 font-semibold">
+                            {t("createUser.role")} – {project.instance_code}
+                          </Label>
+
+                          <div className="flex flex-col w-full h-24 gap-2 overflow-auto">
+                            {(rolesByProject[project.instance_code] ?? []).map(
+                              (role) => {
+                                const checked = formik.values.rolesByProject[
+                                  project.instance_code
+                                ]?.includes(role.role_id);
+
+                                return (
+                                  <label
+                                    key={role.role_id}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      className="dark:bg-transparent"
+                                      onChange={(e) => {
+                                        const currentRoles =
+                                          formik.values.rolesByProject[
+                                            project.instance_code
+                                          ] ?? [];
+
+                                        const updatedRoles = e.target.checked
+                                          ? [...currentRoles, role.role_id]
+                                          : currentRoles.filter(
+                                              (id) => id !== role.role_id,
+                                            );
+
+                                        formik.setFieldValue(
+                                          `rolesByProject.${project.instance_code}`,
+                                          updatedRoles,
+                                        );
+                                      }}
+                                    />
+                                    <span className="text-sm capitalize">
+                                      {role.role_name}
+                                    </span>
+                                  </label>
+                                );
+                              },
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="email">
+                            {t("createUser.email")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="email"
+                          type="email"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("email")}
+                          color={
+                            formik.touched.email && formik.errors.email
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("email")}
+                      </div>
+
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="password">
+                            {t("createUser.password")}*
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <TextInput
+                            className="w-full"
+                            id="password"
+                            type="text"
+                            sizing="sm"
+                            required
+                            {...formik.getFieldProps("password")}
+                            color={
+                              formik.touched.password && formik.errors.password
+                                ? "failure"
+                                : "gray"
+                            }
+                          />
+                          <Button
+                            type="button"
+                            color="alternative"
+                            onClick={() => {
+                              const password = generatePassword();
+
+                              formik.setFieldValue("password", password);
+                            }}
+                          >
+                            {t("createUser.regenerate")}
+                          </Button>
+                        </div>
+
+                        {displayError("password")}
+                        <p className="text-xs text-black dark:text-white">
+                          {t("createUser.helperPassword")}
+                        </p>
+                      </div>
+                      <div className="w-full">
+                        <div className="block mb-2">
+                          <Label htmlFor="confirmPassword">
+                            {t("createUser.confirmPassword")}*
+                          </Label>
+                        </div>
+                        <TextInput
+                          id="confirmPassword"
+                          type="text"
+                          sizing="sm"
+                          required
+                          {...formik.getFieldProps("confirmPassword")}
+                          color={
+                            formik.touched.confirmPassword &&
+                            formik.errors.confirmPassword
+                              ? "failure"
+                              : "gray"
+                          }
+                        />
+                        {displayError("confirmPassword")}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-end gap-3 mt-3">
+                  <Button color="alternative" onClick={handleCancel}>
+                    {t("common.cancel")}
+                  </Button>
+                  <Button
+                    color="blue"
+                    disabled={isButtonDisabled}
+                    onClick={() => formik.handleSubmit()}
+                  >
+                    {formik.isSubmitting
+                      ? t("createUser.loadUserRegister")
+                      : t("createUser.userRegister")}{" "}
+                    <MdKeyboardArrowRight size={25} />
+                  </Button>
                 </div>
-                <div className="gap-5 mt-2 md:grid md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="email">{t("createUser.email")}*</Label>
-                    </div>
-                    <TextInput
-                      id="email"
-                      type="email"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("email")}
-                      color={
-                        formik.touched.email && formik.errors.email
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("email")}
-                  </div>
-
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="password">
-                        {t("createUser.password")}*
-                      </Label>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TextInput
-                        className="w-full"
-                        id="password"
-                        type="text"
-                        sizing="sm"
-                        required
-                        {...formik.getFieldProps("password")}
-                        color={
-                          formik.touched.password && formik.errors.password
-                            ? "failure"
-                            : "gray"
-                        }
-                      />
-                      <Button
-                        type="button"
-                        color="alternative"
-                        onClick={() => {
-                          const password = generatePassword();
-
-                          formik.setFieldValue("password", password);
-                        }}
-                      >
-                        {t("createUser.regenerate")}
-                      </Button>
-                    </div>
-
-                    {displayError("password")}
-                    <p className="text-xs text-black dark:text-white">
-                      {t("createUser.helperPassword")}
-                    </p>
-                  </div>
-                  <div className="w-full">
-                    <div className="block mb-2">
-                      <Label htmlFor="confirmPassword">
-                        {t("createUser.confirmPassword")}*
-                      </Label>
-                    </div>
-                    <TextInput
-                      id="confirmPassword"
-                      type="text"
-                      sizing="sm"
-                      required
-                      {...formik.getFieldProps("confirmPassword")}
-                      color={
-                        formik.touched.confirmPassword &&
-                        formik.errors.confirmPassword
-                          ? "failure"
-                          : "gray"
-                      }
-                    />
-                    {displayError("confirmPassword")}
-                  </div>
-                </div>
-              </>
+              </fieldset>
+            </form>
+            {userCreate && (
+              <div className="flex flex-col items-center justify-center h-full gap-2 m-auto text-center">
+                <FiUserCheck size={100} className="text-green-500 " />
+                <p className="text-2xl font-bold">
+                  {t("createUser.successMessage")}
+                </p>
+                <p className="text-sm text-gray-700">
+                  {t("createUser.successMessageDetails")}
+                </p>
+                <Button
+                  className="mt-2"
+                  color="dark"
+                  onClick={() => navigate("/administration/users")}
+                >
+                  {t("createUser.goToUsers")}
+                </Button>
+              </div>
             )}
-
-            <div className="flex justify-end gap-3 mt-3">
-              <Button color="alternative" onClick={handleCancel}>
-                {t("common.cancel")}
-              </Button>
-              <Button
-                color="blue"
-                disabled={isButtonDisabled}
-                onClick={() => formik.handleSubmit()}
-              >
-                {formik.isSubmitting
-                  ? t("createUser.loadUserRegister")
-                  : t("createUser.userRegister")}{" "}
-                <MdKeyboardArrowRight size={25} />
-              </Button>
-            </div>
-          </fieldset>
-        </form>
-        {userCreate && (
-          <div className="flex flex-col items-center justify-center h-full gap-2 m-auto text-center">
-            <FiUserCheck size={100} className="text-green-500 " />
-            <p className="text-2xl font-bold">
-              {t("createUser.successMessage")}
-            </p>
-            <p className="text-sm text-gray-700">
-              {t("createUser.successMessageDetails")}
-            </p>
-            <Button
-              className="mt-2"
-              color="dark"
-              onClick={() => navigate("/administration/users")}
-            >
-              {t("createUser.goToUsers")}
-            </Button>
           </div>
+        {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
         )}
-      </div>
-      <div className="fixed z-50 flex flex-col gap-2 top-4 right-4">
-        {toast.map((t) => (
-          <ToastSimple
-            key={t.id}
-            messageKey={t.messageKey}
-            messageParams={t.messageParams}
-            type={t.type}
-            to={t.to}
-            linkText={t.linkText}
-            onClose={() =>
-              setToast((prev) => prev.filter((toast) => toast.id !== t.id))
-            }
-          />
-        ))}
-      </div>
+          <div className="fixed z-50 flex flex-col gap-2 top-4 right-4">
+            {toast.map((t) => (
+              <ToastSimple
+                key={t.id}
+                messageKey={t.messageKey}
+                messageParams={t.messageParams}
+                type={t.type}
+                to={t.to}
+                linkText={t.linkText}
+                onClose={() =>
+                  setToast((prev) => prev.filter((toast) => toast.id !== t.id))
+                }
+              />
+            ))}
+          </div>
         </>
       )}
     </AppLayoutSB>

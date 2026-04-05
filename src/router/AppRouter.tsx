@@ -17,6 +17,7 @@ import Profile from '../pages/profile/Profile'
 import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
 import AddProject from "../pages/administration/AddProject";
+import EditProject from "../pages/administration/EditProject";
 import ModulesList from "../pages/administration/ModulesList";
 import SubmodulesList from "../pages/administration/SubmodulesList";
 
@@ -34,6 +35,8 @@ import KmsHome from "../pages/kms/KmsHome";
 import RegisterCertificate from "../pages/kms/RegisterCertificate";
 import VerifySignature from "../pages/kms/VerifySignature";
 import CreateKey from "../pages/kms/CreateKey";
+import SignDocument from "../pages/kms/SignDocument";
+import RotateKey from "../pages/kms/RotateKey";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -141,6 +144,7 @@ export function AppRouter() {
 
           <Route path="/administration/projects" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectsList /></ModuleRouteGuard>} />
           <Route path="/administration/projects/create" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AddProject /></ModuleRouteGuard>} />
+          <Route path="/administration/projects/edit/:projectId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditProject /></ModuleRouteGuard>} />
           <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
           <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 
@@ -157,7 +161,9 @@ export function AppRouter() {
           <Route path="/kms" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
           <Route path="/kms/crear-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><CreateKey /></ModuleRouteGuard>} />
           <Route path="/kms/certificado" element={<ModuleRouteGuard moduleCode="AUDIT"><RegisterCertificate /></ModuleRouteGuard>} />
+          <Route path="/kms/firmar" element={<ModuleRouteGuard moduleCode="AUDIT"><SignDocument /></ModuleRouteGuard>} />
           <Route path="/kms/verificar-firma" element={<ModuleRouteGuard moduleCode="AUDIT"><VerifySignature /></ModuleRouteGuard>} />
+          <Route path="/kms/rotar-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><RotateKey /></ModuleRouteGuard>} />
           <Route path="/digitalSignature" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
         </Route>
 

@@ -16,6 +16,8 @@ export interface ExternalProject {
   description: string;
   /**Imagen principal del proyecto */
   project_image_url: string;
+  /** URL de la aplicación cliente para redirección SSO */
+  client_url: string | null;
   /**Modulos asociados al proyecto */
   systems: ExternalSystems[];
 }
