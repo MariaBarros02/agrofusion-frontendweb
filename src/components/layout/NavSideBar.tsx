@@ -25,7 +25,7 @@ import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
 import { logoutService } from "../../services/agrofusion/auth.service";
 import { useNavigate } from "react-router-dom";
-
+import logoAgrofusionRemovebg2 from "/logoAgrofusion-removebg2.png"
 /**
  * Módulo de componentes de navegación lateral.
  * Contiene el sidebar principal de la aplicación con menús y submenús.
@@ -355,7 +355,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                 className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
 
               >
-                {t("nav.check")}
+                {t("nav.check")}  
               </SidebarItem>
               
               <SidebarItem
@@ -364,7 +364,7 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
 
                 icon={GoPencil}
                 className={`${baseItem} ${
-                  isActive("/digitalSignature") ? activeItem : ""
+                  isActive("/kms") || isActive("/digitalSignature") ? activeItem : ""
                 }`}
               >
                 {t("nav.digitalSig")}

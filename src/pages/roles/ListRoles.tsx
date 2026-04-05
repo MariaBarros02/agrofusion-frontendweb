@@ -123,6 +123,7 @@ const ListRoles = () => {
       key: "actions",
       label: t("roles.functions"),
       type: "actions",
+      width: "300px",
       actions: [
         {
           label: t("roles.view"),
@@ -176,7 +177,7 @@ const ListRoles = () => {
       />
       {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex flex-wrap gap-2 flex-1 overflow-x-auto">
+        <div className="flex flex-wrap flex-1 gap-2 overflow-x-auto">
           <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
@@ -196,7 +197,7 @@ const ListRoles = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">
-                {t("common.active")} / {t("common.inactive")}
+                {t("common.active")} / {t("common.inactive")} / {t("common.deleted")}
               </option>
               <option value="ACTIVE">{t("common.active")}</option>
               <option value="INACTIVE">{t("common.inactive")}</option>
@@ -204,7 +205,7 @@ const ListRoles = () => {
             </Select>
           </div>
         </div>
-        <div className="flex items-end justify-end gap-2 mt-2 md:mt-0 md:ml-4 flex-shrink-0">
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button size="xs" onClick={() => getRoles(1)} color="alternative">
             <FiFilter size={18} /> {t("common.filterActive")}
           </Button>

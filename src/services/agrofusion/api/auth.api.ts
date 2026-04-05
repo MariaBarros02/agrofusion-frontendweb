@@ -1,6 +1,7 @@
 import type { AccountActivateRequest } from "../../../dto/request/accountActivate-request.dto";
 import type { ChangePasswordRequest } from "../../../dto/request/changePassword-request.dto";
 import type { createUserRequest } from "../../../dto/request/createUser-request.dto";
+import type { EditUserRequest, EditProfileRequest, ChangeUserStatusRequest } from "../../../dto/request/editUser-request.dto";
 import type { EditPermissionRequest } from "../../../dto/request/editPermission-request.dto";
 import type { listPermissionsRequest } from "../../../dto/request/listPermissions-request.dto";
 import type { listUsersRequest } from "../../../dto/request/listUsers-request.dto";
@@ -10,7 +11,10 @@ import type { ListUserResponse, PaginatedUsersResponse } from "../../../dto/resp
 import type { LoginResponse } from "../../../dto/response/login-response.dto";
 import type { SsoResponse } from "../../../dto/response/sso-response.dto";
 import type { ExternalProject } from "../../../dto/shared/external-project.dto";
-import type { PaginatedProjectsResponse, ProjectListResponse } from "../../../dto/response/projectList-response.dto";
+import type { ExternalProjectRolesResponse } from "../../../dto/response/externalProjectRoles-response.dto";
+import type { ExternalProjectTypeDocsResponse } from "../../../dto/response/externalProjectTypeDocs-response.dto";
+import type { ExternalProjectUsersResponse } from "../../../dto/response/externalProjectUsers-response.dto";
+import type { PaginatedProjectsResponse } from "../../../dto/response/projectList-response.dto";
 import type { ModuleListResponse, PaginatedModulesResponse } from "../../../dto/response/moduleList-response.dto";
 import type { PaginatedSubmodulesResponse, SubmoduleListResponse } from "../../../dto/response/submoduleList-response.dto";
 import type { User } from "../../../dto/shared/users.dto";
@@ -20,6 +24,7 @@ import type { ListRolesResponse, PaginatedRolesResponse } from "../../../dto/res
 import type { EditRoleRequest } from "../../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../../dto/request/createRole-request-dto";
 import type { ListBasicRole } from "../../../dto/response/listBasicRoles-response.dto";
+import type { ExternalProjectDetailResponse } from "../../../dto/response/externalProjectDetail-response.dto";
 
 /**
  * Servicio encargado de las operaciones de autenticación y gestión de usuarios.
@@ -31,6 +36,26 @@ export const authApi = {
    */
   getExternalProjects: () =>
     authAgrofusionAxios.get<ExternalProject[]>("/external-projects"),
+
+  /**
+   * Obtiene los roles disponibles de todos los proyectos externos activos.
+   * El backend orquesta las llamadas a SIGMA, DISRIEGO, etc. en paralelo.
+   */
+  getExternalProjectRoles: () =>
+    authAgrofusionAxios.get<ExternalProjectRolesResponse>("/external-projects/roles"),
+
+  /**
+   * Obtiene los tipos de documento de todos los proyectos externos activos.
+   */
+  getExternalProjectTypeDocs: () =>
+    authAgrofusionAxios.get<ExternalProjectTypeDocsResponse>("/external-projects/type-documents"),
+
+  /**
+   * Obtiene los datos del usuario en todos los proyectos externos activos.
+   * @param email - Email del usuario a consultar
+   */
+  getExternalProjectUsers: (email: string) =>
+    authAgrofusionAxios.get<ExternalProjectUsersResponse>(`/external-projects/users/${email}`),
 
   /**
    * Obtiene el listado paginado de proyectos externos (RF-GES-01).
@@ -239,26 +264,30 @@ export const authApi = {
     authAgrofusionAxios.delete("users/delete-user", {params: { user_id: user_id} }),
 
 
-/**
- * Actualizar mi perfil de usuario
- *  @param {string} user_id - id del usuario por buscar
- * @param {string} name - nombre para actualizar el registro
- * @param {string} identity_number - Número de identificación para actualizar el registro
- * @returns {Promise} Actualización exitosa
- */
-  editProfile: (user_id:string, name: string, identity_number: string) =>
-    authAgrofusionAxios.put("users/edit-profile", {name, identity_number}, {params: { user_id: user_id} }),
-
+  /**
+   * Actualizar perfil propio del usuario autenticado.
+   * El backend orquesta la actualización en proyectos externos si hay `external_data`.
+   * @param user_id - ID del usuario
+   * @param payload - Datos a actualizar
+   */
+  editProfile: (user_id: string, payload: EditProfileRequest) =>
+    authAgrofusionAxios.put("users/profile", payload, { params: { user_id } }),
 
   /**
- * Actualizar mi perfil de usuario
- *  @param {string} user_id - id del usuario por buscar
- * @param {string} name - nombre para actualizar el registro
- * @param {string} identity_number - Número de identificación para actualizar el registro
- * @returns {Promise} Actualización exitosa
- */
-  editUser: (user_id:string, name: string, identity_number: string, state: string, rol? : string) =>
-    authAgrofusionAxios.put("users/edit-user", {name, identity_number, state, rol}, {params: { user_id: user_id} }),
+   * Actualizar usuario por admin.
+   * El backend orquesta UPDATE_USER en proyectos externos usando `external_data`.
+   * @param user_id - ID del usuario a actualizar
+   * @param payload - Datos a actualizar incluyendo external_data
+   */
+  editUser: (user_id: string, payload: EditUserRequest) =>
+    authAgrofusionAxios.put("users/admin/update-user", payload, { params: { user_id } }),
+
+  /**
+   * Cambiar estado activo/inactivo de un usuario.
+   * El backend orquesta CHANGE_USER_STATUS en proyectos externos.
+   */
+  changeUserStatus: (payload: ChangeUserStatusRequest) =>
+    authAgrofusionAxios.patch("users/change-status", payload),
 /**
  * Cambiar mi contraseña desde mi perfil de usuario
  * @param {string} user_id - id del usuario por buscar
@@ -356,6 +385,12 @@ export const authApi = {
   changeF2AUser: (user_id: string, mfa_active: boolean) =>
     authAgrofusionAxios.post("users/change-fa2-user", null, {params: {user_id, mfa_active} }),
 
+  /**
+   * Obtiene el detalle completo de un proyecto externo con URLs y endpoints.
+   * @param projectId - UUID del proyecto externo
+   */
+  getProjectDetail: (projectId: string) =>
+    authAgrofusionAxios.get<ExternalProjectDetailResponse>(`/external-projects/${projectId}`),
 
 };
 
