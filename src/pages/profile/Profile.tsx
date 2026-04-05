@@ -284,7 +284,7 @@ const Profile = () => {
         type: "success",
         message: "profile.mfaUpdateSuccess",
       });
-    } catch (error) {
+    } catch (error:any) {
       const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
       if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
         console.log("Error de permisos insuficientes");

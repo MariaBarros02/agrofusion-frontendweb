@@ -9,6 +9,7 @@ export type SSOLoginEPError = {
   messageParams?: Record<string, string>;
   type?: "error" | "warning";
   to?: string;
+  errorCode?:string;
   linkText?: string;
 };
 
@@ -83,6 +84,7 @@ const handleSSOError = async (
         messageKey: "login.errorSSOLogin",
         messageParams: { project },
         type: "error",
+        errorCode: error?.response?.data?.detail?.code,
         ...(projectsLinks[project] ?? {}),
       },
     ],

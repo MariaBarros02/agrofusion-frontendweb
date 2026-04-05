@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import AppLayoutSB from "../components/layout/AppLayoutSB";
@@ -16,11 +17,14 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { iconMapper } from "../utils/iconMapper";
 import { FiLink, FiTool } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import type { AlertState } from "../components/layout/AlertSimple";
+import AlertSimple from "../components/layout/AlertSimple";
 const Dashboard = () => {
   const { t } = useTranslation();
   const [projects, setProjects] = useState<ExternalProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<AlertState>(null);
 
   /** Lista de notificaciones activas en pantalla */
   const [toast, setToast] = useState<ToastData[]>([]);
@@ -51,20 +55,30 @@ const Dashboard = () => {
    * @param {string} project - Identificador del proyecto destino ('DISRIEGO' | 'SIGMA').
    */
   const ssoLogin = async (project: ExternalProject) => {
+    
     const result = await handleSSOLoginEP(project.instance_code);
 
-    // CASO ÉXITO: Redirección externa con token de intercambio
     if ("sso_token" in result && result.sso_token) {
       setSSOLogged(project.instance_code);
       const projectSlug = project.instance_code.toLowerCase();
+
       window.open(
         `https://www.inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
-        "_blank",
+        "_blank"
       );
       return;
     }
-    // CASO ERROR: Mapeo de errores del orquestador a la cola de Toasts
+
     if ("errors" in result) {
+       result.errors.forEach((e) => {
+    if (e.errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+      setAlert({
+        message: t(`errors.${e.errorCode}`),
+        type: "warning",
+      });
+      return;
+    }
+  });
       setToast((prev) => [
         ...prev,
         ...result.errors.map((e) => ({
@@ -77,7 +91,9 @@ const Dashboard = () => {
         })),
       ]);
     }
-  };
+
+  
+};
 
   const goToModule = async (project: ExternalProject, moduleUrl: string) => {
     if (!isSSOLogged(project.instance_code)) {
@@ -247,6 +263,17 @@ const Dashboard = () => {
               }
             />
           ))}
+
+          {alert && (
+                        <AlertSimple
+                          message={t(alert.message)}
+                          type={alert.type}
+                          to={alert.to}
+                          onClose={() => {
+                            setAlert(null);
+                          }}
+                        />
+                      )}
         </div>
         </>
         )}
