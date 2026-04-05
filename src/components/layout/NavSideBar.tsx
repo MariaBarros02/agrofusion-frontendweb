@@ -19,7 +19,6 @@ import {
 import ThemeToggle from "../ThemeToggle";
 import { useAuthStore } from "../../store/auth.store";
 import LanguageSwitcher from "../LanguageSwitcher";
-import logoAgrofusionRemovebg2 from "/logoAgrofusion-removebg2.png"
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { LiaCubesSolid } from "react-icons/lia";
