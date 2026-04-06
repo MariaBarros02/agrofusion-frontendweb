@@ -140,7 +140,6 @@ const EditProject = () => {
     },
     validationSchema: EditSchema(t),
     onSubmit: async (values) => {
-      setLoadingData(true);
       setAlert(null);
       try {
         await updateProjectService(projectId || "", values);
@@ -168,8 +167,6 @@ const EditProject = () => {
           return;
         }
         setAlert({ message: "project.edit.errorGeneric", type: "error" });
-      } finally {
-        setLoadingData(false);
       }
     },
   });
@@ -748,7 +745,6 @@ const EditProject = () => {
               <Button
                 type="submit"
                 color="blue"
-                disabled
               >
                 <FiSave className="inline mr-2" size={18} />
                 {t("common.update")}
