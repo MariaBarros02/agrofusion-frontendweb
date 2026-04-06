@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-import { getProjectDetailsService } from "../../services/agrofusion/auth.service";
+import { getProjectFormDataService, updateProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -139,49 +139,65 @@ const EditProject = () => {
       endpoints: buildEndpointInitialValues(),
     },
     validationSchema: EditSchema(t),
-    onSubmit: () => {},
-    enableReinitialize: true,
+    onSubmit: async (values) => {
+      setLoadingData(true);
+      setAlert(null);
+      try {
+        await updateProjectService(projectId || "", values);
+        setAlert({
+          message: "project.edit.success",
+          type: "success",
+          to: "/administration/projects",
+        });
+      } catch (err: any) {
+        const code = err.response?.data?.detail?.code;
+        if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
+          setAlert({ message: "project.edit.errorDuplicateCode", type: "error" });
+          return;
+        }
+        if (code === "EXTERNAL_PROJECT_MODULES_COUNT") {
+          setAlert({ message: "project.edit.errorModulesCount", type: "error" });
+          return;
+        }
+        if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          setAlert({ message: "project.edit.errorNoPermission", type: "warning" });
+          return;
+        }
+        if (code === "EXT_URL_NOT_REACHABLE") {
+          setAlert({ message: "project.edit.errorUrlNotReachable", type: "error" });
+          return;
+        }
+        setAlert({ message: "project.edit.errorGeneric", type: "error" });
+      } finally {
+        setLoadingData(false);
+      }
+    },
   });
 
   useEffect(() => {
     const loadProject = async () => {
       try {
         setLoadingData(true);
-        const data = await getProjectDetailsService(projectId || "");
-        const firstUrl = data.urls?.[0];
-        const backendSystems = data.systems ?? [];
-        const modules: CreateModuleRequest[] = Array.from(
-          { length: MODULES_COUNT },
-          (_, i) => {
-            const sys = backendSystems[i];
-            if (sys) {
-              return {
-                ext_id: sys.ext_id,
-                name: sys.name ?? "",
-                base_url: sys.base_url ?? "",
-                module_icon: sys.module_icon ?? "",
-                description: sys.description ?? "",
-              };
-            }
-            return { ...defaultModule };
-          }
-        );
-
+        const data = await getProjectFormDataService(projectId || "");
         formik.setValues({
           instance_code: data.instance_code ?? "",
           project_name: data.project_name ?? "",
-          project_url: data.client_name ?? "",
+          project_url: data.project_url ?? "",
           description: data.description ?? "",
           is_active: data.is_active ?? true,
-          project_image: "",
-          project_image_mime_type: "",
-          api_url_base: firstUrl?.client_url ?? "",
-          users_api_path: firstUrl?.base_url ?? "",
-          modules,
-          endpoints: buildEndpointInitialValues(),
+          project_image: data.project_image ?? "",
+          project_image_mime_type: data.project_image_mime_type ?? "",
+          api_url_base: data.api_url_base ?? "",
+          users_api_path: data.users_api_path ?? "",
+          modules: data.modules?.length
+            ? data.modules
+            : Array.from({ length: MODULES_COUNT }, () => ({ ...defaultModule })),
+          endpoints: data.endpoints?.length
+            ? data.endpoints
+            : buildEndpointInitialValues(),
         });
-        if (data.project_image_url) {
-          setImagePreview(data.project_image_url);
+        if (data.project_image) {
+          setImagePreview(data.project_image);
         }
       } catch (err: any) {
         console.error(err);
@@ -255,9 +271,9 @@ const EditProject = () => {
         <Label className="text-gray-700 dark:text-gray-300">
           {t(`project.create.${labelKey}`)}
         </Label>
-        <div className="mt-2 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+        <div className="mt-2 overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-600">
           <table className="w-full min-w-[420px] table-fixed text-left text-sm">
-            <thead className="bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+            <thead className="text-sm font-semibold text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
               <tr>
                 <th className="w-[30%] px-3 py-2">{t("project.create.endpointResponseBodyName")}</th>
                 <th className="w-[45%] px-3 py-2">{t("project.create.endpointResponseBodyKey")}</th>
@@ -639,7 +655,7 @@ const EditProject = () => {
               >
                 {PROJECT_EXTERNAL_ENDPOINT_SPECS.map((spec, index) => (
                   <AccordionPanel key={spec.title}>
-                    <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
+                    <AccordionTitle className="text-sm font-medium text-left focus:ring-0 dark:text-white">
                       {t(`project.create.${spec.title}`)}
                     </AccordionTitle>
                     <AccordionContent>
@@ -653,7 +669,7 @@ const EditProject = () => {
                           </p>
                         </div>
                         <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">
-                          <div className="min-w-0 flex-1">
+                          <div className="flex-1 min-w-0">
                             <Label className="text-gray-700 dark:text-gray-300">
                               {t("project.create.endpointSpecUrl")} <span className="text-red-500">*</span>
                             </Label>

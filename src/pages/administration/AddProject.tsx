@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { createProjectService } from "../../services/agrofusion/auth.service";
+import { createProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -142,14 +142,12 @@ const AddProject = () => {
       setLoading(true);
       setAlert(null);
       try {
-        // await createProjectService({
-        //   ...values,
-        // });
-        // setAlert({
-        //   message: "project.create.success",
-        //   type: "success",
-        //   to: "/administration/projects",
-        // });
+        await createProjectService(values);
+        setAlert({
+          message: "project.create.success",
+          type: "success",
+          to: "/administration/projects",
+        });
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
@@ -162,6 +160,10 @@ const AddProject = () => {
         }
         if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
           setAlert({ message: "project.create.errorNoPermission", type: "warning" });
+          return;
+        }
+        if (code === "EXT_URL_NOT_REACHABLE") {
+          setAlert({ message: "project.create.errorUrlNotReachable", type: "error" });
           return;
         }
         setAlert({ message: "project.create.errorGeneric", type: "error" });

@@ -79,6 +79,32 @@ export const authApi = {
     ),
 
   /**
+   * Crea un proyecto externo con sus módulos y endpoints.
+   */
+  createProject: (data: import("../../../dto/request/createProject-request.dto").CreateProjectRequest) =>
+    authAgrofusionAxios.post<{ external_project_id: string; instance_code: string; project_name: string; message: string }>(
+      "/external-projects/setup",
+      data
+    ),
+
+  /**
+   * Obtiene los datos de un proyecto en formato de formulario (para pre-poblar el edit).
+   */
+  getProjectFormData: (projectId: string) =>
+    authAgrofusionAxios.get<import("../../../dto/request/createProject-request.dto").CreateProjectRequest>(
+      `/external-projects/${projectId}/form-data`
+    ),
+
+  /**
+   * Actualiza un proyecto externo existente.
+   */
+  updateProject: (projectId: string, data: import("../../../dto/request/createProject-request.dto").CreateProjectRequest) =>
+    authAgrofusionAxios.put<{ external_project_id: string; instance_code: string; project_name: string; message: string }>(
+      `/external-projects/${projectId}/setup`,
+      data
+    ),
+
+  /**
    * Obtiene el listado paginado de módulos.
    * Parámetros: page_index, page_size, search?, state?, project_id?
    */
