@@ -3,6 +3,8 @@ import type { RegisterErrorPEPayload } from "../audit.service";
 import type { ListAuditRequest } from "../../../dto/request/listAudit-request.dto";
 import type { ListAuditResponse } from "../../../dto/response/listAudit-response.dto";
 import type { ListErrorsRequest } from "../../../dto/request/listErrors-request.dto";
+import type { CreateAuditExportRequest } from "../../../dto/request/createAuditExport-request.dto";
+import type { AuditExportJobResponse } from "../../../dto/response/auditExport-response.dto";
 /**
  * Servicio encargado del registro de logs y auditoría del sistema.
  */
@@ -32,4 +34,16 @@ listEvents: () => auditAgrofusionAxios.get("/audit/events"),
 
 listErrorComponents: () => auditAgrofusionAxios.get("/audit/errors/components"),
 listErrorCodes: () => auditAgrofusionAxios.get("/audit/errors/codes"),
+
+  createAuditExport: (body: CreateAuditExportRequest) =>
+    auditAgrofusionAxios.post<AuditExportJobResponse>("audit/exports", body),
+
+  getAuditExport: (exportId: string) =>
+    auditAgrofusionAxios.get<AuditExportJobResponse>(`audit/exports/${exportId}`),
+
+  listAuditExports: (params?: { limit?: number }) =>
+    auditAgrofusionAxios.get<AuditExportJobResponse[]>("audit/exports", { params }),
+
+  deleteAuditExport: (exportId: string) =>
+    auditAgrofusionAxios.delete(`audit/exports/${exportId}`),
 };

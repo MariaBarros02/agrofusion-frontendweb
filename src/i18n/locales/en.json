@@ -931,6 +931,30 @@
     "switch": {
     "audit": "AgroFusion Audit",
     "errors": "External project errors"
+  },
+  "export": {
+    "title": "Report export",
+    "subtitle": "Builds a file using the same filters as the table. Download uses a short-lived secure link.",
+    "format": "Format",
+    "run": "Generate report",
+    "requested": "Queued. Generating in the background…",
+    "polling": "Processing…",
+    "ready": "Report ready",
+    "failed": "Export failed",
+    "forbidden": "No permission to export",
+    "hashHint": "SHA-256 (integrity)",
+    "records": "records",
+    "download": "Download file",
+    "downloading": "Downloading…",
+    "fmtCsv": "CSV",
+    "fmtCsvDesc": "Spreadsheets",
+    "fmtXlsx": "Excel",
+    "fmtXlsxDesc": "Styled table",
+    "fmtJsonl": "JSONL",
+    "fmtJsonlDesc": "One JSON per line",
+    "fmtPdf": "PDF",
+    "fmtPdfDesc": "Print-ready",
+    "timeout": "Timed out waiting. Check the report status later."
   }
 },
 
