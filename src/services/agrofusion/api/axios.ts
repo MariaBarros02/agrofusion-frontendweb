@@ -23,3 +23,9 @@ export const auditAgrofusionAxios = axios.create({
 applyAuthInterceptor(authAgrofusionAxios);
 applyAuthInterceptor(auditAgrofusionAxios);
 
+export const intAgrofusionAxios = axios.create({
+    baseURL: env.VITE_API_INT_AF_URL,
+  });
+  
+  applyAuthInterceptor(intAgrofusionAxios);
+

@@ -337,11 +337,15 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
                 </div>
               )}
               <SidebarItem
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/accounting-vouchers");
+                }}
                 icon={FiClipboard}
-                className={`${baseItem} ${isActive("/check") ? activeItem : ""}`}
-                onClick={() => navigate("/check")}
+                className={`${baseItem} ${isActive("/accounting-vouchers") ? activeItem : ""}`}
               >
-                {t("nav.check")}  
+                {t("nav.check")}
               </SidebarItem>
               
               <SidebarItem

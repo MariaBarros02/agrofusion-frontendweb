@@ -47,7 +47,12 @@
         "rejected": "Rechazado",
         "High": "Alto",
         "applyFilters": "Aplicar filtros",
-        "resetFilters": "Reiniciar"
+        "resetFilters": "Reiniciar",
+        "processing": "Procesando",
+        "sent": "Enviado",
+        "failed": "Fallido",
+        "cancelled": "Cancelado",
+        "of": "de"
     },
     "theme": {
         "dark": "Modo oscuro",
@@ -1029,5 +1034,33 @@
             "code": "Código",
             "all": "Todos"
         }
-    }
+    },
+    "checks": {
+        "title": "Comprobantes",
+        "description": "Consulta y validación de comprobantes generados por las integraciones del sistema",
+        "loading": "Cargando datos de comprobantes...",
+        "error": "Error cargando comprobantes",
+        "noChecks": "No hay comprobantes",
+        "pagination": "Comprobantes",
+        "searchPlaceholder": "Buscar por id, proyecto o emitido por",
+        "view": "Ver detalle",
+        "export": "Exportar",
+        "columns": {
+          "id": "ID",
+          "transactionType": "Tipo de comprobante",
+          "project": "Proyecto",
+          "state": "Estado",
+          "issuedAt": "Fecha de emisión",
+          "amount": "Monto",
+          "issuedBy": "Emitido por",
+          "actions": "Acciones"
+        },
+        "filters": {
+          "allStates": "Todos los estados",
+          "startDate": "Desde",
+          "endDate": "Hasta",
+          "type": "Tipo",
+          "allTypes": "Todos los tipos"
+        }
+      }
 }

@@ -37,6 +37,8 @@ import VerifySignature from "../pages/kms/VerifySignature";
 import CreateKey from "../pages/kms/CreateKey";
 import SignDocument from "../pages/kms/SignDocument";
 import RotateKey from "../pages/kms/RotateKey";
+import ListChecks from "../pages/accounting-vouchers/ListChecks";
+
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -133,8 +135,32 @@ export function AppRouter() {
           <Route path="/" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
           <Route path="/dashboard" element={<ModuleRouteGuard moduleCode="DASHBOARD"><Dashboard /></ModuleRouteGuard>} />
           <Route path="/profile" element={<ModuleRouteGuard moduleCode="PROFILE"><Profile /></ModuleRouteGuard>} />
-          <Route path="/audit" element={<ModuleRouteGuard moduleCode="AUDIT"><AuditList /></ModuleRouteGuard>}/>
-          <Route path="audit/errors" element={<ModuleRouteGuard moduleCode="AUDIT"><ErrorList /></ModuleRouteGuard>}/>
+          <Route
+            path="/audit"
+            element={
+              <ModuleRouteGuard moduleCode="AUDIT">
+                <AuditList />
+              </ModuleRouteGuard>
+            }
+          />
+
+          <Route
+            path="audit/errors"
+            element={
+              <ModuleRouteGuard moduleCode="AUDIT">
+                <ErrorList />
+              </ModuleRouteGuard>
+            }
+          />
+
+          <Route
+            path="/accounting-vouchers"
+            element={
+              <ModuleRouteGuard moduleCode="ACCOUNTING_VOUCHERS">
+                <ListChecks />
+              </ModuleRouteGuard>
+            }
+          />
 
           {/* ADMINISTRATION */}
           <Route path="/administration/users" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><UsersList /></ModuleRouteGuard>} />
