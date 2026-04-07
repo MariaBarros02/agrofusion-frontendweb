@@ -13,6 +13,7 @@
         "active": "Activo",
         "inactive": "Inactivo",
         "deleted": "Eliminado",
+        "all": "Todos",
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
@@ -39,7 +40,7 @@
         "roles": "Roles",
         "permissions": "Permisos",
         "create": "Crear registro",
-        "update": "Actualizar registro",
+        "update": "Actualizar",
         "delete": "Eliminar registro",
         "read": "Vizualizar registro(s)",
         "success": "Exitoso",
@@ -288,7 +289,8 @@
         "dateIssuanceDoc": "Fecha de expedición",
         "editFailed": "Hubo un error al actualizar el usuario.",
         "noChanges": "No hay cambios por guardar",
-        "editSuccess": "El usuario fue actualizado correctamente"
+        "editSuccess": "El usuario fue actualizado correctamente",
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo."
     },
     "project": {
         "title": "Gestion de proyectos",
@@ -319,7 +321,9 @@
             "statusUpdateSuccess": "Estado del proyecto actualizado correctamente",
             "statusUpdateError": "Error al actualizar el estado del proyecto",
             "noProjects": "No hay proyectos registrados",
-            "paginationText": "proyectos"
+            "paginationText": "proyectos",
+            "action": "Acción",
+            "edit": "Editar"
         },
         "create": {
             "addProject": "Agregar proyecto",
@@ -329,14 +333,15 @@
             "instanceCode": "Código del proyecto",
             "projectUrl": "URL principal del proyecto",
             "projectName": "Nombre del proyecto",
-            "apiUrlBase": "URL api del proyecto",
+            "apiUrlBase": "URL API del proyecto",
+            "usersApiPath": "Path API usuarios",
             "descriptionPlaceholder": "Breve descripción del proyecto",
             "status": "Estado",
             "imageUpload": "Imagen del proyecto",
             "chooseFiles": "Elegir archivos para subir",
             "dragAndDrop": "o arrástralos y suéltalos aquí",
             "quickAccessModules": "Registro de módulos de acceso rápido",
-            "registerEndpoint": "Registrar endpoint",
+            "registerEndpoint": "Registrar endpoints",
             "endpointSpecDescription": "Descripción",
             "endpointSpecUrl": "Path del endpoint",
             "endpointUrlPlaceholderRolesPath": "Ej. /roles/",
@@ -425,7 +430,9 @@
             "module": "Módulo",
             "moduleName": "Nombre del módulo",
             "moduleBaseUrl": "Ruta",
-            "moduleBaseUrlPlaceholder": "Ej. https://inmero.co/disriego/notification",
+            "moduleBaseUrlPlaceholder1": "Ej. /notification",
+            "moduleBaseUrlPlaceholder2": "Ej. /alerts",
+            "moduleBaseUrlPlaceholder3": "Ej. /reports",
             "moduleIcon": "Icono",
             "moduleSelectIcon": "Seleccionar icono",
             "moduleDescription": "Descripción del módulo",
@@ -435,7 +442,20 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
+        },
+        "edit": {
+            "title": "Editar proyecto",
+            "description": "Modifica la información del proyecto externo.",
+            "loading": "Cargando datos del proyecto...",
+            "loadError": "Error al cargar los datos del proyecto.",
+            "success": "Proyecto actualizado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para editar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo actualizar el proyecto."
         }
     },
     "module": {
@@ -551,7 +571,8 @@
         "createdAt": "Fecha de creación",
         "actions": "Acciones",
         "viewDetail": "Ver detalle",
-        "users": "usuarios"
+        "users": "usuarios",
+        "notPerm": "No tienes permisos para listar usuarios."
     },
     "createUser": {
         "title": "Registro de usuario",
@@ -623,7 +644,8 @@
         "factorDoubleAuth": "Factor de doble autenticación",
         "updating": "Actualizando...",
         "mfaUpdateSuccess": "Se ha actualizado el estado de doble factor de autenticación del usuario correctamente",
-        "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario"
+        "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario",
+        "notPerm": "No tienes permisos para listar tu perfil."
     },
     "accountActivation": {
         "resetPassword": "Establece una nueva contraseña",
@@ -652,7 +674,8 @@
         "deleteFDescription": "Esta acción desactivará al usuario",
         "deleteSDescription": "Podrás reactivarlo más adelante.",
         "confirmDeleted": "Confirmar eliminación",
-        "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema."
+        "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema.",
+        "notPerm": "No tienes permisos para ver detalles de usuarios."
     },
     "permissions": {
         "title": "Gestión de permisos",

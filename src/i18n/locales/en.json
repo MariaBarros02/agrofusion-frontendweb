@@ -12,6 +12,8 @@
         "state": "Status",
         "active": "Active",
         "inactive": "Inactive",
+        "deleted": "Deleted",
+        "all": "All",
         "filterActive": "Active filters",
         "filterReset": "Reset filters",
         "cancel": "Cancel",
@@ -39,7 +41,7 @@
         "roles": "Roles",
         "permissions": "Permissions",
         "create": "Create record",
-        "update": "Update record",
+        "update": "Update",
         "delete": "Delete record",
         "read": "View record(s)",
         "success": "Success",
@@ -318,7 +320,9 @@
             "statusUpdateSuccess": "Project status updated successfully",
             "statusUpdateError": "Error updating project status",
             "noProjects": "No registered projects",
-            "paginationText": "projects"
+            "paginationText": "projects",
+            "action": "Action",
+            "edit": "Edit"
         },
         "create": {
             "addProject": "Add project",
@@ -329,6 +333,7 @@
             "projectUrl": "Project main URL",
             "projectName": "Project name",
             "apiUrlBase": "Project API URL",
+            "usersApiPath": "Path API users",
             "descriptionPlaceholder": "Brief project description",
             "status": "Status",
             "imageUpload": "Project image",
@@ -434,6 +439,13 @@
             "errorModulesCount": "You must register exactly three quick access modules for the project.",
             "errorNoPermission": "Unauthorized action. You do not have permission to register projects.",
             "errorGeneric": "Something went wrong. The project could not be registered."
+        },
+        "edit": {
+            "title": "Edit project",
+            "description": "Modify the external project information.",
+            "loading": "Loading project data...",
+            "loadError": "Error loading project data.",
+            "success": "Project updated successfully."
         }
     },
     "module": {

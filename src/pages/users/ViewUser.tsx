@@ -7,21 +7,19 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
+  changeUserStatusService,
   deleteUserService,
-  getExternalProjects,
   getUserDetailsService,
 } from "../../services/agrofusion/auth.service";
 import type { ListUserResponse } from "../../dto/response/listUsers-response.dto";
-import {
-  handleChangeUserStatusEP,
-  handleGetUserByEmailEP,
-} from "../../services/orchestrator/userOrchestrator.services";
+import { projectsLinks } from "../../services/orchestrator/userOrchestrator.services";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
-import { projectsLinks } from "../../services/orchestrator/authOrchestrator.service";
 import ModuleInactive from "../ModuleInactive";
 import { useModuleAccessStore } from "../../store/moduleAccess.store";
 import SubmoduleInactive from "../SubmoduleInactive";
 import { useSubmoduleAccessStore } from "../../store/submoduleAccess.store";
+import type { AlertState } from "../../components/layout/AlertSimple";
+import AlertSimple from "../../components/layout/AlertSimple";
 
 const ViewUser = () => {
   const { t } = useTranslation();
@@ -33,7 +31,8 @@ const ViewUser = () => {
   const [deletingUser, setDeletingUser] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastData[]>([]);
-
+  const [alert, setAlert] = useState<AlertState>(null);
+  const [notPerm, setNotPerm] = useState(false);
   const formatDate = (isoDate: string) => {
     return new Date(isoDate).toLocaleDateString("es-CO");
   };
@@ -43,8 +42,12 @@ const ViewUser = () => {
       setLoading(true);
       const response = await getUserDetailsService(userId || "");
       setUserDetails(response);
-    } catch (error) {
-      console.log(error);
+    } catch (error:any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotPerm(true);
+        return;
+      }
       setError("Error al cargar detalles de usuario");
     } finally {
       setLoading(false);
@@ -55,8 +58,19 @@ const deleteUser = async () => {
 
   try {
     await deleteUserService(userId || "");
-  } catch (error) {
-    console.log(error)
+  } catch (error:any) {
+       const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+        if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          console.log("Error de permisos insuficientes");
+          setAlert({
+            message: t(`errors.${errorCode}`),
+            type:
+              errorCode === "AUTH_INSUFFICIENT_PERMISSIONS"
+                ? "warning"
+                : "error",
+          });
+          return
+        }
     setToasts((prev) => [
         ...prev,
         {
@@ -70,63 +84,30 @@ const deleteUser = async () => {
   }
   try {
     setLoading(true);
-    
-    const data = await getExternalProjects();
 
-    const { users: externalUsersResponse, errors: getUserErrors } =
-      await handleGetUserByEmailEP(
-        userDetails?.email || "",
-        data,
-      );
+    // El backend orquesta CHANGE_USER_STATUS en proyectos externos
+    if (userDetails?.email && userId) {
+      const statusResponse = await changeUserStatusService({
+        user_id: userId,
+        email: userDetails.email,
+        new_status: 3, // DELETED
+      });
 
-    // Mostrar errores de búsqueda externa
-    getUserErrors.forEach((err) => {
-      const link = projectsLinks[err.project];
-
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: err.messageKey,
-          messageParams: err.messageParams,
-          type: err.type ?? "error",
-          ...(link ?? {}),
-        },
-      ]);
-    });
-
-    // Cambiar estado externo
-    const changeResults = await Promise.all(
-      Object.entries(externalUsersResponse).map(([service, user]) =>
-        handleChangeUserStatusEP(
-          {
-            user_id: user.id,
-            new_status: 3,
-          },
-          data.filter((p) => p.instance_code === service),
-        ),
-      ),
-    );
-
-    // Mostrar errores de cambio de estado
-    changeResults.forEach(({ errors }) => {
-      errors.forEach((err) => {
-        const link = projectsLinks[err.project];
-
+      const syncErrors = (statusResponse as any)?.sync_errors ?? [];
+      syncErrors.forEach((err: { instance_code: string; error: string }) => {
         setToasts((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
-            messageKey: err.messageKey,
-            messageParams: err.messageParams,
-            type: err.type ?? "error",
-            ...(link ?? {}),
+            messageKey: "viewUser.externalStatusSyncError",
+            messageParams: { service: err.instance_code },
+            type: "warning" as const,
+            to: projectsLinks[err.instance_code]?.to,
+            linkText: projectsLinks[err.instance_code]?.linkText ?? "",
           },
         ]);
       });
-    });
-
-    
+    }
 
     getUserDetails();
   } catch (error) {
@@ -167,6 +148,12 @@ const deleteUser = async () => {
         <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 h-1/2">
           {" "}
           <p className="text-3xl font-bold">{t("viewUser.error")}</p>{" "}
+        </div>
+      )}{" "}
+      {notPerm && !error && !loading && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm rounded-xl dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("viewUser.notPerm")}</p>{" "}
         </div>
       )}{" "}
       {!loading && !error && !deletingUser && userDetails && (
@@ -266,6 +253,7 @@ const deleteUser = async () => {
           </div>
         </div>
       )}
+       
       <div className="fixed z-50 flex flex-col gap-3 top-4 right-4">
   {toasts.map((toast) => (
     <ToastSimple
@@ -280,6 +268,17 @@ const deleteUser = async () => {
       }
     />
   ))}
+
+   {alert && (
+        <AlertSimple
+          message={t(alert.message)}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => {
+            setAlert(null);
+          }}
+        />
+      )}
 </div>
         </>
       )}
