@@ -211,7 +211,7 @@ const deleteUser = async () => {
               {t("viewUser.editUser")}
             </Button>
             <Button
-              disabled={userDetails?.state == "DELETED"}
+              disabled={userDetails?.state == "DELETED" || userDetails?.user_id === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}
               onClick={() => setDeletingUser(true)}
               color="red"
             >
@@ -243,7 +243,7 @@ const deleteUser = async () => {
               </Button>
               <Button
                 type="button"
-                disabled={userDetails?.state == "DELETED"}
+                disabled={userDetails?.state == "DELETED" || userDetails?.user_id === "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}
                 color="red"
                 onClick={() => deleteUser()}
               >
