@@ -37,7 +37,14 @@ import {
   listUsersService,
   listOriginsService,
   listEventsService,
+  createAuditExportService,
+  getAuditExportService,
 } from "../../services/agrofusion/audit.service";
+import { env } from "../../config/env";
+import type {
+  CreateAuditExportRequest,
+  ExportFormat,
+} from "../../dto/request/createAuditExport-request.dto";
 
 // Tipos para request al backend
 import type { ListAuditRequest } from "../../dto/request/listAudit-request.dto";
@@ -153,6 +160,58 @@ const AuditList = () => {
   //Rango de fechas
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("CSV");
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportMsg, setExportMsg] = useState<string | null>(null);
+  const [exportSuccess, setExportSuccess] = useState<{
+    exportId: string;
+    token: string;
+    filename: string;
+    hash: string;
+    records: number;
+  } | null>(null);
+  const [redownloadBusy, setRedownloadBusy] = useState(false);
+
+  const EXPORT_EXT: Record<ExportFormat, string> = {
+    CSV: "csv",
+    XLSX: "xlsx",
+    JSONL: "jsonl",
+    PDF: "pdf",
+  };
+
+  const FORMAT_OPTIONS: {
+    id: ExportFormat;
+    labelKey: string;
+    descKey: string;
+    accent: string;
+  }[] = [
+    { id: "CSV", labelKey: "audit.export.fmtCsv", descKey: "audit.export.fmtCsvDesc", accent: "from-sky-500/15 to-sky-600/5 ring-sky-400/40" },
+    { id: "XLSX", labelKey: "audit.export.fmtXlsx", descKey: "audit.export.fmtXlsxDesc", accent: "from-emerald-500/15 to-emerald-600/5 ring-emerald-400/40" },
+    { id: "JSONL", labelKey: "audit.export.fmtJsonl", descKey: "audit.export.fmtJsonlDesc", accent: "from-violet-500/15 to-violet-600/5 ring-violet-400/40" },
+    { id: "PDF", labelKey: "audit.export.fmtPdf", descKey: "audit.export.fmtPdfDesc", accent: "from-rose-500/15 to-rose-600/5 ring-rose-400/40" },
+  ];
+
+  const downloadExportFile = async (
+    exportId: string,
+    token: string,
+    filename: string
+  ) => {
+    const base = (env.VITE_API_AUDIT_AF_URL || "").replace(/\/$/, "");
+    const url = `${base}/audit/exports/${exportId}/download?token=${encodeURIComponent(token)}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error("DOWNLOAD_FAILED");
+    }
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  };
 
 // Definición de columnas para la tabla de auditoría
   const columns: Column<AuditEvent>[] = [
@@ -340,6 +399,96 @@ useEffect(() => {
     setPage(1);
   };
 
+  const mapOutcomesForExport = (): string[] | undefined => {
+    if (!result) return undefined;
+    const r = result.toUpperCase();
+    if (r === "SUCCESS") return ["success"];
+    if (r === "FAILED" || r === "FAILURE") return ["failed"];
+    return [result.toLowerCase()];
+  };
+
+  const handleAuditExport = async () => {
+    setExportMsg(null);
+    setExportSuccess(null);
+    setExportBusy(true);
+    try {
+      const body: CreateAuditExportRequest = {
+        format: exportFormat,
+        priority: "normal",
+        export_name: `Informe auditoría ${new Date().toISOString().slice(0, 10)}`,
+        date_from: startDate ? startDate.toISOString() : undefined,
+        date_to: endDate ? endDate.toISOString() : undefined,
+        user_ids: userId ? [userId] : undefined,
+        module_codes: origin ? [origin] : undefined,
+        action_codes: eventType ? [eventType] : undefined,
+        outcomes: mapOutcomesForExport(),
+        search: debouncedSearch || undefined,
+      };
+      const created = await createAuditExportService(body);
+      setExportMsg(t("audit.export.requested"));
+
+      let settled = false;
+      const maxAttempts = 90;
+      for (let i = 0; i < maxAttempts; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const st = await getAuditExportService(created.export_id);
+        if (st.status === "COMPLETED" && st.download_token) {
+          settled = true;
+          const fname =
+            st.download_filename ||
+            `AgroFusion_Auditoria_${created.export_id.slice(0, 8)}.${EXPORT_EXT[exportFormat]}`;
+          await downloadExportFile(created.export_id, st.download_token, fname);
+          setExportSuccess({
+            exportId: created.export_id,
+            token: st.download_token,
+            filename: fname,
+            hash: st.file_hash ?? "",
+            records: st.actual_records ?? 0,
+          });
+          setExportMsg(t("audit.export.ready"));
+          break;
+        }
+        if (st.status === "FAILED") {
+          settled = true;
+          setExportMsg(st.error_message || t("audit.export.failed"));
+          break;
+        }
+        if (i % 5 === 0) {
+          setExportMsg(t("audit.export.polling"));
+        }
+      }
+      if (!settled) {
+        setExportMsg(t("audit.export.timeout"));
+      }
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: { code?: string } } } };
+      const code = e.response?.data?.detail?.code;
+      if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setExportMsg(t("audit.export.forbidden"));
+      } else {
+        setExportMsg(t("audit.export.failed"));
+      }
+    } finally {
+      setExportBusy(false);
+    }
+  };
+
+  const handleRedownload = async () => {
+    if (!exportSuccess) return;
+    setRedownloadBusy(true);
+    try {
+      await downloadExportFile(
+        exportSuccess.exportId,
+        exportSuccess.token,
+        exportSuccess.filename
+      );
+    } catch {
+      setExportMsg(t("audit.export.failed"));
+    } finally {
+      setRedownloadBusy(false);
+    }
+  };
+
   // Control de acceso 
   const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
   useSubmoduleAccessStore((s) => s.loaded);
@@ -394,6 +543,123 @@ useEffect(() => {
         applyFilters={applyFilters}
         resetFilters={resetFilters}
       />
+
+      {showContent && !notListPerm && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white shadow-md dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
+          <div className="border-b border-emerald-100/90 bg-emerald-600/10 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-900/20">
+            <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
+              {t("audit.export.title")}
+            </h3>
+            <p className="mt-1 text-sm text-emerald-800/80 dark:text-emerald-200/70">
+              {t("audit.export.subtitle")}
+            </p>
+          </div>
+          <div className="p-5 space-y-5">
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {t("audit.export.format")}
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {FORMAT_OPTIONS.map((opt) => {
+                  const active = exportFormat === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      disabled={exportBusy}
+                      onClick={() => setExportFormat(opt.id)}
+                      className={`rounded-xl border bg-gradient-to-br p-3 text-left transition-all ring-2 ring-transparent ${
+                        opt.accent
+                      } ${
+                        active
+                          ? "border-emerald-500 shadow-md ring-emerald-500/50 dark:border-emerald-400"
+                          : "border-slate-200/90 opacity-90 hover:border-emerald-300 hover:shadow dark:border-slate-600"
+                      } disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <span className="block text-sm font-bold text-slate-800 dark:text-slate-100">
+                        {t(opt.labelKey)}
+                      </span>
+                      <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                        {t(opt.descKey)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void handleAuditExport()}
+                disabled={exportBusy}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-55"
+              >
+                {exportBusy && (
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                )}
+                {exportBusy ? t("audit.export.polling") : t("audit.export.run")}
+              </button>
+              {exportMsg && !exportSuccess && (
+                <span className="text-sm text-slate-600 dark:text-slate-300">{exportMsg}</span>
+              )}
+            </div>
+
+            {exportSuccess && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                      {t("audit.export.ready")}
+                    </p>
+                    <p className="mt-0.5 text-xs text-emerald-800/80 dark:text-emerald-200/80">
+                      {exportSuccess.records} {t("audit.export.records")} ·{" "}
+                      <span className="font-mono">{exportSuccess.filename}</span>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleRedownload()}
+                    disabled={redownloadBusy}
+                    className="rounded-lg border border-emerald-600 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm hover:bg-emerald-50 dark:border-emerald-500 dark:bg-emerald-900/50 dark:text-emerald-100 dark:hover:bg-emerald-900"
+                  >
+                    {redownloadBusy ? t("audit.export.downloading") : t("audit.export.download")}
+                  </button>
+                </div>
+                <div className="mt-3 rounded-lg bg-white/90 px-3 py-2 dark:bg-gray-900/60">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {t("audit.export.hashHint")}
+                  </p>
+                  <p className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-200">
+                    {exportSuccess.hash || "—"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {showModuleInactive && <ModuleInactive />}
 
       {showContent && (

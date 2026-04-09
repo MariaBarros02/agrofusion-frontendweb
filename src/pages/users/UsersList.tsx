@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useEffect, useState } from "react";
@@ -37,6 +38,7 @@ const UsersList = () => {
   // estado de paginación
   const [page, setPage] = useState(1);
   const [size] = useState(5);
+  const [notPerm, setNotPerm] = useState(false);
 
   // filtros
   const [search, setSearch] = useState("");
@@ -135,8 +137,12 @@ const UsersList = () => {
       const response = await listUsersService(payload);
       setPaginatedUsers(response);
       setPage(pageParam);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {    
+      const errorCode = err.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+      if (errorCode === "AUTH_INSUFFICIENT_PERMISSIONS") {
+        setNotPerm(true);
+        return;
+      }
       setError("Error loading users");
     } finally {
       setLoading(false);
@@ -257,6 +263,12 @@ const UsersList = () => {
               <p className="text-3xl font-bold">{t("users.loading")}</p>
             </div>
           )}
+             {notPerm && !error && !loading && (
+        <div className="flex items-center justify-center mt-3 bg-white border shadow-sm rounded-xl dark:border-gray-600 dark:bg-gray-700 h-1/2">
+          {" "}
+          <p className="text-3xl font-bold">{t("users.notPerm")}</p>{" "}
+        </div>
+      )}{" "}
           {!loading && error && (
             <div className="flex items-center justify-center mt-3 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl h-1/2">
               <p className="text-3xl font-bold">{t("users.error")}</p>

@@ -14,6 +14,7 @@ import type { SubmoduleListResponse } from "../../dto/response/submoduleList-res
 import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
 import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
+import type { CreateProjectRequest } from "../../dto/request/createProject-request.dto";
 
 
 /**
@@ -84,6 +85,30 @@ export const updateProjectStatusService = async (
   status: string
 ) => {
   const { data } = await authApi.updateProjectStatus(projectId, status);
+  return data;
+};
+
+/**
+ * Crea un nuevo proyecto externo con sus módulos y endpoints.
+ */
+export const createProjectService = async (payload: CreateProjectRequest) => {
+  const { data } = await authApi.createProject(payload);
+  return data;
+};
+
+/**
+ * Obtiene los datos de un proyecto en formato de formulario (para el edit).
+ */
+export const getProjectFormDataService = async (projectId: string) => {
+  const { data } = await authApi.getProjectFormData(projectId);
+  return data;
+};
+
+/**
+ * Actualiza un proyecto externo existente.
+ */
+export const updateProjectService = async (projectId: string, payload: CreateProjectRequest) => {
+  const { data } = await authApi.updateProject(projectId, payload);
   return data;
 };
 

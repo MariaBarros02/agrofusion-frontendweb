@@ -28,6 +28,18 @@ interface ActionConfig<T> {
   disabled?: (row: T) => boolean;
 }
 
+const statusColors: Record<string, string> = {
+  ACTIVE: "bg-green-500 text-white",
+  INACTIVE: "bg-amber-400 text-black",
+  DELETED: "bg-red-500 text-white",
+
+  PENDING: "bg-orange-400 text-white",
+  PROCESSING: "bg-blue-500 text-white",
+  SENT: "bg-green-500 text-white",
+  FAILED: "bg-red-500 text-white",
+  CANCELLED: "bg-gray-500 text-white",
+};
+
 interface SingleActionColumn<T> extends BaseColumn<T> {
   type: "action";
   action: ActionConfig<T>;
@@ -80,13 +92,6 @@ interface DataTableProps<T> {
 // STATUS UI
 // =============================
 
-const statusColors: Record<string, string> = {
-  ACTIVE: "bg-green-500 text-white",
-  DELETED: "bg-red-500 text-white",
-  INACTIVE: "bg-amber-400 text-black",
-  PENDING: "bg-orange-100 text-orange-700",
-};
-
 function StatusBadge({
   value,
   label,
@@ -100,7 +105,7 @@ function StatusBadge({
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 ${color}`}
+      className={`inline-flex min-w-[92px] justify-center rounded-full px-3 py-1 text-xs font-semibold ${color}`}
     >
       {label}
       {showChevron && <ChevronDown size={20} />}
@@ -381,7 +386,7 @@ export default function DataTable<T extends Record<string, any>>({
         <div className="ml-3 text-gray-600">
           {t("common.showing")}{" "}
           <strong>{(data.page - 1) * data.size + 1}</strong> -{" "}
-          <strong>{Math.min(data.page * data.size, data.total)}</strong> de{" "}
+          <strong>{Math.min(data.page * data.size, data.total)}</strong> {t("common.of")}{" "}
           <strong>{data.total}</strong> {paginationText ?? ""}
         </div>
       </div>
