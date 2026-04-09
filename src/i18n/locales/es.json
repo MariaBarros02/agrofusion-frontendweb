@@ -886,6 +886,7 @@
         "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
         "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
         "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema.",
+        "EXT_PROJECT_DELETED_IMMUTABLE": "Un proyecto eliminado no puede activarse ni cambiarse de estado.",
         "KEY_NOT_FOUND": "No se encontró la clave indicada.",
         "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
         "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",

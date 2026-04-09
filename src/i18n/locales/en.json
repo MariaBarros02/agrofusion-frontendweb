@@ -872,6 +872,7 @@
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
         "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
         "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system.",
+        "EXT_PROJECT_DELETED_IMMUTABLE": "A deleted project cannot be activated or have its status changed.",
         "KEY_NOT_FOUND": "The specified key was not found.",
         "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
         "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
