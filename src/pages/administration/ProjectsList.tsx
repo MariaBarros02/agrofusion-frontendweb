@@ -82,6 +82,7 @@ const ProjectsList = () => {
       label: t("common.state"),
       type: "statusEditable",
       allowedStatuses: ["ACTIVE", "INACTIVE", "DELETED"],
+      statusChangeDisabled: (project) => project.status === "DELETED",
       onChange: (project, newStatus) => {
         setPendingStatusChange({ project, newStatus });
       },
@@ -190,6 +191,13 @@ const ProjectsList = () => {
             errorMessage == "AUTH_INSUFFICIENT_PERMISSIONS"
               ? "warning"
               : "error",
+        });
+        return;
+      }
+      if (errorMessage === "EXT_PROJECT_DELETED_IMMUTABLE") {
+        setAlert({
+          message: t("errors.EXT_PROJECT_DELETED_IMMUTABLE"),
+          type: "error",
         });
         return;
       }
