@@ -3,6 +3,8 @@ import type { ListAuditRequest } from "../../dto/request/listAudit-request.dto";
 import type { ListAuditResponse } from "../../dto/response/listAudit-response.dto";
 import type { ListErrorsRequest } from "../../dto/request/listErrors-request.dto";
 import type { ListErrorsResponse } from "../../dto/response/listErrors-response.dto";
+import type { CreateAuditExportRequest } from "../../dto/request/createAuditExport-request.dto";
+import type { AuditExportJobResponse } from "../../dto/response/auditExport-response.dto";
 /**
  * Define la estructura de datos para el registro de errores en proyectos externos (PE).
  * Se utiliza para auditar fallos de sincronización, errores de red o excepciones de lógica.
@@ -140,4 +142,25 @@ export const listErrorCodesService = async () => {
     console.error("Error fetching error codes:", error);
     throw error;
   }
+};
+
+export const createAuditExportService = async (
+  payload: CreateAuditExportRequest
+): Promise<AuditExportJobResponse> => {
+  const { data } = await auditApi.createAuditExport(payload);
+  return data;
+};
+
+export const getAuditExportService = async (
+  exportId: string
+): Promise<AuditExportJobResponse> => {
+  const { data } = await auditApi.getAuditExport(exportId);
+  return data;
+};
+
+export const listAuditExportsService = async (
+  limit?: number
+): Promise<AuditExportJobResponse[]> => {
+  const { data } = await auditApi.listAuditExports({ limit });
+  return data;
 };

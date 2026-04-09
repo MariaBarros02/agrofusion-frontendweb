@@ -15,7 +15,7 @@ import {
   TextInput,
   ToggleSwitch,
 } from "flowbite-react";
-//import { createProjectService } from "../../services/agrofusion/auth.service";
+import { createProjectService } from "../../services/agrofusion/auth.service";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import type { AlertState } from "../../components/layout/AlertSimple";
@@ -142,14 +142,12 @@ const AddProject = () => {
       setLoading(true);
       setAlert(null);
       try {
-        // await createProjectService({
-        //   ...values,
-        // });
-        // setAlert({
-        //   message: "project.create.success",
-        //   type: "success",
-        //   to: "/administration/projects",
-        // });
+        await createProjectService(values);
+        setAlert({
+          message: "project.create.success",
+          type: "success",
+          to: "/administration/projects",
+        });
       } catch (err: any) {
         const code = err.response?.data?.detail?.code;
         if (code === "EXTERNAL_PROJECT_INSTANCE_CODE_EXISTS") {
@@ -162,6 +160,10 @@ const AddProject = () => {
         }
         if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
           setAlert({ message: "project.create.errorNoPermission", type: "warning" });
+          return;
+        }
+        if (code === "EXT_URL_NOT_REACHABLE") {
+          setAlert({ message: "project.create.errorUrlNotReachable", type: "error" });
           return;
         }
         setAlert({ message: "project.create.errorGeneric", type: "error" });
@@ -230,9 +232,9 @@ const AddProject = () => {
         <Label className="text-gray-700 dark:text-gray-300">
           {t(`project.create.${labelKey}`)}
         </Label>
-        <div className="mt-2 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+        <div className="mt-2 overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-600">
           <table className="w-full min-w-[420px] table-fixed text-left text-sm">
-            <thead className="bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+            <thead className="text-sm font-semibold text-gray-700 bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
               <tr>
                 <th className="w-[30%] px-3 py-2">{t("project.create.endpointResponseBodyName")}</th>
                 <th className="w-[45%] px-3 py-2">{t("project.create.endpointResponseBodyKey")}</th>
@@ -608,7 +610,7 @@ const AddProject = () => {
               >
                 {PROJECT_EXTERNAL_ENDPOINT_SPECS.map((spec, index) => (
                   <AccordionPanel key={spec.title}>
-                    <AccordionTitle className="text-left text-sm font-medium focus:ring-0 dark:text-white">
+                    <AccordionTitle className="text-sm font-medium text-left focus:ring-0 dark:text-white">
                       {t(`project.create.${spec.title}`)}
                     </AccordionTitle>
                     <AccordionContent>
@@ -622,7 +624,7 @@ const AddProject = () => {
                           </p>
                         </div>
                         <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-end">
-                          <div className="min-w-0 flex-1">
+                          <div className="flex-1 min-w-0">
                             <Label className="text-gray-700 dark:text-gray-300">
                               {t("project.create.endpointSpecUrl")} <span className="text-red-500">*</span>
                             </Label>
@@ -701,7 +703,7 @@ const AddProject = () => {
               <Button
                 type="submit"
                 color="blue"
-                disabled={loading || !formik.isValid}
+                disabled={loading }
               >
                 <FiSave className="inline mr-2" size={18} />
                 {t("example.save")}

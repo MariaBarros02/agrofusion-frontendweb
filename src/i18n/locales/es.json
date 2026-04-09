@@ -47,7 +47,12 @@
         "rejected": "Rechazado",
         "High": "Alto",
         "applyFilters": "Aplicar filtros",
-        "resetFilters": "Reiniciar"
+        "resetFilters": "Reiniciar",
+        "processing": "Procesando",
+        "sent": "Enviado",
+        "failed": "Fallido",
+        "cancelled": "Cancelado",
+        "of": "de"
     },
     "theme": {
         "dark": "Modo oscuro",
@@ -442,6 +447,7 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         },
         "edit": {
@@ -449,7 +455,12 @@
             "description": "Modifica la información del proyecto externo.",
             "loading": "Cargando datos del proyecto...",
             "loadError": "Error al cargar los datos del proyecto.",
-            "success": "Proyecto actualizado correctamente."
+            "success": "Proyecto actualizado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para editar proyectos.",
+            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo actualizar el proyecto."
         }
     },
     "module": {
@@ -947,6 +958,30 @@
             "audit": "Auditoría AgroFusión",
             "errors": "Errores proyectos externos"
         },
+        "export": {
+            "title": "Exportación de informe",
+            "subtitle": "Genera un archivo con los mismos filtros de la tabla. La descarga usa un enlace seguro temporal.",
+            "format": "Formato",
+            "run": "Generar informe",
+            "requested": "Solicitud registrada. Generando en segundo plano…",
+            "polling": "Procesando…",
+            "ready": "Informe listo",
+            "failed": "Exportación fallida",
+            "forbidden": "Sin permiso para exportar",
+            "hashHint": "SHA-256 (integridad)",
+            "records": "registros",
+            "download": "Descargar archivo",
+            "downloading": "Descargando…",
+            "fmtCsv": "CSV",
+            "fmtCsvDesc": "Excel, hojas de cálculo",
+            "fmtXlsx": "Excel",
+            "fmtXlsxDesc": "Tabla con estilos",
+            "fmtJsonl": "JSONL",
+            "fmtJsonlDesc": "Línea por evento",
+            "fmtPdf": "PDF",
+            "fmtPdfDesc": "Informe para archivo",
+            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde."
+        },
         "SESSIONS":"Sesiones",
         "TOKENS": "Tokens",
         "USERS": "Usuarios",
@@ -999,5 +1034,33 @@
             "code": "Código",
             "all": "Todos"
         }
-    }
+    },
+    "checks": {
+        "title": "Comprobantes",
+        "description": "Consulta y validación de comprobantes generados por las integraciones del sistema",
+        "loading": "Cargando datos de comprobantes...",
+        "error": "Error cargando comprobantes",
+        "noChecks": "No hay comprobantes",
+        "pagination": "Comprobantes",
+        "searchPlaceholder": "Buscar por id, proyecto o emitido por",
+        "view": "Ver detalle",
+        "export": "Exportar",
+        "columns": {
+          "id": "ID",
+          "transactionType": "Tipo de comprobante",
+          "project": "Proyecto",
+          "state": "Estado",
+          "issuedAt": "Fecha de emisión",
+          "amount": "Monto",
+          "issuedBy": "Emitido por",
+          "actions": "Acciones"
+        },
+        "filters": {
+          "allStates": "Todos los estados",
+          "startDate": "Desde",
+          "endDate": "Hasta",
+          "type": "Tipo",
+          "allTypes": "Todos los tipos"
+        }
+      }
 }
