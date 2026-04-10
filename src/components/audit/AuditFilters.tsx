@@ -16,7 +16,7 @@ interface Origin {
 
 interface Event {
   code: string;
-  label: string;
+  label?: string;
 }
 
 interface Props {
@@ -112,10 +112,10 @@ const AuditFilters = ({
   const baseKey = type === "audit" ? "audit" : "externalErrors";
 
   return (
-    <div className="p-5 mb-3 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="p-3 mb-3 bg-white border shadow-sm sm:p-4 dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
+      <div className="grid min-w-0 grid-cols-1 justify-items-center gap-x-2 gap-y-1.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 xl:justify-items-stretch">
         {/* Buscar */}
-        <div className="flex flex-col w-full lg:col-start-1 lg:row-start-1">
+        <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-1 xl:row-start-1">
           <Label>{t(`${baseKey}.filters.search`)}</Label>
           <TextInput
             icon={HiSearch}
@@ -128,7 +128,7 @@ const AuditFilters = ({
         </div>
 
         {/* Fecha */}
-        <div className="flex flex-col w-full lg:col-start-1 lg:row-start-2">
+        <div className="flex flex-col min-w-0 w-full max-w-xs [&_.react-datepicker-wrapper]:w-full [&_.react-datepicker__input-container]:w-full xl:max-w-none xl:col-start-1 xl:row-start-2">
           <Label>{t(`${baseKey}.filters.date`)}</Label>
 
           <DatePicker
@@ -142,7 +142,7 @@ const AuditFilters = ({
             }}
             isClearable
             placeholderText={t(`${baseKey}.filters.dateRange`)}
-            className="w-full text-sm h-[34px] px-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+            className="w-full min-w-0 text-sm h-[34px] px-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
           />
         </div>
 
@@ -150,7 +150,7 @@ const AuditFilters = ({
         {type === "audit" && (
           <>
             {/* Usuario */}
-            <div className="relative flex-col w-full first-line:flex lg:col-start-2 lg:row-start-1">
+            <div className="relative flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-1">
               <Label>{t(`${baseKey}.filters.user`)}</Label>
 
               <TextInput
@@ -183,7 +183,7 @@ const AuditFilters = ({
             </div>
 
             {/* Origen */}
-            <div className="flex flex-col w-full lg:col-start-3 lg:row-start-1">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-3 xl:row-start-1">
               <Label>{t("audit.filters.origin")}</Label>
 
               <Select
@@ -202,7 +202,7 @@ const AuditFilters = ({
             </div>
 
             {/* Resultado */}
-            <div className="flex flex-col w-full lg:col-start-2 lg:row-start-2">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-2">
               <Label>{t("audit.filters.result")}</Label>
 
               <Select
@@ -217,7 +217,7 @@ const AuditFilters = ({
             </div>
 
             {/* Evento */}
-            <div className="flex flex-col w-full lg:col-start-4 lg:row-start-1">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-4 xl:row-start-1">
               <Label className="text-sm font-medium">
                 {t("audit.filters.event")}
               </Label>
@@ -232,7 +232,7 @@ const AuditFilters = ({
 
                 {events.map((event) => (
                   <option key={event.code} value={event.code}>
-                    {event.label}
+                    {event.label ?? event.code}
                   </option>
                 ))}
               </Select>
@@ -244,7 +244,7 @@ const AuditFilters = ({
         {type === "errors" && (
           <>
             {/* Proyecto */}
-            <div className="flex flex-col w-full lg:col-start-2 lg:row-start-1">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-1">
               <Label>{t("externalErrors.filters.project")}</Label>
               <TextInput
                 sizing="sm"
@@ -255,7 +255,7 @@ const AuditFilters = ({
             </div>
 
             {/* Severidad */}
-            <div className="flex flex-col w-full lg:col-start-3 lg:row-start-1">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-3 xl:row-start-1">
               <Label>{t("externalErrors.filters.severity")}</Label>
 
               <Select
@@ -275,7 +275,7 @@ const AuditFilters = ({
             </div>
 
             {/* Componente */}
-            <div className="flex flex-col w-full lg:col-start-4 lg:row-start-1">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-4 xl:row-start-1">
               <Label>{t("externalErrors.filters.component")}</Label>
               <Select
                 sizing="sm"
@@ -293,7 +293,7 @@ const AuditFilters = ({
             </div>
 
             {/* Código */}
-            <div className="flex flex-col w-full lg:col-start-2 lg:row-start-2">
+            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-2">
               <Label>{t("externalErrors.filters.code")}</Label>
               <Select
                 sizing="sm"
@@ -313,7 +313,7 @@ const AuditFilters = ({
         )}
 
         {/* Botones */}
-        <div className="flex items-end justify-end gap-2 lg:col-start-3 lg:col-span-2 lg:row-start-2">
+        <div className="flex flex-wrap items-end justify-center gap-2 md:col-span-2 xl:col-start-3 xl:row-start-2">
           <Button size="xs" onClick={applyFilters} color="alternative">
             <FiFilter size={18} /> {t("common.applyFilters")}
           </Button>
