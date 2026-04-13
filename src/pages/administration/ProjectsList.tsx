@@ -28,6 +28,7 @@ import {
   FiEdit2,
   FiFilter,
   FiFlag,
+  FiLink2,
   FiMinusCircle,
   FiTrash2,
 } from "react-icons/fi";
@@ -111,6 +112,16 @@ const ProjectsList = () => {
           disabled: (project) => project.status === "DELETED",
           onClick: (project) =>
             navigate(`/administration/projects/edit/${project.external_project_id}`),
+        },
+        {
+          label: t("project.list.accountingEndpoints"),
+          icon: <FiLink2 />,
+          className: "bg-slate-700 text-white hover:bg-slate-600",
+          disabled: (project) => project.status === "DELETED",
+          onClick: (project) =>
+            navigate(
+              `/administration/projects/${project.external_project_id}/accounting-endpoints`,
+            ),
         },
       ],
     },
