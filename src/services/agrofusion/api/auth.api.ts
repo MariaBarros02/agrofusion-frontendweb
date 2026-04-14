@@ -25,6 +25,10 @@ import type { EditRoleRequest } from "../../../dto/request/editRole-request.dto"
 import type { CreateRoleRequest } from "../../../dto/request/createRole-request-dto";
 import type { ListBasicRole } from "../../../dto/response/listBasicRoles-response.dto";
 import type { ExternalProjectDetailResponse } from "../../../dto/response/externalProjectDetail-response.dto";
+import type { ProjectAccountingEndpointsRequest } from "../../../dto/request/projectAccountingEndpoints-request.dto";
+import type { CreateProjectAccountingInfoEndpointRequest } from "../../../dto/request/createProjectAccountingInfoEndpoint-request.dto";
+import type { AccountingEndpointDetailResponse, PaginatedProjectAccountingEndpointsResponse } from "../../../dto/response/projectAccountingEndpoints-response.dto";
+import type { ExternalRequestTemplateResponse } from "../../../dto/response/externalRequestTemplate-response.dto";
 
 /**
  * Servicio encargado de las operaciones de autenticación y gestión de usuarios.
@@ -417,6 +421,57 @@ export const authApi = {
    */
   getProjectDetail: (projectId: string) =>
     authAgrofusionAxios.get<ExternalProjectDetailResponse>(`/external-projects/${projectId}`),
+
+  /**
+   * Obtiene el listado paginado de endpoints contables para un proyecto externo.
+   */
+  getProjectAccountingEndpoints: (
+    projectId: string,
+    params?: ProjectAccountingEndpointsRequest,
+  ) =>
+    authAgrofusionAxios.get<PaginatedProjectAccountingEndpointsResponse>(
+      `/external-projects/${projectId}/accounting-endpoints`,
+      { params: params ?? {} },
+    ),
+
+  getExternalRequestTemplates: () =>
+    authAgrofusionAxios.get<ExternalRequestTemplateResponse[]>(
+      "/external-projects/request-templates",
+    ),
+
+  createProjectAccountingEndpoint: (
+    projectId: string,
+    payload: CreateProjectAccountingInfoEndpointRequest,
+  ) =>
+    authAgrofusionAxios.post<{ external_endpoint_id: string; message: string }>(
+      `/external-projects/${projectId}/accounting-endpoints`,
+      payload,
+    ),
+
+  getProjectAccountingEndpointDetail: (projectId: string, endpointId: string) =>
+    authAgrofusionAxios.get<AccountingEndpointDetailResponse>(
+      `/external-projects/${projectId}/accounting-endpoints/${endpointId}`,
+    ),
+
+  updateProjectAccountingEndpoint: (
+    projectId: string,
+    endpointId: string,
+    payload: CreateProjectAccountingInfoEndpointRequest,
+  ) =>
+    authAgrofusionAxios.put<{ external_endpoint_id: string; message: string }>(
+      `/external-projects/${projectId}/accounting-endpoints/${endpointId}`,
+      payload,
+    ),
+
+  deleteProjectAccountingEndpoint: (projectId: string, endpointId: string) =>
+    authAgrofusionAxios.delete<{ message: string }>(
+      `/external-projects/${projectId}/accounting-endpoints/${endpointId}`,
+    ),
+
+  validateAccountingTransferConnection: () =>
+    authAgrofusionAxios.get<{ exists: boolean; message: string }>(
+      "/external-projects/accounting-transfer-connection",
+    ),
 
 };
 

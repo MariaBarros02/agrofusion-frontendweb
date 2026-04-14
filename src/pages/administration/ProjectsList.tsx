@@ -28,6 +28,7 @@ import {
   FiEdit2,
   FiFilter,
   FiFlag,
+  FiLink2,
   FiMinusCircle,
   FiTrash2,
 } from "react-icons/fi";
@@ -82,6 +83,7 @@ const ProjectsList = () => {
       label: t("common.state"),
       type: "statusEditable",
       allowedStatuses: ["ACTIVE", "INACTIVE", "DELETED"],
+      statusChangeDisabled: (project) => project.status === "DELETED",
       onChange: (project, newStatus) => {
         setPendingStatusChange({ project, newStatus });
       },
@@ -90,6 +92,7 @@ const ProjectsList = () => {
       key: "created_at",
       label: t("project.list.createdAt"),
       type: "text",
+      width: "120px",
       format: (value: string) => (value ? value.split("T")[0] : "-"),
     },
     {
@@ -102,6 +105,7 @@ const ProjectsList = () => {
       key: "actions",
       label: t("project.list.action"),
       type: "actions",
+      width: "300px",
       actions: [
         {
           label: t("project.list.edit"),
@@ -110,6 +114,16 @@ const ProjectsList = () => {
           disabled: (project) => project.status === "DELETED",
           onClick: (project) =>
             navigate(`/administration/projects/edit/${project.external_project_id}`),
+        },
+        {
+          label: t("project.list.accountingEndpoints"),
+          icon: <FiLink2 />,
+          className: "dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600",
+          disabled: (project) => project.status === "DELETED",
+          onClick: (project) =>
+            navigate(
+              `/administration/projects/${project.external_project_id}/accounting-endpoints`,
+            ),
         },
       ],
     },
@@ -193,6 +207,13 @@ const ProjectsList = () => {
         });
         return;
       }
+      if (errorMessage === "EXT_PROJECT_DELETED_IMMUTABLE") {
+        setAlert({
+          message: t("errors.EXT_PROJECT_DELETED_IMMUTABLE"),
+          type: "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -224,7 +245,7 @@ const ProjectsList = () => {
 
       {/* Filtros y acción Agregar proyecto */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex flex-wrap items-end gap-2 flex-1 overflow-x-auto">
+        <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
           <div className="w-72">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
@@ -252,7 +273,7 @@ const ProjectsList = () => {
             </Select>
           </div>
         </div>
-        <div className="flex items-end justify-end gap-2 mt-2 md:mt-0 md:ml-4 flex-shrink-0">
+        <div className="flex items-end justify-end flex-shrink-0 gap-2 mt-2 md:mt-0 md:ml-4">
           <Button
             size="xs"
             onClick={() => getProjects()}
@@ -328,18 +349,18 @@ const ProjectsList = () => {
         <ModalHeader as="div">
           <div className="flex items-center gap-3">
             {pendingStatusChange?.newStatus === "DELETED" && (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-red-500">
-                <FiTrash2 className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 bg-red-500 rounded-lg shrink-0">
+                <FiTrash2 className="w-6 h-6 text-white" />
               </div>
             )}
             {pendingStatusChange?.newStatus === "INACTIVE" && (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500">
-                <FiMinusCircle className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 rounded-lg shrink-0 bg-amber-500">
+                <FiMinusCircle className="w-6 h-6 text-white" />
               </div>
             )}
             {pendingStatusChange?.newStatus === "ACTIVE" && (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500">
-                <FiCheckCircle className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-lg shrink-0">
+                <FiCheckCircle className="w-6 h-6 text-white" />
               </div>
             )}
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -376,7 +397,7 @@ const ProjectsList = () => {
                 />
                 <Label
                   htmlFor="confirm-status-change"
-                  className="cursor-pointer text-sm font-normal text-gray-700 dark:text-gray-300"
+                  className="text-sm font-normal text-gray-700 cursor-pointer dark:text-gray-300"
                 >
                   {pendingStatusChange.newStatus === "DELETED"
                     ? t("project.list.deleteCheckbox")
@@ -388,7 +409,7 @@ const ProjectsList = () => {
             </>
           )}
         </ModalBody>
-        <ModalFooter className="border-t pt-4">
+        <ModalFooter className="pt-4 border-t">
           <Button color="gray" onClick={handleCloseModal}>
             {t("common.cancel")}
           </Button>
@@ -423,7 +444,7 @@ const ProjectsList = () => {
           />
         )}
       {/* Toasts de feedback */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="fixed z-50 flex flex-col gap-2 bottom-4 right-4">
         {toasts.map((toast) => (
           <ToastSimple
             key={toast.id}

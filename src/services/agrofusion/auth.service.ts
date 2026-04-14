@@ -15,6 +15,8 @@ import type { listRolesRequest } from "../../dto/request/listRoles-request.dto";
 import type { EditRoleRequest } from "../../dto/request/editRole-request.dto";
 import type { CreateRoleRequest } from "../../dto/request/createRole-request-dto";
 import type { CreateProjectRequest } from "../../dto/request/createProject-request.dto";
+import type { ProjectAccountingEndpointsRequest } from "../../dto/request/projectAccountingEndpoints-request.dto";
+import type { CreateProjectAccountingInfoEndpointRequest } from "../../dto/request/createProjectAccountingInfoEndpoint-request.dto";
 
 
 /**
@@ -530,6 +532,67 @@ export const getBasicListRolesService = async (
  */
 export const getProjectDetailsService = async (projectId: string) => {
   const { data } = await authApi.getProjectDetail(projectId);
+  return data;
+};
+
+/**
+ * Obtiene el listado paginado de endpoints contables de un proyecto externo.
+ */
+export const listProjectAccountingEndpointsService = async (
+  projectId: string,
+  params?: ProjectAccountingEndpointsRequest,
+) => {
+  const { data } = await authApi.getProjectAccountingEndpoints(projectId, params);
+  return data;
+};
+
+export const getExternalRequestTemplatesService = async () => {
+  const { data } = await authApi.getExternalRequestTemplates();
+  return data;
+};
+
+export const createProjectAccountingEndpointService = async (
+  projectId: string,
+  payload: CreateProjectAccountingInfoEndpointRequest,
+) => {
+  const { data } = await authApi.createProjectAccountingEndpoint(projectId, payload);
+  return data;
+};
+
+export const getProjectAccountingEndpointDetailService = async (
+  projectId: string,
+  endpointId: string,
+) => {
+  const { data } = await authApi.getProjectAccountingEndpointDetail(
+    projectId,
+    endpointId,
+  );
+  return data;
+};
+
+export const updateProjectAccountingEndpointService = async (
+  projectId: string,
+  endpointId: string,
+  payload: CreateProjectAccountingInfoEndpointRequest,
+) => {
+  const { data } = await authApi.updateProjectAccountingEndpoint(
+    projectId,
+    endpointId,
+    payload,
+  );
+  return data;
+};
+
+export const deleteProjectAccountingEndpointService = async (
+  projectId: string,
+  endpointId: string,
+) => {
+  const { data } = await authApi.deleteProjectAccountingEndpoint(projectId, endpointId);
+  return data;
+};
+
+export const validateAccountingTransferConnectionService = async () => {
+  const { data } = await authApi.validateAccountingTransferConnection();
   return data;
 };
 
