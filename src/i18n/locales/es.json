@@ -516,7 +516,7 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
-            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
+            "errorUrlNotReachable": "La api de usuario ingresada no es alcanzable. Verifique que este activa e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         },
         "edit": {
@@ -528,7 +528,7 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para editar proyectos.",
-            "errorUrlNotReachable": "Una o más URLs ingresadas no son alcanzables. Verifique que estén activas e inténtelo de nuevo.",
+            "errorUrlNotReachable": "La api de usuario ingresada no es alcanzable. Verifique que este activa e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo actualizar el proyecto."
         }
     },
