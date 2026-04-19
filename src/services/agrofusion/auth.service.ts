@@ -605,3 +605,23 @@ export const changeFDoubleAService = async (
   return data;
 }
 
+export const getAccountingConnectionService = async () => {
+  const { data } = await authApi.getAccountingConnection();
+  return data;
+};
+
+export const createAccountingConnectionService = async (
+  payload: { path: string; method_term_id: string }
+) => {
+  const { data } = await authApi.createAccountingConnection(payload);
+  return data;
+};
+
+export const updateAccountingConnectionService = async (
+  externalEndpointId: string,
+  payload: { path: string; method_term_id: string }
+) => {
+  const { data } = await authApi.updateAccountingConnection(externalEndpointId, payload);
+  return data;
+};
+

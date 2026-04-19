@@ -132,7 +132,7 @@ const AuditList = () => {
     items: [],
     total: 0,
     page: 1,
-    size: 5,
+    size: 10,
     total_pages: 1,
   });
 
@@ -145,7 +145,7 @@ const AuditList = () => {
 
   // Parámetros de paginación
   const [page, setPage] = useState(1);
-  const [size] = useState(5);
+  const [size] = useState(10);
 
   //Filtros principales de búsqueda
   const [search, setSearch] = useState("");
@@ -545,8 +545,8 @@ useEffect(() => {
       />
 
       {showContent && !notListPerm && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white shadow-md dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
-          <div className="border-b border-emerald-100/90 bg-emerald-600/10 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-900/20">
+        <div className="mt-4 overflow-hidden border shadow-md rounded-2xl border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
+          <div className="px-5 py-4 border-b border-emerald-100/90 bg-emerald-600/10 dark:border-emerald-900/40 dark:bg-emerald-900/20">
             <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
               {t("audit.export.title")}
             </h3>
@@ -556,7 +556,7 @@ useEffect(() => {
           </div>
           <div className="p-5 space-y-5">
             <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400">
                 {t("audit.export.format")}
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -579,7 +579,7 @@ useEffect(() => {
                       <span className="block text-sm font-bold text-slate-800 dark:text-slate-100">
                         {t(opt.labelKey)}
                       </span>
-                      <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                      <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {t(opt.descKey)}
                       </span>
                     </button>
@@ -597,7 +597,7 @@ useEffect(() => {
               >
                 {exportBusy && (
                   <svg
-                    className="h-4 w-4 animate-spin"
+                    className="w-4 h-4 animate-spin"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -626,7 +626,7 @@ useEffect(() => {
             </div>
 
             {exportSuccess && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/40">
+              <div className="p-4 border rounded-xl border-emerald-200 bg-emerald-50/80 dark:border-emerald-800 dark:bg-emerald-950/40">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
@@ -646,11 +646,11 @@ useEffect(() => {
                     {redownloadBusy ? t("audit.export.downloading") : t("audit.export.download")}
                   </button>
                 </div>
-                <div className="mt-3 rounded-lg bg-white/90 px-3 py-2 dark:bg-gray-900/60">
+                <div className="px-3 py-2 mt-3 rounded-lg bg-white/90 dark:bg-gray-900/60">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     {t("audit.export.hashHint")}
                   </p>
-                  <p className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-200">
+                  <p className="mt-1 font-mono text-xs break-all text-slate-700 dark:text-slate-200">
                     {exportSuccess.hash || "—"}
                   </p>
                 </div>
