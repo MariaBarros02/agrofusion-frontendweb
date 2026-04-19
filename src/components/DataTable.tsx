@@ -336,15 +336,15 @@ export default function DataTable<T extends Record<string, any>>({
                           key={String(col.key)}
                           className="px-3 py-3 text-center"
                         >
-                          <span className="inline-flex justify-center gap-2">
-                            {actionsCol.actions.map((action, i) => {
-                              const isDisabled = action.disabled?.(row);
+                          <span className="inline-flex justify-center gap-2 whitespace-nowrap">
+                          {actionsCol.actions.map((action, i) => {
+                            const isDisabled = action.disabled?.(row);
 
-                              return (
-                                <button
-                                  key={i}
-                                  disabled={isDisabled}
-                                  className={`flex items-center gap-2 px-3 py-1 border rounded-lg
+                            return (
+                              <button
+                                key={i}
+                                disabled={isDisabled}
+                                className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg whitespace-nowrap
         ${action.className ?? ""}
         ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
       `}

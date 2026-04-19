@@ -415,6 +415,19 @@ export const authApi = {
   changeF2AUser: (user_id: string, mfa_active: boolean) =>
     authAgrofusionAxios.post("users/change-fa2-user", null, {params: {user_id, mfa_active} }),
 
+  getAccountingConnection: () =>
+    authAgrofusionAxios.get("accounting-endpoint/connection"),
+
+  createAccountingConnection: (data: { path: string; method_term_id: string }) =>
+    authAgrofusionAxios.post("accounting-endpoint/connection", data),
+
+  updateAccountingConnection: (
+    external_endpoint_id: string,
+    data: { path: string; method_term_id: string }
+  ) =>
+    authAgrofusionAxios.put(`accounting-endpoint/connection/${external_endpoint_id}`, data),
+
+
   /**
    * Obtiene el detalle completo de un proyecto externo con URLs y endpoints.
    * @param projectId - UUID del proyecto externo

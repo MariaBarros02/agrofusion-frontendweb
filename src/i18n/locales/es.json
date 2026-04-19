@@ -17,6 +17,7 @@
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
+        "save": "Guardar",
         "masculine": "Masculino",
         "feminine": "Femenino",
         "other": "Otro",
@@ -52,6 +53,7 @@
         "sent": "Enviado",
         "failed": "Fallido",
         "cancelled": "Cancelado",
+        "selectOption": "Seleccione una opción",
         "of": "de"
     },
     "theme": {
@@ -1135,6 +1137,15 @@
         "searchPlaceholder": "Buscar por id, proyecto o emitido por",
         "view": "Ver detalle",
         "export": "Exportar",
+        "addAccountingConnection": "Agregar conexión contable",
+        "updateAccountingConnection": "Actualizar conexión contable",
+        "accountingConnectionUpdatedSuccess": "Conexión contable actualizada correctamente.",
+        "accountingConnectionUpdatedError": "No se pudo actualizar la conexión contable.",
+        "accountingConnectionPermissionError": "No tienes permisos para actualizar la conexión contable.",
+        "accountingConnectionAlreadyExists": "La conexión contable ya existe.",
+        "requestUrl": "URL de la petición",
+        "requestUrlPlaceholder": "https://api.inmero.co/sigcon/create-voucher-account",
+        "requestMethod": "Método de la petición",
         "columns": {
           "id": "ID",
           "transactionType": "Tipo de comprobante",
