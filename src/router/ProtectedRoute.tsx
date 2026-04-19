@@ -11,6 +11,7 @@ import type { JSX } from "react";
  */
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isAuth = useAuthStore((state) => state.isAuthenticated);
+  const  isHydrated  = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     if (isAuth) {
@@ -18,6 +19,11 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
       fetchActiveSubmodulesService().catch(() => {});
     }
   }, [isAuth]);
+
+    if (!isHydrated) {
+    return null; // o loader
+  }
+  
 
   if (!isAuth) {
     return <Navigate to="/login" replace />;
