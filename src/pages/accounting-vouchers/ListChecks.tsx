@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Label, Select, TextInput } from "flowbite-react";
+import { Button, Label, Select, TextInput, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 import { HiSearch, HiCalendar } from "react-icons/hi";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiFilter, FiFlag, FiFileText } from "react-icons/fi";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
+import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
 import DataTable, { type Column } from "../../components/DataTable";
-import { listChecksService, listCheckTypesService } from "../../services/agrofusion/integration.service";
+import {listChecksService, listCheckTypesService,} from "../../services/agrofusion/integration.service";
+import {getAccountingConnectionService, createAccountingConnectionService, updateAccountingConnectionService,} from "../../services/agrofusion/auth.service";
 import type { listChecksRequest } from "../../dto/request/listChecks-request.dto";
 import type { CheckTypeOptionResponse } from "../../dto/response/listCheckTypes-response.dto";
 import DatePicker from "react-datepicker";
@@ -33,6 +35,14 @@ const ListChecks = () => {
   const [pagination, setPagination] = useState<PaginatedChecksResponse | null>(null);
   const [transactionType, setTransactionType] = useState("");
   const [typeOptions, setTypeOptions] = useState<CheckTypeOptionResponse[]>([]);
+  const [connectionExists, setConnectionExists] = useState(false);
+  const [accountingConnection, setAccountingConnection] = useState<any>(null);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [connectionMode, setConnectionMode] = useState<"create" | "edit">("create");
+  const [alert, setAlert] = useState<AlertState>(null);
+  const [connectionPath, setConnectionPath] = useState("");
+  const [connectionMethodTermId, setConnectionMethodTermId] = useState("");
+  const [savingConnection, setSavingConnection] = useState(false);
 
   const getChecks = useCallback(async (pageParam = 1) => {
       try {
@@ -97,9 +107,95 @@ const ListChecks = () => {
       }
     }, []);
 
+    const handleOpenConnectionModal = () => {
+      const isEdit = connectionExists && accountingConnection;
+    
+      setConnectionMode(isEdit ? "edit" : "create");
+      setConnectionPath(isEdit ? accountingConnection.path || "" : "");
+      setConnectionMethodTermId(isEdit ? accountingConnection.method_term_id || "" : "");
+      setShowConnectionModal(true);
+    };
+
+    const loadAccountingConnection = async () => {
+      try {
+        const response = await getAccountingConnectionService();
+        setConnectionExists(response.exists);
+        setAccountingConnection(response.exists ? response : null);
+      } catch (error) {
+        setConnectionExists(false);
+        setAccountingConnection(null);
+      }
+    };
+    
+    const handleCloseConnectionModal = () => {
+      setShowConnectionModal(false);
+      setConnectionPath("");
+      setConnectionMethodTermId("");
+      setSavingConnection(false);
+    };
+    
+    const handleSaveConnection = async () => {
+      const payload = {
+        path: connectionPath,
+        method_term_id: connectionMethodTermId,
+      };
+    
+      try {
+        if (connectionMode === "edit" && accountingConnection?.external_endpoint_id) {
+          await updateAccountingConnectionService(
+            accountingConnection.external_endpoint_id,
+            payload
+          );
+    
+          setAlert({
+            message: t("checks.accountingConnectionUpdatedSuccess"),
+            type: "success",
+          });
+        } else {
+          await createAccountingConnectionService(payload);
+    
+          setAlert({
+            message: t("checks.accountingConnectionCreatedSuccess"),
+            type: "success",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error saving accounting connection", error);
+        console.log("backendDetail:", error?.response?.data);
+    
+        const backendDetail = error?.response?.data?.detail;
+    
+        if (backendDetail === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          setAlert({
+            message: t("errors.AUTH_INSUFFICIENT_PERMISSIONS"),
+            type: "warning",
+          });
+        } else if (backendDetail === "ACCOUNTING_CONNECTION_ALREADY_EXISTS") {
+          setAlert({
+            message: t("checks.accountingConnectionAlreadyExists"),
+            type: "warning",
+          });
+        } else {
+          setAlert({
+            message:
+              backendDetail ||
+              (connectionMode === "edit"
+                ? t("checks.accountingConnectionUpdatedError")
+                : t("checks.accountingConnectionCreatedError")),
+            type: "error",
+          });
+        }
+      } finally {
+        handleCloseConnectionModal();
+        await loadAccountingConnection();
+      }
+    };
+
     useEffect(() => {
-      void getChecks(1);
-    }, [getChecks]);
+      getCheckTypes();
+      getChecks(1);
+      loadAccountingConnection();
+    }, []);
 
     useEffect(() => {
       void getCheckTypes();
@@ -132,13 +228,13 @@ const ListChecks = () => {
         key: "transaction_type",
         label: t("checks.columns.transactionType"),
         type: "text",
-        width: "210px",
+        width: "170px",
       },
       {
         key: "project_name",
         label: t("checks.columns.project"),
         type: "text",
-        width: "140px",
+        width: "150px",
         format: (_: unknown, row) => row.project_code || row.project_name || "-",
       },
       {
@@ -151,7 +247,7 @@ const ListChecks = () => {
         key: "issued_at",
         label: t("checks.columns.issuedAt"),
         type: "text",
-        width: "150px",
+        width: "120px",
         format: (value: string) =>
           value
             ? new Date(value).toLocaleString("es-CO", {
@@ -165,7 +261,7 @@ const ListChecks = () => {
         key: "amount",
         label: t("checks.columns.amount"),
         type: "text",
-        width: "150px",
+        width: "140px",
         format: (value: number) =>
           value != null
             ? new Intl.NumberFormat("es-CO", {
@@ -179,13 +275,13 @@ const ListChecks = () => {
         key: "issued_by",
         label: t("checks.columns.issuedBy"),
         type: "text",
-        width: "180px",
+        width: "140px",
       },
       {
         key: "actions",
         label: t("checks.columns.actions"),
         type: "actions",
-        width: "210px",
+        width: "220px",
         actions: [
           {
             label: t("checks.view"),
@@ -195,6 +291,7 @@ const ListChecks = () => {
           },
           {
             label: t("checks.export"),
+            className: "bg-blue-600 text-white border-blue-600 hover:bg-blue-700",
             onClick: (row) => {
               console.log("exportar", row.id);
             },
@@ -224,7 +321,7 @@ const ListChecks = () => {
             <Label className="text-xs">{t("audit.filters.date")}</Label>
 
             <div className="relative">
-              <HiCalendar className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <HiCalendar className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 pointer-events-none dark:text-gray-300" />
 
               <DatePicker
                 selectsRange
@@ -240,7 +337,7 @@ const ListChecks = () => {
                 popperPlacement="bottom-start"
                 popperClassName="z-50"
                 portalId="root"
-                className="w-72 h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900"
+                className="w-72 h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
           </div>
@@ -298,6 +395,15 @@ const ListChecks = () => {
           >
             {t("common.filterReset")}
           </Button>
+          <Button
+            size="xs"
+            className="bg-green-600 text-white hover:bg-green-700"
+            onClick={handleOpenConnectionModal}
+          >
+            {connectionExists
+              ? t("checks.updateAccountingConnection")
+              : t("checks.addAccountingConnection")}
+          </Button>
         </div>
       </div>
 
@@ -335,6 +441,60 @@ const ListChecks = () => {
           />
         )}
       </>
+      <Modal show={showConnectionModal} onClose={handleCloseConnectionModal} size="md">
+        <ModalHeader>
+        {connectionMode === "edit"
+          ? t("checks.updateAccountingConnection")
+          : t("checks.addAccountingConnection")}
+        </ModalHeader>
+
+        <ModalBody>
+          <div className="space-y-4">
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="connectionPath">{t("checks.requestUrl")}</Label>
+              </div>
+              <TextInput
+                id="connectionPath"
+                value={connectionPath}
+                onChange={(e) => setConnectionPath(e.target.value)}
+                placeholder={t("checks.requestUrlPlaceholder")}
+              />
+            </div>
+
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="connectionMethod">{t("checks.requestMethod")}</Label>
+              </div>
+              <Select
+                id="connectionMethod"
+                value={connectionMethodTermId}
+                onChange={(e) => setConnectionMethodTermId(e.target.value)}
+              >
+                <option value="">{t("common.selectOption")}</option>
+                <option value="34f67224-6976-480c-bc7f-77fa25d8748f">GET</option>
+                <option value="d6e3e5be-c29a-45de-9aa3-2b61af6537f6">POST</option>
+              </Select>
+            </div>
+          </div>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button color="gray" onClick={handleCloseConnectionModal}>
+            {t("common.cancel")}
+          </Button>
+          <Button color="blue" onClick={handleSaveConnection} isProcessing={savingConnection}>
+            {t("common.save")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+      {alert && (
+        <AlertSimple
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
     </AppLayoutSB>
   );
 };
