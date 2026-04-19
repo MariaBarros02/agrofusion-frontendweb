@@ -69,7 +69,8 @@ const CreateUser = () => {
   const [existUserError, setExistUserError] = useState<boolean | null>(null);
   const [userCreate, setUserCreate] = useState<any>(null);
   const [alert, setAlert] = useState<AlertState>(null);
-  
+  const currentYear = new Date().getFullYear();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<ExternalProject[]>([]);
@@ -118,7 +119,7 @@ const CreateUser = () => {
     hasProjects: boolean,
   ): yup.ObjectSchema<RegisterValues> =>
     yup.object({
-      name: yup.string().required(t("validation.completeField")),
+      name: yup.string().required(t("validation.completeField")).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters")),
 
       firstLastName: yup
         .string()
@@ -130,7 +131,7 @@ const CreateUser = () => {
             if (!hasProjects) return true;
             return !!value;
           },
-        ),
+        ).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters")),
 
       secondLastName: yup
         .string()
@@ -142,7 +143,7 @@ const CreateUser = () => {
             if (!hasProjects) return true;
             return !!value;
           },
-        ),
+        ).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters")),
 
       typeDocumentByProject: yup
         .object<Record<string, string>>()
@@ -155,8 +156,8 @@ const CreateUser = () => {
             if (!value) return false;
             return Object.values(value).every((v) => !!v);
           },
-        ),
-
+        )
+        ,
       dateIssuanceDoc: yup
         .string()
         .default("")
@@ -167,8 +168,33 @@ const CreateUser = () => {
             if (!hasProjects) return true;
             return !!value;
           },
+        )
+        .test(
+          "max-year",
+          t("validation.dateMaxYear", { year: currentYear }),
+          (value) => {
+            if (!value || typeof value !== "string") return true;
+            return new Date(value).getFullYear() <= currentYear;
+          },
+        )
+        .test(
+          "min-year",
+          t("validation.dateMinYear", { year: 1990 }),
+          (value) => {
+            if (!value) return true;
+            return new Date(value).getFullYear() >= 1990;
+          },
+        )
+        .test(
+          "issuance-after-birthday",
+          t("validation.issuanceAfterBirthday"),
+          function (value) {
+            if (!value) return true;
+            const { birthday } = this.parent;
+            if (!birthday) return true;
+            return new Date(value) >= new Date(birthday);
+          },
         ),
-
       birthday: yup
         .string()
         .default("")
@@ -178,6 +204,31 @@ const CreateUser = () => {
           (value) => {
             if (!hasProjects) return true;
             return !!value;
+          },
+        ).test(
+          "max-year",
+          t("validation.dateMaxYear", { year: currentYear }),
+          (value) => {
+            if (!value || typeof value !== "string") return true;
+            return new Date(value).getFullYear() <= currentYear;
+          },
+        )
+        .test(
+          "min-year",
+          t("validation.dateMinYear", { year: 1990 }),
+          (value) => {
+            if (!value) return true;
+            return new Date(value).getFullYear() >= 1990;
+          },
+        )
+        .test(
+          "birthday-before-issuance",
+          t("validation.birthdayBeforeIssuance"),
+          function (value) {
+            if (!value) return true;
+            const { dateIssuanceDoc } = this.parent;
+            if (!dateIssuanceDoc) return true;
+            return new Date(value) <= new Date(dateIssuanceDoc);
           },
         ),
 
@@ -223,6 +274,13 @@ const CreateUser = () => {
       password: yup
         .string()
         .min(12, t("validation.passwordMin", { min: 12 }))
+        .matches(/[A-Z]/, t("validation.passwordUppercase"))
+        .matches(/[a-z]/, t("validation.passwordLowercase"))
+        .matches(/[0-9]/, t("validation.passwordNumber"))
+        .matches(
+          /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/,
+          t("validation.passwordSpecial"),
+        )
         .required(t("validation.completeField")),
 
       confirmPassword: yup
@@ -300,7 +358,25 @@ const CreateUser = () => {
     initialValues: initialValues,
     enableReinitialize: true,
     validationSchema: RegisterSchema(t, hasProjects),
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setTouched }) => {
+      const projectTouchedDocs = projects.reduce<Record<string, boolean>>(
+        (acc, p) => {
+          acc[p.instance_code] = true;
+          return acc;
+        },
+        {},
+      );
+      const projectTouchedRoles = projects.reduce<Record<string, boolean>>(
+        (acc, p) => {
+          acc[p.instance_code] = true;
+          return acc;
+        },
+        {},
+      );
+      setTouched({
+        typeDocumentByProject: projectTouchedDocs,
+        rolesByProject: projectTouchedRoles,
+      });
       setExistUserError(null);
 
       try {
@@ -421,7 +497,7 @@ const CreateUser = () => {
                 ? "warning"
                 : "error",
           });
-          return
+          return;
         }
         setToast((prev) => [
           ...prev,
@@ -521,6 +597,8 @@ const CreateUser = () => {
             id: crypto.randomUUID(),
             type: e.type ?? ("warning" as const),
             messageKey: e.messageKey,
+            to: e.to,
+            linkText: e.linkText,
             messageParams: e.messageParams,
           })),
         ]);
@@ -801,6 +879,26 @@ const CreateUser = () => {
                                 e.target.value,
                               )
                             }
+                            onBlur={() =>
+                              formik.setFieldTouched(
+                                `typeDocumentByProject.${project.instance_code}`,
+                                true,
+                                true,
+                              )
+                            }
+                            color={
+                              (
+                                formik.touched.typeDocumentByProject as Record<
+                                  string,
+                                  boolean
+                                >
+                              )?.[project.instance_code] &&
+                              !formik.values.typeDocumentByProject[
+                                project.instance_code
+                              ]
+                                ? "failure"
+                                : "gray"
+                            }
                           >
                             <option value="" disabled>
                               {t("createUser.placeholderTypDoc")}
@@ -814,6 +912,19 @@ const CreateUser = () => {
                               </option>
                             ))}
                           </Select>
+                          {(
+                            formik.touched.typeDocumentByProject as Record<
+                              string,
+                              boolean
+                            >
+                          )?.[project.instance_code] &&
+                            !formik.values.typeDocumentByProject[
+                              project.instance_code
+                            ] && (
+                              <p className="mt-1 text-sm text-red-500">
+                                {t("validation.completeField")}
+                              </p>
+                            )}
                         </div>
                       ))}
                       <div className="w-full">
@@ -943,7 +1054,30 @@ const CreateUser = () => {
                             {t("createUser.role")} – {project.instance_code}
                           </Label>
 
-                          <div className="flex flex-col w-full h-24 gap-2 overflow-auto">
+                          <div
+                            className={`flex flex-col w-full h-24 gap-2 overflow-auto p-1 rounded-md border ${
+                              (
+                                formik.touched.rolesByProject as Record<
+                                  string,
+                                  boolean
+                                >
+                              )?.[project.instance_code] &&
+                              (
+                                formik.values.rolesByProject[
+                                  project.instance_code
+                                ] ?? []
+                              ).length === 0
+                                ? "border-red-500 bg-red-50"
+                                : "border-transparent"
+                            }`}
+                            onBlur={() =>
+                              formik.setFieldTouched(
+                                `rolesByProject.${project.instance_code}`,
+                                true,
+                                true,
+                              )
+                            }
+                          >
                             {(rolesByProject[project.instance_code] ?? []).map(
                               (role) => {
                                 const checked = formik.values.rolesByProject[
@@ -958,7 +1092,6 @@ const CreateUser = () => {
                                     <input
                                       type="checkbox"
                                       checked={checked}
-                                      className="dark:bg-transparent"
                                       onChange={(e) => {
                                         const currentRoles =
                                           formik.values.rolesByProject[
@@ -976,6 +1109,13 @@ const CreateUser = () => {
                                           updatedRoles,
                                         );
                                       }}
+                                      onBlur={() =>
+                                        formik.setFieldTouched(
+                                          `rolesByProject.${project.instance_code}`,
+                                          true,
+                                          true,
+                                        )
+                                      }
                                     />
                                     <span className="text-sm capitalize">
                                       {role.role_name}
@@ -985,6 +1125,21 @@ const CreateUser = () => {
                               },
                             )}
                           </div>
+                          {(
+                            formik.touched.rolesByProject as Record<
+                              string,
+                              boolean
+                            >
+                          )?.[project.instance_code] &&
+                            (
+                              formik.values.rolesByProject[
+                                project.instance_code
+                              ] ?? []
+                            ).length === 0 && (
+                              <p className="mt-1 text-sm text-red-500">
+                                {t("validation.completeField")}
+                              </p>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -1109,16 +1264,16 @@ const CreateUser = () => {
               </div>
             )}
           </div>
-        {alert && (
-        <AlertSimple
-          message={t(alert.message)}
-          type={alert.type}
-          to={alert.to}
-          onClose={() => {
-            setAlert(null);
-          }}
-        />
-        )}
+          {alert && (
+            <AlertSimple
+              message={t(alert.message)}
+              type={alert.type}
+              to={alert.to}
+              onClose={() => {
+                setAlert(null);
+              }}
+            />
+          )}
           <div className="fixed z-50 flex flex-col gap-2 top-4 right-4">
             {toast.map((t) => (
               <ToastSimple

@@ -295,7 +295,10 @@
         "editFailed": "Hubo un error al actualizar el usuario.",
         "noChanges": "No hay cambios por guardar",
         "editSuccess": "El usuario fue actualizado correctamente",
-        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo."
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo.",
+        "EXT_CHANGE_USER_STATUS_FAILED": "Hubo un error al cambiar el estado del usuario en el proyecto externo.",
+        "EXT_UPDATE_USER_FAILED": "Hubo un error al actualizar el usuario en el proyecto externo."
     },
     "project": {
         "title": "Gestion de proyectos",
@@ -681,7 +684,11 @@
         "successMessage": "Usuario creado correctamente",
         "successMessageDetails": "Se ha enviado una notificación al correo del usuario.",
         "goToUsers": "Volver al listado",
-        "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente."
+        "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente.",
+        "EXT_GET_TYPE_DOCUMENT_FAILED": "Hubo un error al obtener los tipos de documentos desde el proyecto externo.",
+        "EXT_GET_ROLES_FAILED": "Hubo un error al obtener los roles desde el proyecto externo.",
+        "EXT_CREATE_USER_FAILED": "Hubo un error al crear el usuario en el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo."
     },
     "profile": {
         "title": "Mi perfil",
@@ -719,7 +726,10 @@
         "updating": "Actualizando...",
         "mfaUpdateSuccess": "Se ha actualizado el estado de doble factor de autenticación del usuario correctamente",
         "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario",
-        "notPerm": "No tienes permisos para listar tu perfil."
+        "notPerm": "No tienes permisos para listar tu perfil.",
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo.",
+        "EXT_UPDATE_USER_FAILED": "Hubo un error al actualizar el usuario en el proyecto externo."
     },
     "accountActivation": {
         "resetPassword": "Establece una nueva contraseña",
@@ -749,7 +759,8 @@
         "deleteSDescription": "Podrás reactivarlo más adelante.",
         "confirmDeleted": "Confirmar eliminación",
         "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema.",
-        "notPerm": "No tienes permisos para ver detalles de usuarios."
+        "notPerm": "No tienes permisos para ver detalles de usuarios.",
+        "identityNumber": "Número de documento"
     },
     "permissions": {
         "title": "Gestión de permisos",
@@ -913,7 +924,16 @@
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
         "passwordsMustMatch": "Las contraseñas no coinciden.",
         "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres.",
-        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres."
+        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres.",
+        "passwordSpecial": "Debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}|;:,.<>?)",
+        "dateMinYear": "La fecha no puede ser anterior a {{year}}",
+        "issuanceAfterBirthday": "La fecha de expedición no puede ser anterior a la fecha de nacimiento",
+        "birthdayBeforeIssuance": "La fecha de nacimiento no puede ser posterior a la fecha de expedición",
+        "dateMaxYear": "La fecha no puede ser mayor al año {{year}}",
+        "onlyLetters": "Este campo solo acepta letras"
+
+
+
     },
     "errors": {
         "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",

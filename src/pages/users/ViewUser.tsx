@@ -182,19 +182,27 @@ const deleteUser = async () => {
             </div>
             <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid ">
               <div>
+                <p className="font-bold text-gray-500">{t("viewUser.identityNumber")}</p>
+                <p>{userDetails?.identity_number}</p>
+              </div>
+               <div>
                 <p className="font-bold text-gray-500">{t("viewUser.email")}</p>
                 <p>{userDetails?.email}</p>
               </div>
+            </div>
+            <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid ">
+ 
               <div>
                 <p className="font-bold text-gray-500 ">{t("viewUser.role")}</p>
                 <p>{userDetails?.rol}</p>
               </div>
-            </div>
-            <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid">
-              <div>
+               <div>
                 <p className="font-bold text-gray-500">{t("viewUser.state")}</p>
                 <p>{t(`common.${userDetails?.state.toLowerCase()}`)}</p>
               </div>
+            </div>
+            <div className="justify-between mt-5 text-sm md:grid-cols-2 md:grid">
+             
               <div>
                 <p className="font-bold text-gray-500">
                   {t("viewUser.createdAt")}

@@ -87,7 +87,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   onPageChange: (page: number) => void;
   paginationText?: string;
-  maxVisiblePages?: number;  //Usado en Auditoria
+  maxVisiblePages?: number; //Usado en Auditoria
 }
 
 // =============================
@@ -128,9 +128,12 @@ export default function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   const maxPages = maxVisiblePages ?? data.total_pages;
 
-  const startPage = Math.max(1, data.page - Math.floor(maxPages / 2));
+  const halfPages = Math.floor(maxPages / 2);
+  let startPage = Math.max(1, data.page - halfPages);
   const endPage = Math.min(data.total_pages, startPage + maxPages - 1);
-  
+  if (endPage - startPage + 1 < maxPages) {
+    startPage = Math.max(1, endPage - maxPages + 1);
+  }
   const { t } = useTranslation();
 
   const [openStatusRowIndex, setOpenStatusRowIndex] = useState<number | null>(
@@ -209,7 +212,10 @@ export default function DataTable<T extends Record<string, any>>({
                     // STATUS SIMPLE
                     if (col.type === "status") {
                       return (
-                        <td key={String(col.key)} className="px-3 py-3 text-center">
+                        <td
+                          key={String(col.key)}
+                          className="px-3 py-3 text-center"
+                        >
                           <span className="inline-flex justify-center">
                             <StatusBadge
                               value={value}
@@ -225,7 +231,8 @@ export default function DataTable<T extends Record<string, any>>({
                     // STATUS EDITABLE (INLINE DROPDOWN)
                     if (col.type === "statusEditable") {
                       const statusCol = col as StatusEditableColumn<T>;
-                      const statusLocked = statusCol.statusChangeDisabled?.(row) ?? false;
+                      const statusLocked =
+                        statusCol.statusChangeDisabled?.(row) ?? false;
 
                       return (
                         <td
@@ -238,7 +245,7 @@ export default function DataTable<T extends Record<string, any>>({
                           className="relative px-3 py-3 text-center"
                         >
                           <span className="inline-flex justify-center">
-                          {statusLocked ? (
+                            {statusLocked ? (
                               <StatusBadge
                                 value={value}
                                 label={
@@ -304,15 +311,18 @@ export default function DataTable<T extends Record<string, any>>({
                     if (col.type === "action") {
                       const actionCol = col as SingleActionColumn<T>;
                       return (
-                        <td key={String(col.key)} className="px-3 py-3 text-center">
+                        <td
+                          key={String(col.key)}
+                          className="px-3 py-3 text-center"
+                        >
                           <span className="inline-flex justify-center">
-                          <button
-                            className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50 ${actionCol.action.className ?? ""}`}
-                            onClick={() => actionCol.action.onClick(row)}
-                          >
-                            {actionCol.action.icon}
-                            {actionCol.action.label}
-                          </button>
+                            <button
+                              className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg hover:bg-gray-50 ${actionCol.action.className ?? ""}`}
+                              onClick={() => actionCol.action.onClick(row)}
+                            >
+                              {actionCol.action.icon}
+                              {actionCol.action.label}
+                            </button>
                           </span>
                         </td>
                       );
@@ -327,32 +337,37 @@ export default function DataTable<T extends Record<string, any>>({
                           className="px-3 py-3 text-center"
                         >
                           <span className="inline-flex justify-center gap-2">
-                          {actionsCol.actions.map((action, i) => {
-                            const isDisabled = action.disabled?.(row);
+                            {actionsCol.actions.map((action, i) => {
+                              const isDisabled = action.disabled?.(row);
 
-                            return (
-                              <button
-                                key={i}
-                                disabled={isDisabled}
-                                className={`flex items-center gap-2 px-3 py-1 border rounded-lg
+                              return (
+                                <button
+                                  key={i}
+                                  disabled={isDisabled}
+                                  className={`flex items-center gap-2 px-3 py-1 border rounded-lg
         ${action.className ?? ""}
         ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
       `}
-                                onClick={() => {
-                                  if (!isDisabled) action.onClick(row);
-                                }}
-                              >
-                                {action.icon}
-                                {action.label}
-                              </button>
-                            );
-                          })}
+                                  onClick={() => {
+                                    if (!isDisabled) action.onClick(row);
+                                  }}
+                                >
+                                  {action.icon}
+                                  {action.label}
+                                </button>
+                              );
+                            })}
                           </span>
                         </td>
                       );
                     }
 
-                    return <td key={String((col as BaseColumn<T>).key)} className="text-center" />;
+                    return (
+                      <td
+                        key={String((col as BaseColumn<T>).key)}
+                        className="text-center"
+                      />
+                    );
                   })}
                 </tr>
               </React.Fragment>
@@ -372,23 +387,23 @@ export default function DataTable<T extends Record<string, any>>({
             <IoIosArrowBack className="size-4" />
             {t("common.previous")}
           </button>
-          
 
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-            (pageNumber) => (
-              <button
-                key={pageNumber}
-                onClick={() => onPageChange(pageNumber)}
-                className={`min-w-[2rem] px-3 py-1.5 border rounded ${
-                  data.page === pageNumber
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "hover:bg-gray-50"
-                }`}
-              >
-                {pageNumber}
-              </button>
-            ),
-          )}
+          {Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i,
+          ).map((pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => onPageChange(pageNumber)}
+              className={`min-w-[2rem] px-3 py-1.5 border rounded ${
+                data.page === pageNumber
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              {pageNumber}
+            </button>
+          ))}
 
           <button
             disabled={data.page === data.total_pages}
@@ -403,8 +418,8 @@ export default function DataTable<T extends Record<string, any>>({
         <div className="ml-3 text-gray-600">
           {t("common.showing")}{" "}
           <strong>{(data.page - 1) * data.size + 1}</strong> -{" "}
-          <strong>{Math.min(data.page * data.size, data.total)}</strong> {t("common.of")}{" "}
-          <strong>{data.total}</strong> {paginationText ?? ""}
+          <strong>{Math.min(data.page * data.size, data.total)}</strong>{" "}
+          {t("common.of")} <strong>{data.total}</strong> {paginationText ?? ""}
         </div>
       </div>
     </div>
