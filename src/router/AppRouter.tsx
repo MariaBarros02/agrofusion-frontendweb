@@ -18,6 +18,7 @@ import EditUser from "../pages/users/EditUser";
 import ProjectsList from "../pages/administration/ProjectsList";
 import AddProject from "../pages/administration/AddProject";
 import EditProject from "../pages/administration/EditProject";
+import AccountingTransferRequest from "../pages/administration/AccountingTransferRequest";
 import ProjectAccountingEndpoints from "../pages/administration/ProjectAccountingEndpoints";
 import ModulesList from "../pages/administration/ModulesList";
 import SubmodulesList from "../pages/administration/SubmodulesList";
@@ -171,6 +172,14 @@ export function AppRouter() {
               </ModuleRouteGuard>
             }
           />
+          <Route
+            path="/projects/:projectId/accounting-transfer-request"
+            element={
+              <ModuleRouteGuard moduleCode="DASHBOARD">
+                <AccountingTransferRequest />
+              </ModuleRouteGuard>
+            }
+          />
 
           {/* ADMINISTRATION */}
           <Route path="/administration/users" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><UsersList /></ModuleRouteGuard>} />
@@ -182,6 +191,7 @@ export function AppRouter() {
           <Route path="/administration/projects/create" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AddProject /></ModuleRouteGuard>} />
           <Route path="/administration/projects/edit/:projectId" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><EditProject /></ModuleRouteGuard>} />
           <Route path="/administration/projects/:projectId/accounting-endpoints" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ProjectAccountingEndpoints /></ModuleRouteGuard>} />
+          <Route path="/administration/projects/:projectId/accounting-transfer-request" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><AccountingTransferRequest /></ModuleRouteGuard>} />
           <Route path="/administration/modules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><ModulesList /></ModuleRouteGuard>} />
           <Route path="/administration/submodules" element={<ModuleRouteGuard moduleCode="ADMINISTRATION"><SubmodulesList /></ModuleRouteGuard>} />
 

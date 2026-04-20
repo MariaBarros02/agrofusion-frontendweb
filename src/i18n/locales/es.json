@@ -404,6 +404,28 @@
                 "allOperationTypes": "Todos los tipos"
             }
         },
+        "transferRequest": {
+            "title": "Obtener información económica de {{apiName}} desde {{project}}",
+            "description": "Consulta la información económica disponible del proyecto externo a partir del endpoint seleccionado.",
+            "startDate": "Desde",
+            "accountingInterval": "Intervalo contable",
+            "intervalPlaceholder": "Selecciona un intervalo contable",
+            "endDate": "Hasta",
+            "endDatePlaceholder": "Se calculara automaticamente",
+            "consult": "Consultar información",
+            "resultTitle": "Resultado de la consulta",
+            "emptyState": "Selecciona un rango de fechas y consulta la información para visualizar el contenido contable.",
+            "transfer": "Transferir a contabilidad",
+            "preview": "INFORMACION CONTABLE",
+            "previewRange": "Consulta realizada desde {{startDate}} hasta {{endDate}}.",
+            "fallbackApiName": "la API seleccionada",
+            "fallbackProject": "Proyecto externo",
+            "intervals": {
+                "biweekly": "Quincenal",
+                "monthly": "Mensual",
+                "yearly": "Anual"
+            }
+        },
         "create": {
             "addProject": "Agregar proyecto",
             "title": "Nuevo proyecto",
