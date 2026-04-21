@@ -400,6 +400,28 @@
                 "allOperationTypes": "All types"
             }
         },
+        "transferRequest": {
+            "title": "Obtain economic information from {{apiName}} from {{project}}",
+            "description": "Query the available economic information from the external project using the selected endpoint.",
+            "startDate": "From",
+            "accountingInterval": "Accounting interval",
+            "intervalPlaceholder": "Select an accounting interval",
+            "endDate": "To",
+            "endDatePlaceholder": "It will be calculated automatically",
+            "consult": "Consult information",
+            "resultTitle": "Query result",
+            "emptyState": "Select a date range and query the information to display the accounting content.",
+            "transfer": "Transfer to accounting",
+            "preview": "ACCOUNTING INFORMATION",
+            "previewRange": "Query performed from {{startDate}} to {{endDate}}.",
+            "fallbackApiName": "the selected API",
+            "fallbackProject": "External project",
+            "intervals": {
+                "biweekly": "Biweekly",
+                "monthly": "Monthly",
+                "yearly": "Yearly"
+            }
+        },
         "create": {
             "addProject": "Add project",
             "title": "New project",

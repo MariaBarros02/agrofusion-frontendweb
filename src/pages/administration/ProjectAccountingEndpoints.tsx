@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Label,
@@ -35,9 +35,9 @@ import {
   getProjectDetailsService,
   listProjectAccountingEndpointsService,
   updateProjectAccountingEndpointService,
-  validateAccountingTransferConnectionService,
 } from "../../services/agrofusion/auth.service";
 import AlertConfirmation from "../../components/layout/AlertConfirmation";
+import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
 
 const EMPTY_CREATE_FORM: CreateProjectAccountingInfoEndpointRequest = {
@@ -60,6 +60,7 @@ const methodBadgeStyles: Record<string, string> = {
 
 const ProjectAccountingEndpoints = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
 
   const [search, setSearch] = useState("");
@@ -81,6 +82,7 @@ const ProjectAccountingEndpoints = () => {
   const [pendingDelete, setPendingDelete] =
     useState<AccountingEndpointListItemResponse | null>(null);
   const [confirmDeleteChecked, setConfirmDeleteChecked] = useState(false);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [copiedEndpointId, setCopiedEndpointId] = useState<string | null>(null);
 
@@ -192,6 +194,19 @@ const ProjectAccountingEndpoints = () => {
     return fallbackKey;
   };
 
+  const handlePermissionAlert = (err: any) => {
+    const errorCode = err?.response?.data?.detail?.code;
+    if (errorCode !== "AUTH_INSUFFICIENT_PERMISSIONS") {
+      return false;
+    }
+
+    setAlert({
+      message: t("errors.AUTH_INSUFFICIENT_PERMISSIONS"),
+      type: "warning",
+    });
+    return true;
+  };
+
   const openEditModal = async (endpoint: AccountingEndpointListItemResponse) => {
     if (!projectId) return;
 
@@ -206,6 +221,9 @@ const ProjectAccountingEndpoints = () => {
       );
       setCreateFormData(mapDetailToForm(detail));
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
       setShowModal(false);
       setEditingEndpoint(null);
       setCreateFormData(EMPTY_CREATE_FORM);
@@ -249,17 +267,18 @@ const ProjectAccountingEndpoints = () => {
 
       closeModal();
       await getEndpoints(pagination?.page ?? 1);
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: editingEndpoint
+      setAlert({
+        message: t(
+          editingEndpoint
             ? "project.accountingEndpoints.endpointUpdated"
             : "project.accountingEndpoints.endpointCreated",
-          type: "success",
-        },
-      ]);
+        ),
+        type: "success",
+      });
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -287,15 +306,14 @@ const ProjectAccountingEndpoints = () => {
       setPendingDelete(null);
       setConfirmDeleteChecked(false);
       await getEndpoints(1);
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: "project.accountingEndpoints.endpointDeleted",
-          type: "success",
-        },
-      ]);
+      setAlert({
+        message: t("project.accountingEndpoints.endpointDeleted"),
+        type: "success",
+      });
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -335,28 +353,28 @@ const ProjectAccountingEndpoints = () => {
   };
 
   const handleTransferValidation = async () => {
-    try {
-      const result = await validateAccountingTransferConnectionService();
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: result.exists
-            ? "project.accountingEndpoints.transferConnectionExists"
-            : "project.accountingEndpoints.transferConnectionMissing",
-          type: result.exists ? "success" : "warning",
-        },
-      ]);
-    } catch {
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: "project.accountingEndpoints.transferValidationError",
-          type: "error",
-        },
-      ]);
-    }
+    return true;
+  };
+
+  const handleTransfer = async (endpoint: AccountingEndpointListItemResponse) => {
+    if (!projectId) return;
+
+    const shouldContinue = await handleTransferValidation();
+    if (!shouldContinue) return;
+
+    const targetPath =
+      canUseAdministrationFlow && !canUseDashboardFlow
+        ? `/administration/projects/${projectId}/accounting-transfer-request`
+        : `/projects/${projectId}/accounting-transfer-request`;
+
+    navigate(targetPath, {
+      state: {
+        apiName: endpoint.api_name,
+        projectCode: endpoint.external_project_code,
+        endpointId: endpoint.external_endpoint_id,
+        urlEndpoint: endpoint.url_endpoint,
+      },
+    });
   };
 
   const columns: Column<AccountingEndpointListItemResponse>[] = [
@@ -452,7 +470,7 @@ const ProjectAccountingEndpoints = () => {
           icon: <FiSend />,
           className: "bg-blue-600 text-white hover:bg-blue-500",
           disabled: (row) => row.is_deleted,
-          onClick: () => handleTransferValidation(),
+          onClick: (row) => handleTransfer(row),
         },
       ],
     },
@@ -754,6 +772,15 @@ const ProjectAccountingEndpoints = () => {
           setConfirmDeleteChecked(false);
         }}
       />
+
+      {alert && (
+        <AlertSimple
+          message={alert.message}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => setAlert(null)}
+        />
+      )}
 
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (
