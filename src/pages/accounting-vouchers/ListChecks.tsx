@@ -43,6 +43,7 @@ const ListChecks = () => {
   const [connectionPath, setConnectionPath] = useState("");
   const [connectionMethodTermId, setConnectionMethodTermId] = useState("");
   const [savingConnection, setSavingConnection] = useState(false);
+  const [connectionApiKey, setConnectionApiKey] = useState("");
 
   const getChecks = useCallback(async (pageParam = 1) => {
       try {
@@ -113,6 +114,11 @@ const ListChecks = () => {
       setConnectionMode(isEdit ? "edit" : "create");
       setConnectionPath(isEdit ? accountingConnection.path || "" : "");
       setConnectionMethodTermId(isEdit ? accountingConnection.method_term_id || "" : "");
+      setConnectionApiKey(
+        isEdit
+          ? accountingConnection?.params_template?.api_key || ""
+          : "",
+      );
       setShowConnectionModal(true);
     };
 
@@ -131,16 +137,46 @@ const ListChecks = () => {
       setShowConnectionModal(false);
       setConnectionPath("");
       setConnectionMethodTermId("");
+      setConnectionApiKey("");
       setSavingConnection(false);
     };
     
     const handleSaveConnection = async () => {
+      if (!connectionPath.trim()) {
+        setAlert({
+          message: t("checks.requestUrlRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
+      if (!connectionMethodTermId) {
+        setAlert({
+          message: t("checks.requestMethodRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
+      if (!connectionApiKey.trim()) {
+        setAlert({
+          message: t("checks.apiKeyRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
       const payload = {
-        path: connectionPath,
+        path: connectionPath.trim(),
         method_term_id: connectionMethodTermId,
+        params_template: {
+          api_key: connectionApiKey.trim(),
+        },
       };
     
       try {
+        setSavingConnection(true);
+    
         if (connectionMode === "edit" && accountingConnection?.external_endpoint_id) {
           await updateAccountingConnectionService(
             accountingConnection.external_endpoint_id,
@@ -173,6 +209,11 @@ const ListChecks = () => {
         } else if (backendDetail === "ACCOUNTING_CONNECTION_ALREADY_EXISTS") {
           setAlert({
             message: t("checks.accountingConnectionAlreadyExists"),
+            type: "warning",
+          });
+        } else if (backendDetail === "ACCOUNTING_CONNECTION_API_KEY_REQUIRED") {
+          setAlert({
+            message: t("checks.apiKeyRequired"),
             type: "warning",
           });
         } else {
@@ -255,20 +296,6 @@ const ListChecks = () => {
                 month: "2-digit",
                 day: "2-digit",
               })
-            : "-",
-      },
-      {
-        key: "amount",
-        label: t("checks.columns.amount"),
-        type: "text",
-        width: "140px",
-        format: (value: number) =>
-          value != null
-            ? new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-                maximumFractionDigits: 0,
-              }).format(value)
             : "-",
       },
       {
@@ -476,6 +503,19 @@ const ListChecks = () => {
                 <option value="d6e3e5be-c29a-45de-9aa3-2b61af6537f6">POST</option>
               </Select>
             </div>
+            <div>
+              <div className="mb-2 block">
+              <Label htmlFor="connectionApiKey">
+                {t("checks.apiKey")} <span className="text-red-500">*</span>
+              </Label>
+              </div>
+              <TextInput
+                id="connectionApiKey"
+                value={connectionApiKey}
+                onChange={(e) => setConnectionApiKey(e.target.value)}
+                placeholder={t("checks.apiKeyPlaceholder")}
+              />
+            </div>
           </div>
         </ModalBody>
 
@@ -483,7 +523,16 @@ const ListChecks = () => {
           <Button color="gray" onClick={handleCloseConnectionModal}>
             {t("common.cancel")}
           </Button>
-          <Button color="blue" onClick={handleSaveConnection} isProcessing={savingConnection}>
+          <Button
+            color="blue"
+            onClick={handleSaveConnection}
+            isProcessing={savingConnection}
+            disabled={
+              !connectionPath.trim() ||
+              !connectionMethodTermId ||
+              !connectionApiKey.trim()
+            }
+          >
             {t("common.save")}
           </Button>
         </ModalFooter>
