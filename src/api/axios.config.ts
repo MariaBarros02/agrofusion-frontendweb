@@ -2,6 +2,7 @@
 import type { AxiosError, AxiosInstance } from "axios";
 import axios from 'axios';
 import { useAuthStore } from "../store/auth.store";
+import { env } from '../config/env';
 
 /** * Estado global para evitar múltiples peticiones simultáneas de refresco de token.
  * @type {boolean}
@@ -88,7 +89,7 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
           originalRequest._retry = true;
           isRefreshing = true;
 
-          const refreshInstance = axios.create({ baseURL: originalRequest.baseURL });
+          const refreshInstance = axios.create({ baseURL: env.VITE_API_AUTH_AF_URL });
           try {
             /** * Intento de renovar el Access Token usando el Refresh Token 
              */
