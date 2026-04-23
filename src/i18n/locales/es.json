@@ -17,6 +17,7 @@
         "filterActive": "Filtros activos",
         "filterReset": "Reiniciar filtros",
         "cancel": "Cancelar",
+        "save": "Guardar",
         "masculine": "Masculino",
         "feminine": "Femenino",
         "other": "Otro",
@@ -47,7 +48,13 @@
         "rejected": "Rechazado",
         "High": "Alto",
         "applyFilters": "Aplicar filtros",
-        "resetFilters": "Reiniciar"
+        "resetFilters": "Reiniciar",
+        "processing": "Procesando",
+        "sent": "Enviado",
+        "failed": "Fallido",
+        "cancelled": "Cancelado",
+        "selectOption": "Seleccione una opción",
+        "of": "de"
     },
     "theme": {
         "dark": "Modo oscuro",
@@ -290,7 +297,10 @@
         "editFailed": "Hubo un error al actualizar el usuario.",
         "noChanges": "No hay cambios por guardar",
         "editSuccess": "El usuario fue actualizado correctamente",
-        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo."
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo.",
+        "EXT_CHANGE_USER_STATUS_FAILED": "Hubo un error al cambiar el estado del usuario en el proyecto externo.",
+        "EXT_UPDATE_USER_FAILED": "Hubo un error al actualizar el usuario en el proyecto externo."
     },
     "project": {
         "title": "Gestion de proyectos",
@@ -323,7 +333,76 @@
             "noProjects": "No hay proyectos registrados",
             "paginationText": "proyectos",
             "action": "Acción",
-            "edit": "Editar"
+            "edit": "Editar",
+            "accountingEndpoints": "Endpoints contables"
+        },
+        "accountingEndpoints": {
+            "title": "Endpoints contables por proyecto",
+            "description": "Consulta los endpoints contables configurados para el proyecto {{project}}.",
+            "searchPlaceholder": "Buscar por API, URL o tipo de operación",
+            "loading": "Cargando endpoints contables...",
+            "error": "Error al cargar endpoints contables",
+            "noEndpoints": "No hay endpoints contables para este proyecto",
+            "paginationText": "endpoints",
+            "backToProjects": "Volver a proyectos",
+            "addEndpoint": "Agregar endpoint",
+            "edit": "Editar",
+            "transfer": "Transferir",
+            "delete": "Eliminar",
+            "createModalTitle": "Agregar endpoint contable",
+            "editModalTitle": "Editar endpoint contable",
+            "createEndpoint": "Crear endpoint",
+            "saveChanges": "Guardar cambios",
+            "endpointCreated": "Endpoint contable creado correctamente",
+            "endpointUpdated": "Endpoint contable actualizado correctamente",
+            "endpointDeleted": "Endpoint contable eliminado correctamente",
+            "endpointLoadError": "No se pudo cargar el endpoint contable",
+            "endpointSaveError": "No se pudo guardar el endpoint contable",
+            "endpointDeleteError": "No se pudo eliminar el endpoint contable",
+            "invalidApiUrl": "La api ingresada no existe",
+            "copyUrl": "Copiar URL",
+            "copyError": "No se pudo copiar la URL",
+            "transferConnectionExists": "Existe conexión a contabilidad",
+            "transferConnectionMissing": "No existe una conexión a un sistema de contabilidad. Agrega la conexión en el módulo de comprobantes",
+            "transferValidationError": "No se pudo validar la conexión a contabilidad",
+            "deleteTitle": "Eliminar endpoint contable",
+            "deleteQuestion": "¿Quieres eliminar este endpoint contable?",
+            "deleteDescription": "Esta acción hará un borrado lógico del endpoint y bloqueará futuras acciones sobre él.",
+            "deleteCheckbox": "Confirmo que deseo eliminar este endpoint contable.",
+            "columns": {
+                "apiName": "Nombre de la API",
+                "urlEndpoint": "URL/Endpoint",
+                "projectCode": "Proyecto externo",
+                "operationType": "Tipo de operación",
+                "method": "Método",
+                "actions": "Acciones"
+            },
+            "form": {
+                "apiName": "Nombre de la API",
+                "endpointName": "Nombre del endpoint",
+                "endpointNamePlaceholder": "Ej: Facturación, Nómina, etc.",
+                "apiUrl": "Url de la api",
+                "apiUrlPlaceholder": "https://api.inmero.co/disriego",
+                "apiPath": "Path API",
+                "apiPathPlaceholder": "/facturation",
+                "requestUrl": "URL de la petición",
+                "requestUrlPlaceholder": "/account-information",
+                "requestTemplate": "Plantilla contable",
+                "operationType": "Tipo de operación",
+                "path": "Path del endpoint",
+                "method": "Método HTTP",
+                "description": "Descripción del endpoint",
+                "descriptionPlaceholder": "Describe el propósito del endpoint",
+                "authentication": "Autenticación",
+                "authenticationOpen": "SIN AUTENTICACIÓN",
+                "authenticationProtected": "CON AUTENTICACIÓN"
+            },
+            "filters": {
+                "method": "Método",
+                "allMethods": "Todos los métodos",
+                "operationType": "Tipo de operación",
+                "allOperationTypes": "Todos los tipos"
+            }
         },
         "create": {
             "addProject": "Agregar proyecto",
@@ -442,6 +521,7 @@
             "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
             "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
             "errorNoPermission": "Acción no autorizada. No tiene permisos para registrar proyectos.",
+            "errorUrlNotReachable": "La api de usuario ingresada no es alcanzable. Verifique que este activa e inténtelo de nuevo.",
             "errorGeneric": "Algo ocurrió mal. No se pudo registrar el proyecto."
         },
         "edit": {
@@ -449,7 +529,12 @@
             "description": "Modifica la información del proyecto externo.",
             "loading": "Cargando datos del proyecto...",
             "loadError": "Error al cargar los datos del proyecto.",
-            "success": "Proyecto actualizado correctamente."
+            "success": "Proyecto actualizado correctamente.",
+            "errorDuplicateCode": "Ya existe un proyecto registrado con este código.",
+            "errorModulesCount": "Debe registrar exactamente tres módulos de acceso rápido para el proyecto.",
+            "errorNoPermission": "Acción no autorizada. No tiene permisos para editar proyectos.",
+            "errorUrlNotReachable": "La api de usuario ingresada no es alcanzable. Verifique que este activa e inténtelo de nuevo.",
+            "errorGeneric": "Algo ocurrió mal. No se pudo actualizar el proyecto."
         }
     },
     "module": {
@@ -601,7 +686,11 @@
         "successMessage": "Usuario creado correctamente",
         "successMessageDetails": "Se ha enviado una notificación al correo del usuario.",
         "goToUsers": "Volver al listado",
-        "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente."
+        "errorCreatingUser": "Ocurrió un error al crear el usuario. Inténtalo nuevamente.",
+        "EXT_GET_TYPE_DOCUMENT_FAILED": "Hubo un error al obtener los tipos de documentos desde el proyecto externo.",
+        "EXT_GET_ROLES_FAILED": "Hubo un error al obtener los roles desde el proyecto externo.",
+        "EXT_CREATE_USER_FAILED": "Hubo un error al crear el usuario en el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo."
     },
     "profile": {
         "title": "Mi perfil",
@@ -639,7 +728,10 @@
         "updating": "Actualizando...",
         "mfaUpdateSuccess": "Se ha actualizado el estado de doble factor de autenticación del usuario correctamente",
         "mfaUpdateError": "Hubo un error al actualizar el estado de doble factor de autenticación del usuario",
-        "notPerm": "No tienes permisos para listar tu perfil."
+        "notPerm": "No tienes permisos para listar tu perfil.",
+        "EXT_GET_USER_BY_EMAIL_FAILED": "No se pudo obtener la información del usuario desde el proyecto externo.",
+        "EXT_AUTH_FAILED": "Hubo un error de autenticación con el proyecto externo.",
+        "EXT_UPDATE_USER_FAILED": "Hubo un error al actualizar el usuario en el proyecto externo."
     },
     "accountActivation": {
         "resetPassword": "Establece una nueva contraseña",
@@ -669,7 +761,8 @@
         "deleteSDescription": "Podrás reactivarlo más adelante.",
         "confirmDeleted": "Confirmar eliminación",
         "errorUserAdministrator": "No puedes deshabilitar el superadministrador del sistema.",
-        "notPerm": "No tienes permisos para ver detalles de usuarios."
+        "notPerm": "No tienes permisos para ver detalles de usuarios.",
+        "identityNumber": "Número de documento"
     },
     "permissions": {
         "title": "Gestión de permisos",
@@ -833,7 +926,16 @@
         "passwordSpecialCharacter": "La contraseña debe contener al menos un carácter especial",
         "passwordsMustMatch": "Las contraseñas no coinciden.",
         "documentNumberMax": "El número de documento debe tener máximo {{max}} caracteres.",
-        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres."
+        "nameMaxPermissions": "El nombre del permiso debe contener máximo 120 caracteres.",
+        "passwordSpecial": "Debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}|;:,.<>?)",
+        "dateMinYear": "La fecha no puede ser anterior a {{year}}",
+        "issuanceAfterBirthday": "La fecha de expedición no puede ser anterior a la fecha de nacimiento",
+        "birthdayBeforeIssuance": "La fecha de nacimiento no puede ser posterior a la fecha de expedición",
+        "dateMaxYear": "La fecha no puede ser mayor al año {{year}}",
+        "onlyLetters": "Este campo solo acepta letras"
+
+
+
     },
     "errors": {
         "AUTH_USER_NOT_FOUND": "El usuario no existe o fue eliminado del sistema.",
@@ -875,6 +977,7 @@
         "ROLE_CODE_ALREADY_EXISTS": "Ya existe un rol con este codigo",
         "MODULE_NOT_FOUND": "El módulo no existe o fue eliminado del sistema.",
         "SUBMODULE_NOT_FOUND": "El submódulo no existe o fue eliminado del sistema.",
+        "EXT_PROJECT_DELETED_IMMUTABLE": "Un proyecto eliminado no puede activarse ni cambiarse de estado.",
         "KEY_NOT_FOUND": "No se encontró la clave indicada.",
         "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
         "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",
@@ -947,6 +1050,30 @@
             "audit": "Auditoría AgroFusión",
             "errors": "Errores proyectos externos"
         },
+        "export": {
+            "title": "Exportación de informe",
+            "subtitle": "Genera un archivo con los mismos filtros de la tabla. La descarga usa un enlace seguro temporal.",
+            "format": "Formato",
+            "run": "Generar informe",
+            "requested": "Solicitud registrada. Generando en segundo plano…",
+            "polling": "Procesando…",
+            "ready": "Informe listo",
+            "failed": "Exportación fallida",
+            "forbidden": "Sin permiso para exportar",
+            "hashHint": "SHA-256 (integridad)",
+            "records": "registros",
+            "download": "Descargar archivo",
+            "downloading": "Descargando…",
+            "fmtCsv": "CSV",
+            "fmtCsvDesc": "Excel, hojas de cálculo",
+            "fmtXlsx": "Excel",
+            "fmtXlsxDesc": "Tabla con estilos",
+            "fmtJsonl": "JSONL",
+            "fmtJsonlDesc": "Línea por evento",
+            "fmtPdf": "PDF",
+            "fmtPdfDesc": "Informe para archivo",
+            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde."
+        },
         "SESSIONS":"Sesiones",
         "TOKENS": "Tokens",
         "USERS": "Usuarios",
@@ -999,5 +1126,42 @@
             "code": "Código",
             "all": "Todos"
         }
-    }
+    },
+    "checks": {
+        "title": "Comprobantes",
+        "description": "Consulta y validación de comprobantes generados por las integraciones del sistema",
+        "loading": "Cargando datos de comprobantes...",
+        "error": "Error cargando comprobantes",
+        "noChecks": "No hay comprobantes",
+        "pagination": "Comprobantes",
+        "searchPlaceholder": "Buscar por id, proyecto o emitido por",
+        "view": "Ver detalle",
+        "export": "Exportar",
+        "addAccountingConnection": "Agregar conexión contable",
+        "updateAccountingConnection": "Actualizar conexión contable",
+        "accountingConnectionUpdatedSuccess": "Conexión contable actualizada correctamente.",
+        "accountingConnectionUpdatedError": "No se pudo actualizar la conexión contable.",
+        "accountingConnectionPermissionError": "No tienes permisos para actualizar la conexión contable.",
+        "accountingConnectionAlreadyExists": "La conexión contable ya existe.",
+        "requestUrl": "URL de la petición",
+        "requestUrlPlaceholder": "https://api.inmero.co/sigcon/create-voucher-account",
+        "requestMethod": "Método de la petición",
+        "columns": {
+          "id": "ID",
+          "transactionType": "Tipo de comprobante",
+          "project": "Proyecto",
+          "state": "Estado",
+          "issuedAt": "Fecha de emisión",
+          "amount": "Monto",
+          "issuedBy": "Emitido por",
+          "actions": "Acciones"
+        },
+        "filters": {
+          "allStates": "Todos los estados",
+          "startDate": "Desde",
+          "endDate": "Hasta",
+          "type": "Tipo",
+          "allTypes": "Todos los tipos"
+        }
+      }
 }

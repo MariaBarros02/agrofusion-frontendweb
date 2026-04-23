@@ -1,0 +1,20 @@
+export type AuditExportJobResponse = {
+  export_id: string;
+  status: string;
+  format: string;
+  requested_at?: string;
+  started_at?: string;
+  completed_at?: string;
+  failed_at?: string;
+  export_name?: string | null;
+  actual_records?: number | null;
+  file_size_bytes?: number | null;
+  file_hash?: string | null;
+  digital_signature?: string | null;
+  error_message?: string | null;
+  retry_count: number;
+  download_url?: string | null;
+  download_expires_at?: string | null;
+  download_token?: string | null;
+  download_filename?: string | null;
+};
