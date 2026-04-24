@@ -35,6 +35,7 @@ import {
   getProjectDetailsService,
   listProjectAccountingEndpointsService,
   updateProjectAccountingEndpointService,
+  validateAccountingTransferConnectionService,
 } from "../../services/agrofusion/auth.service";
 import AlertConfirmation from "../../components/layout/AlertConfirmation";
 import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
@@ -353,7 +354,39 @@ const ProjectAccountingEndpoints = () => {
   };
 
   const handleTransferValidation = async () => {
-    return true;
+    try {
+      await validateAccountingTransferConnectionService();
+      return true;
+    } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return false;
+      }
+
+      const errorCode = err?.response?.data?.detail?.code;
+      const backendMessage = err?.response?.data?.detail?.meta?.message;
+
+      if (
+        errorCode === "ACCOUNTING_TRANSFER_CONNECTION_NOT_FOUND" ||
+        backendMessage ===
+          "No existe una conexión a un sistema de contabilidad. Agrega la conexión en el módulo de comprobantes"
+      ) {
+        setAlert({
+          message: t("project.accountingEndpoints.transferConnectionMissing"),
+          type: "warning",
+        });
+        return false;
+      }
+
+      setToasts((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          messageKey: "project.accountingEndpoints.transferValidationError",
+          type: "error",
+        },
+      ]);
+      return false;
+    }
   };
 
   const handleTransfer = async (endpoint: AccountingEndpointListItemResponse) => {

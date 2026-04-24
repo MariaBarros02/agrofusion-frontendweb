@@ -16,7 +16,7 @@ type TransferLocationState = {
   urlEndpoint?: string;
 };
 
-type AccountingInterval = "" | "quincenal" | "mensual" | "anual";
+type AccountingInterval = "" | "mensual" | "anual";
 
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
@@ -37,10 +37,6 @@ const calculateEndDate = (
   if (!year || !month || !day) return "";
 
   const calculatedDate = new Date(year, month - 1, day);
-
-  if (interval === "quincenal") {
-    calculatedDate.setDate(calculatedDate.getDate() + 15);
-  }
 
   if (interval === "mensual") {
     calculatedDate.setMonth(calculatedDate.getMonth() + 1);
@@ -169,9 +165,6 @@ const AccountingTransferRequest = () => {
                 >
                   <option value="">
                     {t("project.transferRequest.intervalPlaceholder")}
-                  </option>
-                  <option value="quincenal">
-                    {t("project.transferRequest.intervals.biweekly")}
                   </option>
                   <option value="mensual">
                     {t("project.transferRequest.intervals.monthly")}

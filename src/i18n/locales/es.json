@@ -421,7 +421,6 @@
             "fallbackApiName": "la API seleccionada",
             "fallbackProject": "Proyecto externo",
             "intervals": {
-                "biweekly": "Quincenal",
                 "monthly": "Mensual",
                 "yearly": "Anual"
             }
