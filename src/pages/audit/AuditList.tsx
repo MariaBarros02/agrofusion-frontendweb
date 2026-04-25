@@ -549,12 +549,12 @@ useEffect(() => {
       />
 
       {showContent && !notListPerm && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white shadow-md dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
+        <div className="my-4 overflow-hidden border shadow-md rounded-2xl border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
           <button
             type="button"
             onClick={() => setExportPanelOpen((o) => !o)}
             aria-expanded={exportPanelOpen}
-            className="flex w-full items-center justify-between gap-3 border-b border-emerald-100/90 bg-emerald-600/10 px-5 py-4 text-left transition hover:bg-emerald-600/15 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
+            className="flex items-center justify-between w-full gap-3 px-5 py-4 text-left transition border-b border-emerald-100/90 bg-emerald-600/10 hover:bg-emerald-600/15 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
           >
             <div className="min-w-0">
               <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
@@ -592,7 +592,7 @@ useEffect(() => {
             <p className="text-sm text-emerald-800/85 dark:text-emerald-200/75">
               {t("audit.export.subtitle")}
             </p>
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200/90 bg-white/60 px-4 py-3 dark:border-slate-600 dark:bg-gray-900/40">
+            <label className="flex items-start gap-3 px-4 py-3 border cursor-pointer rounded-xl border-slate-200/90 bg-white/60 dark:border-slate-600 dark:bg-gray-900/40">
               <input
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
@@ -602,7 +602,7 @@ useEffect(() => {
               />
               <span className="text-sm text-slate-700 dark:text-slate-200">
                 <span className="font-medium">{t("audit.export.maskPiiLabel")}</span>
-                <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400">
                   {t("audit.export.maskPiiHint")}
                 </span>
               </span>
@@ -611,7 +611,7 @@ useEffect(() => {
               <p className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400">
                 {t("audit.export.format")}
               </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4z">
                 {FORMAT_OPTIONS.map((opt) => {
                   const active = exportFormat === opt.id;
                   return (
