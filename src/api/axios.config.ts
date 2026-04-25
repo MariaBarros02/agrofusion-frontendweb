@@ -2,6 +2,7 @@
 import type { AxiosError, AxiosInstance } from "axios";
 import axios from 'axios';
 import { useAuthStore } from "../store/auth.store";
+import { env } from '../config/env';
 
 /** * Estado global para evitar múltiples peticiones simultáneas de refresco de token.
  * @type {boolean}
@@ -87,8 +88,8 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
 
           originalRequest._retry = true;
           isRefreshing = true;
-
-          const refreshInstance = axios.create({ baseURL: originalRequest.baseURL });
+          store.setRefreshing(true);
+          const refreshInstance = axios.create({ baseURL: env.VITE_API_AUTH_AF_URL });
           try {
             /** * Intento de renovar el Access Token usando el Refresh Token 
              */
@@ -105,16 +106,18 @@ export const applyAuthInterceptor = (api: AxiosInstance) => {
               `Bearer ${access_token}`;
 
             return api(originalRequest);
+
           } catch (refreshError) {
             /** * Si el refresco falla (ej: Refresh Token expirado), 
              * limpiamos todo y redirigimos al login.
              */
             store.logout();
             localStorage.removeItem("auth-storage");
-            window.location.href = "/login";
+            store.logout();            
             return Promise.reject(refreshError);
           } finally {
             isRefreshing = false;
+            store.setRefreshing(false);
           }
         }
       }

@@ -17,6 +17,7 @@
         "filterActive": "Active filters",
         "filterReset": "Reset filters",
         "cancel": "Cancel",
+        "save": "Save",
         "masculine": "Male",
         "feminine": "Female",
         "other": "Other",
@@ -31,6 +32,7 @@
         "pep": "PEP",
         "nitOtherCountry": "Foreign NIT",
         "nuip": "NUIP",
+        "selectOption": "Select an option",
         "blocked": "Blocked",
         "deleted": "Deleted",
         "pending": "Pending",
@@ -47,7 +49,12 @@
         "success": "Success",
         "rejected": "Rejected",
         "applyFilters": "Apply filters",
-        "resetFilters": "Reset"
+        "resetFilters": "Reset",
+        "processing": "Processing",
+        "sent": "Sent",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "of": "of"
     },
     "theme": {
         "dark": "Dark mode",
@@ -461,7 +468,97 @@
             "noProjects": "No registered projects",
             "paginationText": "projects",
             "action": "Action",
-            "edit": "Edit"
+            "edit": "Edit",
+            "accountingEndpoints": "Accounting endpoints"
+        },
+        "accountingEndpoints": {
+            "title": "Accounting endpoints by project",
+            "description": "View the accounting endpoints configured for project {{project}}.",
+            "searchPlaceholder": "Search by API, URL, or operation type",
+            "loading": "Loading accounting endpoints...",
+            "error": "Error loading accounting endpoints",
+            "noEndpoints": "There are no accounting endpoints for this project",
+            "paginationText": "endpoints",
+            "backToProjects": "Back to projects",
+            "addEndpoint": "Add endpoint",
+            "edit": "Edit",
+            "transfer": "Transfer",
+            "delete": "Delete",
+            "createModalTitle": "Add accounting endpoint",
+            "editModalTitle": "Edit accounting endpoint",
+            "createEndpoint": "Create endpoint",
+            "saveChanges": "Save changes",
+            "endpointCreated": "Accounting endpoint created successfully",
+            "endpointUpdated": "Accounting endpoint updated successfully",
+            "endpointDeleted": "Accounting endpoint deleted successfully",
+            "endpointLoadError": "The accounting endpoint could not be loaded",
+            "endpointSaveError": "The accounting endpoint could not be saved",
+            "endpointDeleteError": "The accounting endpoint could not be deleted",
+            "invalidApiUrl": "The entered API does not exist",
+            "copyUrl": "Copy URL",
+            "copyError": "The URL could not be copied",
+            "transferConnectionExists": "Accounting connection exists",
+            "transferConnectionMissing": "There is no connection to an accounting system. Add the connection in the vouchers module",
+            "transferValidationError": "The accounting connection could not be validated",
+            "deleteTitle": "Delete accounting endpoint",
+            "deleteQuestion": "Do you want to delete this accounting endpoint?",
+            "deleteDescription": "This action performs a logical deletion and blocks future actions on the endpoint.",
+            "deleteCheckbox": "I confirm that I want to delete this accounting endpoint.",
+            "columns": {
+                "apiName": "API name",
+                "urlEndpoint": "URL/Endpoint",
+                "projectCode": "External project",
+                "operationType": "Operation type",
+                "method": "Method",
+                "actions": "Actions"
+            },
+            "form": {
+                "apiName": "API name",
+                "endpointName": "Endpoint name",
+                "endpointNamePlaceholder": "E.g. Billing, Payroll, etc.",
+                "apiUrl": "API URL",
+                "apiUrlPlaceholder": "https://api.inmero.co/disriego",
+                "apiPath": "API Path",
+                "apiPathPlaceholder": "/facturation",
+                "requestUrl": "Request URL",
+                "requestUrlPlaceholder": "/account-information",
+                "requestTemplate": "Accounting template",
+                "operationType": "Operation type",
+                "path": "Endpoint path",
+                "method": "HTTP method",
+                "description": "Endpoint description",
+                "descriptionPlaceholder": "Describe the endpoint purpose",
+                "authentication": "Authentication",
+                "authenticationOpen": "NO AUTHENTICATION",
+                "authenticationProtected": "WITH AUTHENTICATION"
+            },
+            "filters": {
+                "method": "Method",
+                "allMethods": "All methods",
+                "operationType": "Operation type",
+                "allOperationTypes": "All types"
+            }
+        },
+        "transferRequest": {
+            "title": "Obtain economic information from {{apiName}} from {{project}}",
+            "description": "Query the available economic information from the external project using the selected endpoint.",
+            "startDate": "From",
+            "accountingInterval": "Accounting interval",
+            "intervalPlaceholder": "Select an accounting interval",
+            "endDate": "To",
+            "endDatePlaceholder": "It will be calculated automatically",
+            "consult": "Consult information",
+            "resultTitle": "Query result",
+            "emptyState": "Select a date range and query the information to display the accounting content.",
+            "transfer": "Transfer to accounting",
+            "preview": "ACCOUNTING INFORMATION",
+            "previewRange": "Query performed from {{startDate}} to {{endDate}}.",
+            "fallbackApiName": "the selected API",
+            "fallbackProject": "External project",
+            "intervals": {
+                "monthly": "Monthly",
+                "yearly": "Yearly"
+            }
         },
         "create": {
             "addProject": "Add project",
@@ -1006,6 +1103,7 @@
         "ROLE_CODE_ALREADY_EXISTS": "A role with code {{code}} already exists",
         "MODULE_NOT_FOUND": "The module does not exist or has been deleted from the system.",
         "SUBMODULE_NOT_FOUND": "The submodule does not exist or has been deleted from the system.",
+        "EXT_PROJECT_DELETED_IMMUTABLE": "A deleted project cannot be activated or have its status changed.",
         "KEY_NOT_FOUND": "The specified key was not found.",
         "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
         "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
@@ -1160,6 +1258,49 @@
 }
 
 
-}
+},
+"checks": {
+    "title": "Receipts",
+    "description": "Query and validation of receipts generated by system integrations",
+    "loading": "Loading receipts...",
+    "error": "Error loading receipts",
+    "noChecks": "No receipts found",
+    "pagination": "receipts",
+    "searchPlaceholder": "Search by id, project or issued by",
+    "view": "View detail",
+    "export": "Export",
+    "addAccountingConnection": "Add accounting connection",
+    "updateAccountingConnection": "Update accounting connection",
+    "accountingConnectionUpdatedSuccess": "Accounting connection updated successfully.",
+    "accountingConnectionUpdatedError": "Could not update the accounting connection.",
+    "accountingConnectionPermissionError": "You do not have permission to update the accounting connection.",
+    "accountingConnectionAlreadyExists": "The accounting connection already exists.",
+    "accountingConnectionCreatedSuccess": "Accounting connection created successfully.",
+    "accountingConnectionCreatedError": "Could not create the accounting connection.",
+    "requestUrl": "Request URL",
+    "requestUrlPlaceholder": "https://api.inmero.co/sigcon/create-voucher-account",
+    "requestMethod": "Request method",
+    "apiKey": "API key",
+    "apiKeyPlaceholder": "Enter the API key",
+    "requestUrlRequired": "The request URL is required.",
+    "requestMethodRequired": "The request method is required.",
+    "apiKeyRequired": "The API key is required.",
+    "columns": {
+      "id": "ID",
+      "transactionType": "Receipt type",
+      "project": "Project",
+      "state": "Status",
+      "issuedAt": "Issue date",
+      "issuedBy": "Issued by",
+      "actions": "Actions"
+    },
+    "filters": {
+      "allStates": "All statuses",
+      "startDate": "From",
+      "endDate": "To",
+      "type": "Type",
+      "allTypes": "All types"
+    }
+  }
 
 }

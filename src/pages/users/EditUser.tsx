@@ -71,20 +71,23 @@ const getStatusNumber = (statusText: string) => {
   return entry ? Number(entry[0]) : undefined;
 };
 
+const currentYear = new Date().getFullYear();
+
+
 const EditSchema = (t: any, hasExternal: boolean) =>
   yup.object({
-    name: yup.string().required(t("validation.completeField")),
+    name: yup.string().required(t("validation.completeField")).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters")),
 
     state: yup.string().required(t("validation.completeField")),
 
     rol: yup.string().required(t("validation.completeField")),
 
     first_last_name: hasExternal
-      ? yup.string().required(t("validation.completeField"))
+      ? yup.string().required(t("validation.completeField")).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters"))
       : yup.string().nullable(),
 
     second_last_name: hasExternal
-      ? yup.string().required(t("validation.completeField"))
+      ? yup.string().required(t("validation.completeField")).matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, t("validation.onlyLetters"))
       : yup.string().nullable(),
 
     gender_id: hasExternal
@@ -94,11 +97,61 @@ const EditSchema = (t: any, hasExternal: boolean) =>
     document_number: yup.string().required(t("validation.completeField")),
 
     birthday: hasExternal
-      ? yup.string().required(t("validation.completeField"))
+      ? yup.string().required(t("validation.completeField")).test(
+          "max-year",
+          t("validation.dateMaxYear", { year: currentYear }),
+          (value) => {
+            if (!value || typeof value !== "string") return true;
+            return new Date(value).getFullYear() <= currentYear;
+          },
+        )
+        .test(
+          "min-year",
+          t("validation.dateMinYear", { year: 1990 }),
+          (value) => {
+            if (!value) return true;
+            return new Date(value).getFullYear() >= 1990;
+          },
+        )
+        .test(
+          "birthday-before-issuance",
+          t("validation.birthdayBeforeIssuance"),
+          function (value) {
+            if (!value) return true;
+            const { dateIssuanceDoc } = this.parent;
+            if (!dateIssuanceDoc) return true;
+            return new Date(value) <= new Date(dateIssuanceDoc);
+          },
+        )
       : yup.string().nullable(),
 
     date_issuance_document: hasExternal
-      ? yup.string().required(t("validation.completeField"))
+      ? yup.string().required(t("validation.completeField")).test(
+          "max-year",
+          t("validation.dateMaxYear", { year: currentYear }),
+          (value) => {
+            if (!value || typeof value !== "string") return true;
+            return new Date(value).getFullYear() <= currentYear;
+          },
+        )
+        .test(
+          "min-year",
+          t("validation.dateMinYear", { year: 1990 }),
+          (value) => {
+            if (!value) return true;
+            return new Date(value).getFullYear() >= 1990;
+          },
+        )
+        .test(
+          "issuance-after-birthday",
+          t("validation.issuanceAfterBirthday"),
+          function (value) {
+            if (!value) return true;
+            const { birthday } = this.parent;
+            if (!birthday) return true;
+            return new Date(value) >= new Date(birthday);
+          },
+        )
       : yup.string().nullable(),
   });
 
@@ -518,7 +571,7 @@ const EditUser = () => {
                     </div>
                   </>
                 )}
-                {externalUsers && (
+                {/* {externalUsers && (
                   <div className="w-full">
                     <div className="block mb-2">
                       <Label htmlFor="document_number">
@@ -539,7 +592,7 @@ const EditUser = () => {
                     />
                     {displayError("document_number")}
                   </div>
-                )}
+                )} */}
                 {externalUsers && (
                   <div className="w-full">
                     <div className="block mb-2">

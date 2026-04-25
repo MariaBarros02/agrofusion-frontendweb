@@ -162,7 +162,7 @@ const EditProject = () => {
           setAlert({ message: "project.edit.errorNoPermission", type: "warning" });
           return;
         }
-        if (code === "EXT_URL_NOT_REACHABLE") {
+        if (code === "EXT_ENDPOINT_URL_NOT_REACHABLE") {
           setAlert({ message: "project.edit.errorUrlNotReachable", type: "error" });
           return;
         }

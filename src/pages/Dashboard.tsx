@@ -238,7 +238,7 @@ const Dashboard = () => {
                     </div>
                     <Link
                       className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 hover:underline"
-                      to="/dashboard"
+                      to={`/projects/${project.external_project_id}/accounting-endpoints`}
                     >
                       <FiLink />
                       {t("dashboard.integrate")}
