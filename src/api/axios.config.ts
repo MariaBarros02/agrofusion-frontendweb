@@ -3,6 +3,7 @@ import type { AxiosError, AxiosInstance } from "axios";
 import axios from 'axios';
 import { useAuthStore } from "../store/auth.store";
 import { env } from '../config/env';
+import { env } from '../config/env';
 
 /** * Estado global para evitar múltiples peticiones simultáneas de refresco de token.
  * @type {boolean}

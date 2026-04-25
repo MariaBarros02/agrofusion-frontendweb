@@ -54,7 +54,11 @@
         "failed": "Fallido",
         "cancelled": "Cancelado",
         "selectOption": "Seleccione una opción",
-        "of": "de"
+        "of": "de",
+        "CREATE": "Crear",
+        "UPDATE": "Actualizar",
+        "DELETE": "Eliminar",
+        "READ": "Vizualizar"
     },
     "theme": {
         "dark": "Modo oscuro",
@@ -404,6 +408,27 @@
                 "allOperationTypes": "Todos los tipos"
             }
         },
+        "transferRequest": {
+            "title": "Obtener información económica de {{apiName}} desde {{project}}",
+            "description": "Consulta la información económica disponible del proyecto externo a partir del endpoint seleccionado.",
+            "startDate": "Desde",
+            "accountingInterval": "Intervalo contable",
+            "intervalPlaceholder": "Selecciona un intervalo contable",
+            "endDate": "Hasta",
+            "endDatePlaceholder": "Se calculara automaticamente",
+            "consult": "Consultar información",
+            "resultTitle": "Resultado de la consulta",
+            "emptyState": "Selecciona un rango de fechas y consulta la información para visualizar el contenido contable.",
+            "transfer": "Transferir a contabilidad",
+            "preview": "INFORMACION CONTABLE",
+            "previewRange": "Consulta realizada desde {{startDate}} hasta {{endDate}}.",
+            "fallbackApiName": "la API seleccionada",
+            "fallbackProject": "Proyecto externo",
+            "intervals": {
+                "monthly": "Mensual",
+                "yearly": "Anual"
+            }
+        },
         "create": {
             "addProject": "Agregar proyecto",
             "title": "Nuevo proyecto",
@@ -492,6 +517,7 @@
             "endpointTitleChangeStatus": "Cambiar el estado de un usuario",
             "endpointDescChangeStatus": "El endpoint permite modificar el estado de un usuario en el sistema, por ejemplo para activar o desactivar su acceso.",
             "endpointParamEditUserId": "Id del usuario",
+            "endpointFieldUserId": "Id del usuario",
             "endpointParamEditUserIdPlaceholder": "Id del usuario",
             "endpointFieldEditUserName": "Nombre del usuario",
             "endpointFieldEditUserRoles": "Id(s) del rol del usuario",
@@ -862,7 +888,8 @@
         "editPermission": "Editar permiso",
         "countUsers": "Cantidad de usuarios asociados",
         "editRole": "Editar rol",
-        "permissions": "Permisos asociados al rol"
+        "permissions": "Permisos asociados al rol",
+        "actionLegend": "Acciones"
     },
     "editRole": {
         "title": "Editar rol",
@@ -1146,13 +1173,19 @@
         "requestUrl": "URL de la petición",
         "requestUrlPlaceholder": "https://api.inmero.co/sigcon/create-voucher-account",
         "requestMethod": "Método de la petición",
+        "apiKey": "API key",
+        "apiKeyPlaceholder": "Ingresa la API key",
+        "requestUrlRequired": "La URL de la petición es obligatoria.",
+        "requestMethodRequired": "El método de la petición es obligatorio.",
+        "apiKeyRequired": "La API key es obligatoria.",
+        "accountingConnectionCreatedSuccess": "Conexión contable creada correctamente.",
+        "accountingConnectionCreatedError": "No se pudo crear la conexión contable.",
         "columns": {
           "id": "ID",
           "transactionType": "Tipo de comprobante",
           "project": "Proyecto",
           "state": "Estado",
           "issuedAt": "Fecha de emisión",
-          "amount": "Monto",
           "issuedBy": "Emitido por",
           "actions": "Acciones"
         },

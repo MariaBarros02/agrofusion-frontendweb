@@ -400,6 +400,27 @@
                 "allOperationTypes": "All types"
             }
         },
+        "transferRequest": {
+            "title": "Obtain economic information from {{apiName}} from {{project}}",
+            "description": "Query the available economic information from the external project using the selected endpoint.",
+            "startDate": "From",
+            "accountingInterval": "Accounting interval",
+            "intervalPlaceholder": "Select an accounting interval",
+            "endDate": "To",
+            "endDatePlaceholder": "It will be calculated automatically",
+            "consult": "Consult information",
+            "resultTitle": "Query result",
+            "emptyState": "Select a date range and query the information to display the accounting content.",
+            "transfer": "Transfer to accounting",
+            "preview": "ACCOUNTING INFORMATION",
+            "previewRange": "Query performed from {{startDate}} to {{endDate}}.",
+            "fallbackApiName": "the selected API",
+            "fallbackProject": "External project",
+            "intervals": {
+                "monthly": "Monthly",
+                "yearly": "Yearly"
+            }
+        },
         "create": {
             "addProject": "Add project",
             "title": "New project",
@@ -1108,16 +1129,22 @@
     "accountingConnectionUpdatedError": "Could not update the accounting connection.",
     "accountingConnectionPermissionError": "You do not have permission to update the accounting connection.",
     "accountingConnectionAlreadyExists": "The accounting connection already exists.",
+    "accountingConnectionCreatedSuccess": "Accounting connection created successfully.",
+    "accountingConnectionCreatedError": "Could not create the accounting connection.",
     "requestUrl": "Request URL",
     "requestUrlPlaceholder": "https://api.inmero.co/sigcon/create-voucher-account",
     "requestMethod": "Request method",
+    "apiKey": "API key",
+    "apiKeyPlaceholder": "Enter the API key",
+    "requestUrlRequired": "The request URL is required.",
+    "requestMethodRequired": "The request method is required.",
+    "apiKeyRequired": "The API key is required.",
     "columns": {
       "id": "ID",
       "transactionType": "Receipt type",
       "project": "Project",
       "state": "Status",
       "issuedAt": "Issue date",
-      "amount": "Amount",
       "issuedBy": "Issued by",
       "actions": "Actions"
     },
