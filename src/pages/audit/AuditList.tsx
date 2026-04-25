@@ -172,6 +172,9 @@ const AuditList = () => {
     records: number;
   } | null>(null);
   const [redownloadBusy, setRedownloadBusy] = useState(false);
+  const [exportPanelOpen, setExportPanelOpen] = useState(false);
+  /** Si true, el backend enmascara IP/correo en el archivo (no es cifrado, solo ocultación parcial). */
+  const [exportMaskPii, setExportMaskPii] = useState(true);
 
   const EXPORT_EXT: Record<ExportFormat, string> = {
     CSV: "csv",
@@ -423,6 +426,7 @@ useEffect(() => {
         action_codes: eventType ? [eventType] : undefined,
         outcomes: mapOutcomesForExport(),
         search: debouncedSearch || undefined,
+        mask_pii: exportMaskPii,
       };
       const created = await createAuditExportService(body);
       setExportMsg(t("audit.export.requested"));
@@ -545,16 +549,64 @@ useEffect(() => {
       />
 
       {showContent && !notListPerm && (
-        <div className="mt-4 overflow-hidden border shadow-md rounded-2xl border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
-          <div className="px-5 py-4 border-b border-emerald-100/90 bg-emerald-600/10 dark:border-emerald-900/40 dark:bg-emerald-900/20">
-            <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-              {t("audit.export.title")}
-            </h3>
-            <p className="mt-1 text-sm text-emerald-800/80 dark:text-emerald-200/70">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white shadow-md dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
+          <button
+            type="button"
+            onClick={() => setExportPanelOpen((o) => !o)}
+            aria-expanded={exportPanelOpen}
+            className="flex w-full items-center justify-between gap-3 border-b border-emerald-100/90 bg-emerald-600/10 px-5 py-4 text-left transition hover:bg-emerald-600/15 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
+          >
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
+                {t("audit.export.title")}
+              </h3>
+              <p className="mt-0.5 text-xs text-emerald-800/70 dark:text-emerald-200/60">
+                {exportPanelOpen
+                  ? t("audit.export.collapseHint")
+                  : t("audit.export.expandHint")}
+              </p>
+            </div>
+            <span
+              className={`shrink-0 text-emerald-700 transition-transform dark:text-emerald-300 ${
+                exportPanelOpen ? "rotate-180" : ""
+              }`}
+              aria-hidden
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </button>
+          {exportPanelOpen && (
+          <div className="p-5 space-y-5">
+            <p className="text-sm text-emerald-800/85 dark:text-emerald-200/75">
               {t("audit.export.subtitle")}
             </p>
-          </div>
-          <div className="p-5 space-y-5">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200/90 bg-white/60 px-4 py-3 dark:border-slate-600 dark:bg-gray-900/40">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                checked={exportMaskPii}
+                onChange={(e) => setExportMaskPii(e.target.checked)}
+                disabled={exportBusy}
+              />
+              <span className="text-sm text-slate-700 dark:text-slate-200">
+                <span className="font-medium">{t("audit.export.maskPiiLabel")}</span>
+                <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                  {t("audit.export.maskPiiHint")}
+                </span>
+              </span>
+            </label>
             <div>
               <p className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400">
                 {t("audit.export.format")}
@@ -657,6 +709,7 @@ useEffect(() => {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 

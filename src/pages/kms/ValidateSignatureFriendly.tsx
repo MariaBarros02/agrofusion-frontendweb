@@ -1,0 +1,356 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import AppLayoutSB from "../../components/layout/AppLayoutSB";
+import TitleTarget from "../../components/layout/TitleTarget";
+import { useTranslation } from "react-i18next";
+import { Button, Label, Select, TextInput } from "flowbite-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Ban,
+  ShieldCheck,
+  FileText,
+  User as UserIcon,
+} from "lucide-react";
+import {
+  kmsApi,
+  type SignatureListItem,
+  type SignatureValidationFriendly,
+} from "../../services/agrofusion/kms.api";
+import { KmsFeedbackModal, type KmsFeedbackVariant } from "../../components/kms/KmsFeedbackModal";
+import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
+
+/**
+ * RF-INT-18: Presentación al usuario del resultado de validación de firmas.
+ *
+ * El usuario:
+ *   - Selecciona un registro de firma existente (sin digitar nada técnico).
+ *   - El sistema invoca internamente el proceso de validación (RF-INT-17).
+ *   - La respuesta se traduce a lenguaje comprensible (Válida / Inválida /
+ *     Expirada / Revocada) y se muestran los campos mínimos requeridos:
+ *     estado, firmante, fecha de firma e identificador de documento.
+ *   - Los datos técnicos se muestran como información de solo lectura.
+ */
+export default function ValidateSignatureFriendly() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const [signatures, setSignatures] = useState<SignatureListItem[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [listError, setListError] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<SignatureValidationFriendly | null>(null);
+  const [feedback, setFeedback] = useState<{
+    variant: KmsFeedbackVariant;
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoadingList(true);
+      setListError(false);
+      try {
+        const res = await kmsApi.listSignatures({ limit: 100 });
+        if (cancelled) return;
+        setSignatures(res.data.signatures ?? []);
+      } catch {
+        if (!cancelled) setListError(true);
+      } finally {
+        if (!cancelled) setLoadingList(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectedSignature = useMemo(
+    () => signatures.find((s) => s.signature_id === selectedId) ?? null,
+    [signatures, selectedId],
+  );
+
+  const validate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedId) {
+      setFeedback({
+        variant: "warning",
+        message: t("kms.validatePresentable.missingSignature"),
+      });
+      return;
+    }
+    setLoading(true);
+    setResult(null);
+    setFeedback(null);
+    try {
+      const { data } = await kmsApi.validateSignaturePresentable(selectedId);
+      setResult(data);
+    } catch (err: unknown) {
+      setFeedback({ variant: "error", message: resolveKmsErrorMessage(t, err) });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderEstadoBadge = (estado: string) => {
+    const low = estado.toLowerCase();
+    let Icon = ShieldCheck;
+    let cls = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (low.includes("inv")) {
+      Icon = XCircle;
+      cls = "bg-red-50 text-red-700 border-red-200";
+    } else if (low.includes("exp")) {
+      Icon = Clock;
+      cls = "bg-amber-50 text-amber-700 border-amber-200";
+    } else if (low.includes("rev")) {
+      Icon = Ban;
+      cls = "bg-rose-50 text-rose-700 border-rose-200";
+    } else if (low.includes("v")) {
+      Icon = CheckCircle2;
+      cls = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    }
+    return (
+      <span
+        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${cls}`}
+      >
+        <Icon className="h-4 w-4" aria-hidden />
+        {estado}
+      </span>
+    );
+  };
+
+  const formatDate = (iso: string | null | undefined) => {
+    if (!iso) return "—";
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso;
+    }
+  };
+
+  return (
+    <AppLayoutSB>
+      <TitleTarget title="kms.validatePresentable.title" description="kms.validatePresentable.subtitle" />
+      <div className="p-4 m-0 mt-3 bg-white border shadow-sm rounded-2xl h-[calc(100vh-130px)] overflow-auto dark:border-gray-600 dark:bg-gray-700">
+        <KmsFeedbackModal
+          open={!!feedback}
+          variant={feedback?.variant ?? "error"}
+          message={feedback?.message ?? ""}
+          onAccept={() => setFeedback(null)}
+        />
+
+        <form onSubmit={validate} className="max-w-5xl mx-auto">
+          <div className="mb-8 rounded-xl border border-sky-100 bg-sky-50/80 p-5 dark:border-slate-600 dark:bg-slate-800/60">
+            <Label htmlFor="sig" className="text-gray-900 dark:text-white text-base font-semibold">
+              {t("kms.validatePresentable.selectLabel")}
+            </Label>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {t("kms.validatePresentable.selectHelp")}
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+              <Select
+                id="sig"
+                value={selectedId}
+                disabled={loadingList}
+                onChange={(e) => {
+                  setSelectedId(e.target.value);
+                  setResult(null);
+                }}
+              >
+                <option value="">{t("kms.validatePresentable.chooseSignature")}</option>
+                {signatures.map((s) => {
+                  const label = `${
+                    s.signed_at ? new Date(s.signed_at).toLocaleString() : "—"
+                  }  ·  ${s.document_hash.slice(0, 10)}…`;
+                  return (
+                    <option key={s.signature_id} value={s.signature_id}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </Select>
+              <Button
+                type="submit"
+                disabled={loading || !selectedId}
+                className="bg-blue-600 enabled:hover:bg-blue-700"
+              >
+                {loading ? "…" : t("kms.validatePresentable.validateBtn")}
+              </Button>
+            </div>
+            {loadingList && (
+              <p className="mt-2 text-sm text-gray-500">{t("kms.validatePresentable.loading")}</p>
+            )}
+            {listError && (
+              <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
+                {t("kms.validatePresentable.loadError")}
+              </p>
+            )}
+            {!loadingList && !listError && signatures.length === 0 && (
+              <p className="mt-2 text-sm text-gray-500">{t("kms.validatePresentable.empty")}</p>
+            )}
+          </div>
+
+          {selectedSignature && !result && (
+            <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm dark:border-slate-600 dark:bg-slate-800/50">
+              <p className="text-gray-700 dark:text-gray-200">
+                {t("kms.validatePresentable.aboutToValidate")}
+              </p>
+            </div>
+          )}
+
+          {result && (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      {t("kms.validatePresentable.resultTitle")}
+                    </p>
+                    <div className="mt-2">{renderEstadoBadge(result.estado)}</div>
+                  </div>
+                  <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+                    <p>
+                      <span className="font-semibold">ID Validación:</span>{" "}
+                      <span className="font-mono">{result.validation_id}</span>
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-gray-700 dark:text-gray-200">
+                  {result.resultado_general}
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                  <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                    <UserIcon className="h-5 w-5 text-blue-600" />
+                    {t("kms.validatePresentable.signerBlock")}
+                  </h3>
+                  <dl className="space-y-3 text-sm">
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.signerName")}
+                      </dt>
+                      <dd className="font-medium text-gray-900 dark:text-white">
+                        {result.firmante || "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.signerEmail")}
+                      </dt>
+                      <dd className="font-medium text-gray-900 dark:text-white">
+                        {result.firmante_email || "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.signedAt")}
+                      </dt>
+                      <dd className="font-medium text-gray-900 dark:text-white">
+                        {formatDate(result.fecha_firma)}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+                  <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                    <FileText className="h-5 w-5 text-emerald-600" />
+                    {t("kms.validatePresentable.documentBlock")}
+                  </h3>
+                  <dl className="space-y-3 text-sm">
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.documentId")}
+                      </dt>
+                      <dd className="font-mono text-xs break-all text-gray-900 dark:text-white">
+                        {result.identificador_documento || "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.documentType")}
+                      </dt>
+                      <dd className="font-medium text-gray-900 dark:text-white">
+                        {result.tipo_documento || "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500 dark:text-gray-400">
+                        {t("kms.validatePresentable.signingReason")}
+                      </dt>
+                      <dd className="font-medium text-gray-900 dark:text-white">
+                        {result.razon_firma || "—"}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-6 shadow-sm dark:border-slate-600 dark:bg-slate-800/60">
+                <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                  <ShieldCheck className="h-5 w-5 text-violet-600" />
+                  {t("kms.validatePresentable.technicalBlock")}
+                </h3>
+                <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+                  {t("kms.validatePresentable.technicalHint")}
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>{t("kms.validatePresentable.hash")}</Label>
+                    <TextInput
+                      readOnly
+                      value={result.datos_tecnicos.hash_documento ?? ""}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label>{t("kms.validatePresentable.hashAlg")}</Label>
+                    <TextInput readOnly value={result.datos_tecnicos.algoritmo_hash ?? ""} />
+                  </div>
+                  <div>
+                    <Label>{t("kms.validatePresentable.signatureFormat")}</Label>
+                    <TextInput readOnly value={result.datos_tecnicos.formato_firma ?? ""} />
+                  </div>
+                  <div>
+                    <Label>{t("kms.validatePresentable.signatureAlg")}</Label>
+                    <TextInput readOnly value={result.datos_tecnicos.algoritmo_firma ?? ""} />
+                  </div>
+                  <div>
+                    <Label>{t("kms.validatePresentable.certificateId")}</Label>
+                    <TextInput
+                      readOnly
+                      value={result.datos_tecnicos.certificate_id ?? ""}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label>{t("kms.validatePresentable.certificateSerial")}</Label>
+                    <TextInput readOnly value={result.datos_tecnicos.certificate_serial ?? ""} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>{t("kms.validatePresentable.certificateFingerprint")}</Label>
+                    <TextInput
+                      readOnly
+                      value={result.datos_tecnicos.certificate_fingerprint ?? ""}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 flex flex-wrap justify-end gap-3">
+            <Button color="light" type="button" onClick={() => navigate("/kms")}>
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </AppLayoutSB>
+  );
+}
