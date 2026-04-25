@@ -1234,7 +1234,7 @@
             "ready": "Informe listo",
             "failed": "Exportación fallida",
             "forbidden": "Sin permiso para exportar",
-            "hashHint": "SHA-256 (integridad)",
+            "hashHint": "SHA-256 del lote (contenido de registros). Con KMS activo, la descarga es un ZIP con el archivo de datos, manifest.json (batch_hash, metadatos) y la firma queda asociada en el sistema.",
             "records": "registros",
             "download": "Descargar archivo",
             "downloading": "Descargando…",

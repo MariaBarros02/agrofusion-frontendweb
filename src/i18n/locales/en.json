@@ -1199,7 +1199,7 @@
     "ready": "Report ready",
     "failed": "Export failed",
     "forbidden": "No permission to export",
-    "hashHint": "SHA-256 (integrity)",
+    "hashHint": "SHA-256 of the data batch. With an active signing key, the download is a ZIP with the data file, manifest.json (batch_hash, metadata), and the signature is registered in the system.",
     "records": "records",
     "download": "Download file",
     "downloading": "Downloading…",
