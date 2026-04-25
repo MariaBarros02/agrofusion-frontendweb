@@ -2,11 +2,17 @@ import { Link } from "react-router-dom";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
-import { KeyRound, FileBadge, ShieldCheck, ArrowRight, PenSquare, RefreshCcw } from "lucide-react";
+import {
+  KeyRound,
+  ArrowRight,
+  PenSquare,
+  RefreshCcw,
+  BadgeCheck,
+  Ban,
+  ListChecks,
+} from "lucide-react";
 
-/**
- * Punto de entrada KMS: enlaces a formularios reales contra el backend de auditoría.
- */
+
 export default function KmsHome() {
   const { t } = useTranslation();
 
@@ -19,20 +25,6 @@ export default function KmsHome() {
       accent: "from-sky-500 to-blue-600",
     },
     {
-      to: "/kms/certificado",
-      title: t("kms.home.cardCert"),
-      desc: t("kms.home.cardCertDesc"),
-      icon: FileBadge,
-      accent: "from-emerald-500 to-teal-600",
-    },
-    {
-      to: "/kms/verificar-firma",
-      title: t("kms.home.cardVerify"),
-      desc: t("kms.home.cardVerifyDesc"),
-      icon: ShieldCheck,
-      accent: "from-violet-500 to-indigo-600",
-    },
-    {
       to: "/kms/firmar",
       title: t("kms.home.cardSign"),
       desc: t("kms.home.cardSignDesc"),
@@ -40,11 +32,32 @@ export default function KmsHome() {
       accent: "from-amber-500 to-orange-600",
     },
     {
+      to: "/kms/validar-firma",
+      title: t("kms.home.cardValidatePresentable"),
+      desc: t("kms.home.cardValidatePresentableDesc"),
+      icon: BadgeCheck,
+      accent: "from-cyan-500 to-sky-600",
+    },
+    {
+      to: "/kms/consultar-firmas",
+      title: t("kms.home.cardQuery"),
+      desc: t("kms.home.cardQueryDesc"),
+      icon: ListChecks,
+      accent: "from-indigo-500 to-violet-600",
+    },
+    {
       to: "/kms/rotar-clave",
       title: t("kms.home.cardRotate"),
       desc: t("kms.home.cardRotateDesc"),
       icon: RefreshCcw,
       accent: "from-fuchsia-500 to-pink-600",
+    },
+    {
+      to: "/kms/revocar",
+      title: t("kms.home.cardRevoke"),
+      desc: t("kms.home.cardRevokeDesc"),
+      icon: Ban,
+      accent: "from-rose-500 to-red-600",
     },
   ];
 
