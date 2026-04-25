@@ -1147,6 +1147,7 @@
         "KEY_NOT_FOUND": "No se encontró la clave indicada.",
         "KEY_CREATION_FAILED": "No se pudo crear la clave. Verifica los datos e inténtalo de nuevo.",
         "KEY_ALIAS_EXISTS": "Ya existe una clave activa con ese alias en el proyecto.",
+        "ACTIVE_KEY_ALREADY_EXISTS": "Ya existe una clave activa con el mismo propósito en el proyecto. Rota o revoca la clave existente para poder crear otra.",
         "DUPLICATE_KEY_FINGERPRINT": "Ya existe una clave con la misma huella digital.",
         "INVALID_STATUS": "El filtro de estado no es válido.",
         "INVALID_PURPOSE": "El propósito de clave no es válido.",

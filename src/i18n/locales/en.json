@@ -1107,6 +1107,7 @@
         "KEY_NOT_FOUND": "The specified key was not found.",
         "KEY_CREATION_FAILED": "Could not create the key. Check the data and try again.",
         "KEY_ALIAS_EXISTS": "An active key with this alias already exists in the project.",
+        "ACTIVE_KEY_ALREADY_EXISTS": "An active key for the same purpose already exists in this project. Rotate or revoke the existing key before creating another.",
         "DUPLICATE_KEY_FINGERPRINT": "A key with the same fingerprint already exists.",
         "INVALID_STATUS": "The status filter is not valid.",
         "INVALID_PURPOSE": "The key purpose is not valid.",
