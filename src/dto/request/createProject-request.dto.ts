@@ -97,6 +97,7 @@ export const PROJECT_EXTERNAL_ENDPOINT_SPECS: ProjectEndpointRegistrationItem[] 
       { displayName: "endpointParamSearchUserEmail", allowedTypes: ["string"], disabled: true, placeholderKey: "endpointParamSearchUserEmailPlaceholder" },
     ],
     responseBodyFields: [
+      {displayName: "endpointFieldUserId", allowedTypes: ["string", "number"] },
       { displayName: "endpointFieldUserName", allowedTypes: ["string"] },
       { displayName: "endpointFieldUserRoles", allowedTypes: ["array", "string", "number"] },
       { displayName: "endpointFieldUserBirthday", allowedTypes: ["string", "datetime"] },

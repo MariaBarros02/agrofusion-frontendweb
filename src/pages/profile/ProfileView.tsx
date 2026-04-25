@@ -89,22 +89,11 @@ export default function ProfileView({
             <p>{formatGender(firstExternalUser.gender_id)}</p>
           </div>
         )}
-        {hasExternal && (
-          <div>
-            <p className="text-lg font-bold">{t("profile.telephone")}</p>
-            <p>{firstExternalUser.phone}</p>
-          </div>
-        )}
         <div>
           <p className="text-lg font-bold">{t("profile.email")}</p>
           <p>{userDetails?.email}</p>
         </div>
-        {hasExternal && (
-          <div>
-            <p className="text-lg font-bold">{t("profile.address")}</p>
-            <p>{firstExternalUser.address}</p>
-          </div>
-        )}
+
       </div>
              <div className="w-full ">
           <p className="text-lg font-bold mt-2">

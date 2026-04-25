@@ -80,4 +80,7 @@ export interface ListPermissionsResponse{
 export interface PermissionBasicResponse {
     permission_id: string;
     permission_name: string;
+    module_code?:string;
+    module_name?: string;
+    action_name?: string;
 }
