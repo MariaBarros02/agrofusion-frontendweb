@@ -8,6 +8,7 @@
         "logout": "Cerrar Sesión",
         "goTo": "Ir a",
         "go": "Ir",
+        "error": "Error",
         "search": "Buscar",
         "state": "Estado",
         "active": "Activo",
@@ -1259,7 +1260,8 @@
         "ROLES": "Roles",
         "PERMISSIONS" : "Permisos",
         "SSO":"SSO",
-        "AUTH": "Autenticación"
+        "AUTH": "Autenticación",
+        "AUDIT_EXPORT": "Exportación de Auditoría"
     },
     "externalErrors": {
         "title": "Errores Proyectos Externos",

@@ -242,6 +242,20 @@ const AuditList = () => {
           );
         }
 
+        if (value === "ERROR") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-full">
+              {t("common.error")}
+            </span>
+          );
+        }
+        if (value === "FAILURE") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-white bg-orange-500 rounded-full">
+              {t("common.rejected")}
+            </span>
+          );
+        }
         return value;
       },
     },
