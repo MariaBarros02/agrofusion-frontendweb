@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import {
   KeyRound,
   ArrowRight,
-  PenSquare,
   RefreshCcw,
   BadgeCheck,
   Ban,
@@ -23,13 +22,6 @@ export default function KmsHome() {
       desc: t("kms.home.cardCreateKeyDesc"),
       icon: KeyRound,
       accent: "from-sky-500 to-blue-600",
-    },
-    {
-      to: "/kms/firmar",
-      title: t("kms.home.cardSign"),
-      desc: t("kms.home.cardSignDesc"),
-      icon: PenSquare,
-      accent: "from-amber-500 to-orange-600",
     },
     {
       to: "/kms/validar-firma",

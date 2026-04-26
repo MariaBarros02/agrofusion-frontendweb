@@ -36,7 +36,6 @@ import ErrorList from "../pages/audit/ErrorList";
 import KmsHome from "../pages/kms/KmsHome";
 import ValidateSignatureFriendly from "../pages/kms/ValidateSignatureFriendly";
 import CreateKey from "../pages/kms/CreateKey";
-import SignDocument from "../pages/kms/SignDocument";
 import RotateKey from "../pages/kms/RotateKey";
 import RevokeResource from "../pages/kms/RevokeResource";
 import QuerySignatures from "../pages/kms/QuerySignatures";
@@ -207,7 +206,6 @@ export function AppRouter() {
           {/* KMS / Firma digital (API auditoría) — alineado con RF-INT-11 … RF-INT-20 */}
           <Route path="/kms" element={<ModuleRouteGuard moduleCode="AUDIT"><KmsHome /></ModuleRouteGuard>} />
           <Route path="/kms/crear-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><CreateKey /></ModuleRouteGuard>} />
-          <Route path="/kms/firmar" element={<ModuleRouteGuard moduleCode="AUDIT"><SignDocument /></ModuleRouteGuard>} />
           <Route path="/kms/validar-firma" element={<ModuleRouteGuard moduleCode="AUDIT"><ValidateSignatureFriendly /></ModuleRouteGuard>} />
           <Route path="/kms/consultar-firmas" element={<ModuleRouteGuard moduleCode="AUDIT"><QuerySignatures /></ModuleRouteGuard>} />
           <Route path="/kms/rotar-clave" element={<ModuleRouteGuard moduleCode="AUDIT"><RotateKey /></ModuleRouteGuard>} />

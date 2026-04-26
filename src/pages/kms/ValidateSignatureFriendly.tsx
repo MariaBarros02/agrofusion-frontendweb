@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
-import { Button, Label, Select, TextInput } from "flowbite-react";
+import { Button, Label, TextInput } from "flowbite-react";
 import {
   CheckCircle2,
   XCircle,
@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   FileText,
   User as UserIcon,
+  Search,
 } from "lucide-react";
 import {
   kmsApi,
@@ -37,7 +38,11 @@ export default function ValidateSignatureFriendly() {
   const navigate = useNavigate();
 
   const [signatures, setSignatures] = useState<SignatureListItem[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
+  const [totalInSystem, setTotalInSystem] = useState(0);
+  const [filterText, setFilterText] = useState("");
+  /** true tras el primer fetch (éxito o error) */
+  const [listFetchDone, setListFetchDone] = useState(false);
+  const [loadingList, setLoadingList] = useState(false);
   const [listError, setListError] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,25 +52,74 @@ export default function ValidateSignatureFriendly() {
     message: string;
   } | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoadingList(true);
-      setListError(false);
-      try {
-        const res = await kmsApi.listSignatures({ limit: 100 });
-        if (cancelled) return;
-        setSignatures(res.data.signatures ?? []);
-      } catch {
-        if (!cancelled) setListError(true);
-      } finally {
-        if (!cancelled) setLoadingList(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  /** Panel bajo el input: abierto tras cargar, o al enfocar con datos */
+  const [listOpen, setListOpen] = useState(false);
+  const comboboxRef = useRef<HTMLDivElement>(null);
+
+  const loadSignatureList = useCallback(async () => {
+    setLoadingList(true);
+    setListError(false);
+    setSelectedId("");
+    setResult(null);
+    setListOpen(true);
+    try {
+      const res = await kmsApi.listSignatures({ limit: 1000, offset: 0 });
+      setSignatures(res.data.signatures ?? []);
+      setTotalInSystem(res.data.total ?? 0);
+    } catch {
+      setListError(true);
+      setSignatures([]);
+      setTotalInSystem(0);
+    } finally {
+      setLoadingList(false);
+      setListFetchDone(true);
+      setListOpen(true);
+    }
   }, []);
+
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      const el = comboboxRef.current;
+      if (el && !el.contains(e.target as Node)) setListOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  const formatSignatureLabel = (s: SignatureListItem) => {
+    const when = s.signed_at ? new Date(s.signed_at).toLocaleString() : "—";
+    const h = s.document_hash?.length ? `${s.document_hash.slice(0, 10)}…` : "—";
+    const dtype = s.document_type?.trim();
+    return dtype ? `${when}  ·  ${dtype}  ·  ${h}` : `${when}  ·  ${h}`;
+  };
+
+  const filteredSignatures = useMemo(() => {
+    const q = filterText.trim().toLowerCase();
+    if (!q) return signatures;
+    return signatures.filter((s) => {
+      if (selectedId && s.signature_id === selectedId) return true;
+      const blob = [
+        s.signed_at,
+        s.document_hash,
+        s.signature_id,
+        s.document_id,
+        s.document_type,
+        s.key_id,
+        s.hash_algorithm,
+        s.signer_user_id,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return blob.includes(q);
+    });
+  }, [signatures, filterText, selectedId]);
+
+  useEffect(() => {
+    if (selectedId && !filteredSignatures.some((s) => s.signature_id === selectedId)) {
+      setSelectedId("");
+    }
+  }, [filteredSignatures, selectedId]);
 
   const selectedSignature = useMemo(
     () => signatures.find((s) => s.signature_id === selectedId) ?? null,
@@ -121,6 +175,9 @@ export default function ValidateSignatureFriendly() {
     );
   };
 
+  const listPanelVisible =
+    loadingList || (listOpen && (listFetchDone || listError));
+
   const formatDate = (iso: string | null | undefined) => {
     if (!iso) return "—";
     try {
@@ -149,47 +206,134 @@ export default function ValidateSignatureFriendly() {
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               {t("kms.validatePresentable.selectHelp")}
             </p>
-            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
-              <Select
-                id="sig"
-                value={selectedId}
-                disabled={loadingList}
-                onChange={(e) => {
-                  setSelectedId(e.target.value);
-                  setResult(null);
-                }}
-              >
-                <option value="">{t("kms.validatePresentable.chooseSignature")}</option>
-                {signatures.map((s) => {
-                  const label = `${
-                    s.signed_at ? new Date(s.signed_at).toLocaleString() : "—"
-                  }  ·  ${s.document_hash.slice(0, 10)}…`;
-                  return (
-                    <option key={s.signature_id} value={s.signature_id}>
-                      {label}
-                    </option>
-                  );
-                })}
-              </Select>
-              <Button
-                type="submit"
-                disabled={loading || !selectedId}
-                className="bg-blue-600 enabled:hover:bg-blue-700"
-              >
-                {loading ? "…" : t("kms.validatePresentable.validateBtn")}
-              </Button>
+            <div className="mt-4 space-y-3">
+              <div>
+                <Label
+                  htmlFor="signature-search"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {t("kms.validatePresentable.searchLabel")}
+                </Label>
+                <div ref={comboboxRef} className="relative mt-1">
+                  <div className="relative min-w-0">
+                    <Search
+                      className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-gray-400"
+                      aria-hidden
+                    />
+                    <TextInput
+                      id="signature-search"
+                      type="search"
+                      role="combobox"
+                      aria-expanded={listPanelVisible}
+                      aria-controls="signature-listbox"
+                      aria-autocomplete="list"
+                      value={filterText}
+                      disabled={loadingList}
+                      onChange={(e) => {
+                        setFilterText(e.target.value);
+                        setSelectedId("");
+                        if (listFetchDone) setListOpen(true);
+                      }}
+                      onFocus={() => {
+                        if (!loadingList && (!listFetchDone || listError)) {
+                          void loadSignatureList();
+                        } else if (listFetchDone && !listError) {
+                          setListOpen(true);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                        }
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          setListOpen(false);
+                        }
+                      }}
+                      placeholder={t("kms.validatePresentable.searchPlaceholder")}
+                      className="pl-10"
+                      autoComplete="off"
+                    />
+                  </div>
+                  {listPanelVisible && (
+                    <div
+                      id="signature-listbox"
+                      role="listbox"
+                      aria-label={t("kms.validatePresentable.selectLabel")}
+                      className="absolute left-0 right-0 top-full z-30 mt-1 max-h-60 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"
+                    >
+                      {loadingList ? (
+                        <p className="p-3 text-sm text-gray-500 dark:text-gray-400">
+                          {t("kms.validatePresentable.loading")}
+                        </p>
+                      ) : listError ? (
+                        <p className="p-3 text-sm text-amber-700 dark:text-amber-400">
+                          {t("kms.validatePresentable.loadError")}
+                        </p>
+                      ) : filteredSignatures.length === 0 ? (
+                        <p className="p-3 text-sm text-gray-500 dark:text-gray-400">
+                          {signatures.length === 0
+                            ? t("kms.validatePresentable.empty")
+                            : t("kms.validatePresentable.noFilterMatches")}
+                        </p>
+                      ) : (
+                        <ul className="max-h-60 overflow-y-auto overflow-x-hidden p-1">
+                          {filteredSignatures.map((s) => {
+                            const active = s.signature_id === selectedId;
+                            return (
+                              <li key={s.signature_id}>
+                                <button
+                                  type="button"
+                                  role="option"
+                                  aria-selected={active}
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => {
+                                    setSelectedId(s.signature_id);
+                                    setFilterText(formatSignatureLabel(s));
+                                    setResult(null);
+                                    setListOpen(false);
+                                  }}
+                                  className={[
+                                    "w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
+                                    active
+                                      ? "bg-sky-100 font-medium text-sky-900 dark:bg-sky-900/40 dark:text-sky-100"
+                                      : "text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-700/80",
+                                  ].join(" ")}
+                                >
+                                  {formatSignatureLabel(s)}
+                                </button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {t("kms.validatePresentable.beforeSearchHint")}
+                </p>
+                {listFetchDone && !loadingList && !listError && (
+                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                    {t("kms.validatePresentable.listMeta", {
+                      shown: filteredSignatures.length,
+                      loaded: signatures.length,
+                      total: totalInSystem,
+                    })}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <Button
+                  type="submit"
+                  disabled={loading || !selectedId}
+                  className="w-full bg-blue-600 enabled:hover:bg-blue-700 sm:w-auto sm:min-w-[9rem]"
+                >
+                  {loading ? "…" : t("kms.validatePresentable.validateBtn")}
+                </Button>
+              </div>
             </div>
-            {loadingList && (
-              <p className="mt-2 text-sm text-gray-500">{t("kms.validatePresentable.loading")}</p>
-            )}
-            {listError && (
-              <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
-                {t("kms.validatePresentable.loadError")}
-              </p>
-            )}
-            {!loadingList && !listError && signatures.length === 0 && (
-              <p className="mt-2 text-sm text-gray-500">{t("kms.validatePresentable.empty")}</p>
-            )}
           </div>
 
           {selectedSignature && !result && (
