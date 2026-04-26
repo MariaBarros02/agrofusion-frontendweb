@@ -213,6 +213,7 @@ const AuditFilters = ({
                 <option value="">{t("audit.filters.all")}</option>
                 <option value="SUCCESS">{t("common.success")}</option>
                 <option value="FAILED">{t("common.rejected")}</option>
+                <option value="ERROR">{t("common.error")}</option>
               </Select>
             </div>
 

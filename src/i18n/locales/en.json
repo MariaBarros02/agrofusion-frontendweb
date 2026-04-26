@@ -30,6 +30,7 @@
         "passport": "Passport",
         "forID": "Foreign identification document",
         "pep": "PEP",
+        "error": "Error",
         "nitOtherCountry": "Foreign NIT",
         "nuip": "NUIP",
         "selectOption": "Select an option",
