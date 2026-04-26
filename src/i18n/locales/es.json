@@ -1261,7 +1261,8 @@
         "PERMISSIONS" : "Permisos",
         "SSO":"SSO",
         "AUTH": "Autenticación",
-        "AUDIT_EXPORT": "Exportación de Auditoría"
+        "AUDIT_EXPORT": "Exportación de Auditoría",
+        "ACCOUNTING_VOUCHERS": "Comprobantes contables"
     },
     "externalErrors": {
         "title": "Errores Proyectos Externos",
