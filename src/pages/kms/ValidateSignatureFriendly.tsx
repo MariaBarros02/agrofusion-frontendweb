@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AppLayoutSB from "../../components/layout/AppLayoutSB";
 import TitleTarget from "../../components/layout/TitleTarget";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,8 @@ import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
 export default function ValidateSignatureFriendly() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const preselectFromUrl = useRef(false);
 
   const [signatures, setSignatures] = useState<SignatureListItem[]>([]);
   const [totalInSystem, setTotalInSystem] = useState(0);
@@ -59,7 +61,9 @@ export default function ValidateSignatureFriendly() {
   const loadSignatureList = useCallback(async () => {
     setLoadingList(true);
     setListError(false);
-    setSelectedId("");
+    if (!preselectFromUrl.current) {
+      setSelectedId("");
+    }
     setResult(null);
     setListOpen(true);
     try {
@@ -77,6 +81,13 @@ export default function ValidateSignatureFriendly() {
     }
   }, []);
 
+  const formatSignatureLabel = useCallback((s: SignatureListItem) => {
+    const when = s.signed_at ? new Date(s.signed_at).toLocaleString() : "—";
+    const h = s.document_hash?.length ? `${s.document_hash.slice(0, 10)}…` : "—";
+    const dtype = s.document_type?.trim();
+    return dtype ? `${when}  ·  ${dtype}  ·  ${h}` : `${when}  ·  ${h}`;
+  }, []);
+
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const el = comboboxRef.current;
@@ -86,12 +97,31 @@ export default function ValidateSignatureFriendly() {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  const formatSignatureLabel = (s: SignatureListItem) => {
-    const when = s.signed_at ? new Date(s.signed_at).toLocaleString() : "—";
-    const h = s.document_hash?.length ? `${s.document_hash.slice(0, 10)}…` : "—";
-    const dtype = s.document_type?.trim();
-    return dtype ? `${when}  ·  ${dtype}  ·  ${h}` : `${when}  ·  ${h}`;
-  };
+  useEffect(() => {
+    const id = searchParams.get("signatureId");
+    if (!id?.trim()) return;
+    preselectFromUrl.current = true;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await kmsApi.getSignature(id.trim());
+        if (cancelled) return;
+        setSelectedId(data.signature_id);
+        setFilterText(formatSignatureLabel(data));
+        setSignatures((prev) => {
+          if (prev.some((s) => s.signature_id === data.signature_id)) return prev;
+          return [data, ...prev];
+        });
+        setListFetchDone(true);
+        setListError(false);
+      } catch {
+        if (!cancelled) preselectFromUrl.current = false;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, formatSignatureLabel]);
 
   const filteredSignatures = useMemo(() => {
     const q = filterText.trim().toLowerCase();

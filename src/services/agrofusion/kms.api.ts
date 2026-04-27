@@ -77,6 +77,8 @@ export type SignatureQueryItem = {
   signer_name: string | null;
   signed_at: string;
   document_id: string | null;
+  key_algorithm?: string | null;
+  export_name?: string | null;
 };
 
 /** Respuesta paginada de /kms/signatures/query (RF-INT-19) */
@@ -94,6 +96,8 @@ export type SignatureQueryDetail = SignatureQueryItem & {
   signing_reason: string | null;
   key_id: string | null;
   certificate_id: string | null;
+  key_algorithm?: string | null;
+  export_name?: string | null;
 };
 
 /** Evento de auditoría KMS (RF-INT-19) */
@@ -114,8 +118,16 @@ export type QuerySignaturesFilters = {
   date_from?: string;
   date_to?: string;
   signer_user_id?: string;
+  /** Subcadena en users.name (emisor / firmante) */
+  signer_name?: string;
+  /** Búsqueda en UUID, hash, nombre de export */
+  q?: string;
+  key_algorithm?: string;
   document_type?: string;
-  validation_status?: "valid" | "invalid" | "expired" | "revoked";
+  /** Solo lotes de exportación de auditoría firmados (AUDIT_EXPORT) */
+  audit_export_only?: boolean;
+  validation_status?: "valid" | "invalid" | "expired" | "revoked" | "unknown";
+  limit?: number;
   offset?: number;
 };
 
@@ -227,10 +239,15 @@ export const kmsApi = {
         ...(filters.date_from ? { date_from: filters.date_from } : {}),
         ...(filters.date_to ? { date_to: filters.date_to } : {}),
         ...(filters.signer_user_id ? { signer_user_id: filters.signer_user_id } : {}),
+        ...(filters.signer_name ? { signer_name: filters.signer_name } : {}),
+        ...(filters.q ? { q: filters.q } : {}),
+        ...(filters.key_algorithm ? { key_algorithm: filters.key_algorithm } : {}),
         ...(filters.document_type ? { document_type: filters.document_type } : {}),
+        ...(filters.audit_export_only === true ? { audit_export_only: true } : {}),
         ...(filters.validation_status
           ? { validation_status: filters.validation_status }
           : {}),
+        ...(filters.limit != null ? { limit: filters.limit } : {}),
         ...(filters.offset != null ? { offset: filters.offset } : {}),
       },
     }),
