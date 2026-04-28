@@ -41,7 +41,7 @@ export function resolveKmsErrorMessage(t: TFunction, err: unknown): string {
     const key = `errors.${code}`;
     const msg = t(key);
     if (msg !== key) return msg;
-    return key;
+    return code;
   }
 
   if (!Array.isArray(detail) && detail?.msg) {
