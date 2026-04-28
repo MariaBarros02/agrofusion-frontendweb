@@ -52,9 +52,11 @@ const EditRoles = () => {
   );
   const navigate = useNavigate();
   const [alert, setAlert] = useState<AlertState>(null);
-  const [availablePermissions, setAvailablePermissions] = useState<
-    PermissionBasicResponse[]
-  >([]);
+  // const [availablePermissions, setAvailablePermissions] = useState<
+  //   PermissionBasicResponse[]
+  // >([]);
+  const [allPermissions, setAllPermissions] = useState<PermissionBasicResponse[]>([]);
+
   const [rolePermissions, setRolePermissions] = useState<
     PermissionBasicResponse[]
   >([]);
@@ -72,21 +74,29 @@ const EditRoles = () => {
     }
   };
   const loadAvailablePermissions = async () => {
-    try {
-      const allPermissions = await getPermissionsBasicService();
+  try {
+    const permissions = await getPermissionsBasicService();
+    setAllPermissions(permissions);
+  } catch (error) {
+    console.log(error);
+  }
+};
+  // const loadAvailablePermissions = async () => {
+  //   try {
+  //     const allPermissions = await getPermissionsBasicService();
 
-      const filtered = allPermissions.filter(
-        (perm) =>
-          !rolePermissions.some(
-            (rolePerm) =>
-              String(rolePerm.permission_id) === String(perm.permission_id),
-          ),
-      );
-      setAvailablePermissions(filtered);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     const filtered = allPermissions.filter(
+  //       (perm) =>
+  //         !rolePermissions.some(
+  //           (rolePerm) =>
+  //             String(rolePerm.permission_id) === String(perm.permission_id),
+  //         ),
+  //     );
+  //     setAvailablePermissions(filtered);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   useEffect(() => {
     if (roleId) {
@@ -103,6 +113,13 @@ const EditRoles = () => {
     setRolePermissions(updated);
     formik.setFieldValue("permissions", updated);
   };
+    const availablePermissions = allPermissions.filter(
+  (perm) =>
+    !rolePermissions.some(
+      (rolePerm) =>
+        String(rolePerm.permission_id) === String(perm.permission_id),
+    ),
+);
 
   const groupedAvailablePermissions = availablePermissions.reduce(
     (acc, perm) => {
