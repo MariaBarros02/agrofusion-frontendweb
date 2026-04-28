@@ -40,6 +40,7 @@ import RotateKey from "../pages/kms/RotateKey";
 import RevokeResource from "../pages/kms/RevokeResource";
 import QuerySignatures from "../pages/kms/QuerySignatures";
 import ListChecks from "../pages/accounting-vouchers/ListChecks";
+import ViewCheck from "../pages/accounting-vouchers/ViewCheck";
 /**
  * Router Principal de la Aplicación.
  * Define la estructura de navegación utilizando React Router DOM.
@@ -159,6 +160,14 @@ export function AppRouter() {
             element={
               <ModuleRouteGuard moduleCode="ACCOUNTING_VOUCHERS">
                 <ListChecks />
+              </ModuleRouteGuard>
+            }
+          />
+          <Route
+            path="/accounting-vouchers/:checkId"
+            element={
+              <ModuleRouteGuard moduleCode="ACCOUNTING_VOUCHERS">
+                <ViewCheck />
               </ModuleRouteGuard>
             }
           />
