@@ -1254,6 +1254,7 @@
         "SSO":"SSO",
         "AUTH": "Autenticación",
         "AUDIT_EXPORT": "Exportación de Auditoría",
+        "CHECKS": "Contabilidad",
         "ACCOUNTING_VOUCHERS": "Comprobantes contables"
 
     },
