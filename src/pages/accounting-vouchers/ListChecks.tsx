@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button, Label, Select, TextInput, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 import { HiSearch, HiCalendar } from "react-icons/hi";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,6 +24,7 @@ import type {
 
 const ListChecks = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
@@ -127,7 +129,7 @@ const ListChecks = () => {
         const response = await getAccountingConnectionService();
         setConnectionExists(response.exists);
         setAccountingConnection(response.exists ? response : null);
-      } catch (error) {
+      } catch {
         setConnectionExists(false);
         setAccountingConnection(null);
       }
@@ -313,7 +315,7 @@ const ListChecks = () => {
           {
             label: t("checks.view"),
             onClick: (row) => {
-              console.log("abrir detalle", row.id);
+              navigate(`/accounting-vouchers/${row.id}`);
             },
           },
           {
