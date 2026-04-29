@@ -561,6 +561,50 @@
             "intervals": {
                 "monthly": "Mensual",
                 "yearly": "Anual"
+            },
+            "result": {
+                "normalizedJson": "JSON normalizado",
+                "generalBatchInfo": "Información general del lote contable recibido",
+                "metadata": "Metadatos",
+                "date": "Fecha",
+                "action": "Acción",
+                "receivedAccountingBatch": "Lote contable recibido",
+                "identification": "Identificación",
+                "system": "Sistema",
+                "result": "Resultado",
+                "httpOk": "HTTP 200",
+                "amountsAndDocuments": "Montos y documentos",
+                "consolidatedTotals": "Totales consolidados de facturas y pagos",
+                "summary": "Resumen",
+                "total": "Total",
+                "totalDocuments": "Documentos totales",
+                "invoicesCount": "Facturas",
+                "paymentsCount": "Pagos",
+                "queriedPeriod": "Periodo consultado",
+                "invoicesTitle": "Facturas",
+                "invoicesDescription": "Una línea por cada factura recibida",
+                "invoicesBadge": "Facturas",
+                "invoiceEmpty": "No se encontraron facturas para el periodo consultado.",
+                "paymentsTitle": "Pagos",
+                "paymentsDescription": "Una línea por cada transacción recibida",
+                "transactionsBadge": "Transacciones",
+                "paymentEmpty": "No se encontraron pagos para el periodo consultado.",
+                "type": "Tipo",
+                "amount": "Monto",
+                "reference": "Referencia",
+                "status": "Estado",
+                "paymentMethod": "Medio de pago",
+                "statuses": {
+                    "ACTIVE": "Activo",
+                    "PENDING": "Pendiente",
+                    "COMPLETED": "Completado",
+                    "UNKNOWN": "Desconocido",
+                    "FAILED": "Fallido",
+                    "CANCELLED": "Cancelado",
+                    "PAID": "Pagado",
+                    "OPEN": "Abierto",
+                    "PROCESSING": "En proceso"
+                }
             }
         },
         "create": {
@@ -1156,10 +1200,14 @@
         "KEY_EXPIRED": "La clave ha expirado.",
         "KEY_PURPOSE_INVALID": "La clave no tiene el propósito adecuado para esta operación.",
         "INVALID_HASH_FORMAT": "Formato no válido o hash incorrecto.",
-        "KEY_ID_REQUIRED": "Debes indicar el ID de clave.",
+        "KEY_ID_REQUIRED": "Debes indicar el ID de clave.",        
         "KEY_ALREADY_REVOKED": "Esta clave ya se encuentra revocada.",
         "CERTIFICATE_ALREADY_REVOKED": "Este certificado ya se encuentra revocado.",
-        "CERTIFICATE_NOT_FOUND": "No se encontró el certificado indicado."
+        "CERTIFICATE_NOT_FOUND": "No se encontró el certificado indicado.",        
+        "EXTERNAL_ENDPOINT_NOT_FOUND": "No se encontró el punto final externo configurado.",
+        "ACCOUNTING_ENDPOINT_NOT_FOUND": "No se encontró el endpoint contable asociado al proyecto.",
+        "ACCOUNTING_TRANSFER_PERIOD_ALREADY_EXISTS": "Ya existe una transferencia contable para este periodo. Solo se permite una por cada periodo.",
+        "UNKNOWN_ERROR": "Ocurrió un error inesperado."
     },
     "moduleRouteGuard": {
         "preparing": "Preparando contenido..."
