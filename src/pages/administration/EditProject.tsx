@@ -83,12 +83,12 @@ const EditSchema = (t: (key: string) => string) => {
   return yup.object({
     instance_code: yup.string().required(msg).trim(),
     project_name: yup.string().required(msg).trim(),
-    project_url: yup.string().required(msg).trim(),
+    project_url: yup.string().required(msg).trim().matches(/^https:\/\//, t("project.create.validationUrlMustBeHttps")),
     description: yup.string().required(msg).trim(),
     is_active: yup.boolean().required(),
     project_image: yup.string().required(msg),
     project_image_mime_type: yup.string().required(msg),
-    api_url_base: yup.string().required(msg).trim(),
+    api_url_base: yup.string().required(msg).trim().matches(/^https:\/\//, t("project.create.validationUrlMustBeHttps")),
     users_api_path: yup.string().required(msg).trim(),
     modules: yup
       .array()
