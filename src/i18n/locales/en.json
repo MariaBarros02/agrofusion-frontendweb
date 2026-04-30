@@ -52,11 +52,13 @@
         "applyFilters": "Apply filters",
         "resetFilters": "Reset",
         "processing": "Processing",
+        "processed": "Processed",
         "sent": "Sent",
         "failed": "Failed",
         "cancelled": "Cancelled",
         "completed": "Completed",
         "refused": "Refused",
+        "paid": "Paid",
         "of": "of"
     },
     "theme": {
@@ -1326,13 +1328,14 @@
       "loading": "Loading voucher detail...",
       "loadError": "Error loading voucher detail.",
       "goBack": "Back",
-      "amount": "Total amount",
+      "amount": "Total",
       "module": "Source module",
       "queueStatus": "Queue status",
       "retryCount": "Retries",
       "sentAt": "Sent date",
       "acknowledgedAt": "Acknowledged date",
       "accountingEntryId": "Accounting entry",
+      "accountingStatus": "Accounting status",
       "payload": "Sent payload",
       "transactionData": "Transaction data",
       "response": "Accounting response",
@@ -1342,7 +1345,7 @@
       "transactionsSection": "Associated Payments",
       "generatedAt": "Generation date",
       "actionLabel": "Action",
-      "actionValue": "Accounting batch received",
+      "actionValue": "Accounting batch sent",
       "exchangeId": "Identification",
       "systemName": "System",
       "accountingPeriod": "Accounting period",
@@ -1362,7 +1365,8 @@
       "transactionAmount": "Amount",
       "transactionReference": "Reference",
       "transactionStatus": "Status",
-      "noTransactions": "No payments registered"
+      "noTransactions": "No payments registered",
+      "accountingAlert": "Accounting alert: {{message}}"
     },
     "columns": {
       "id": "ID",

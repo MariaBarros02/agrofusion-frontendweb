@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { AccordionPanel, AccordionTitle, AccordionContent, Button } from "flowbite-react";
 import { HiChevronDown } from "react-icons/hi";
 import { useTranslation } from "react-i18next";
@@ -46,6 +46,7 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-gray-500 text-white",
   COMPLETED: "bg-green-500 text-white",
   REFUSED: "bg-red-500 text-white",
+  PAID: "bg-green-500 text-white",
 };
 
 const StatusBadge = ({ value, label }: { value?: string | null; label?: string }) => {
@@ -106,6 +107,18 @@ const ViewCheck = () => {
   const invoices: any[] | undefined = payload?.invoices ?? payload?.Invoices;
   const transactions: any[] | undefined = payload?.transactions ?? payload?.Transactions;
 
+  const failedDocuments: any[] = (check?.response_json as any)?.failedDocuments ?? [];
+  const failedMap = new Map<string, any>(
+    failedDocuments.map((d: any) => [String(d.documentId), d])
+  );
+
+  const rawAccountingStatus = check?.state?.toLowerCase() !== "processing"
+    ? ((check?.response_json as any)?.status ?? null)
+    : null;
+  const accountingStatusValue = rawAccountingStatus
+    ? t(`common.${String(rawAccountingStatus).toLowerCase()}`, { defaultValue: rawAccountingStatus })
+    : "-";
+
   return (
     <AppLayoutSB>
       <TitleTarget
@@ -130,8 +143,22 @@ const ViewCheck = () => {
             <Field label={t("checks.columns.state")} value={t(`common.${String(check.state).toLowerCase()}`, { defaultValue: check.state })} />
             <Field label={t("checks.columns.issuedAt")} value={formatDate(check.issued_at)} />
             <Field label={t("checks.columns.issuedBy")} value={check.issued_by} />
-            <Field label={t("checks.detail.amount")} value={check.amount != null ? formatAmount(check.amount) : undefined} />
-            <Field label={t("checks.detail.accountingEntryId")} value={check.accounting_entry_id} />
+            <Field
+              label={t("checks.detail.amount")}
+              value={
+                check.amount != null
+                  ? formatAmount(check.amount)
+                  : summary?.TotalNet != null
+                    ? summary?.Currency
+                      ? `${summary.Currency} ${Number(summary.TotalNet).toLocaleString("es-CO")}`
+                      : formatAmount(summary.TotalNet)
+                    : undefined
+              }
+            />
+            <Field
+              label={t("checks.detail.accountingStatus")}
+              value={accountingStatusValue}
+            />
           </div>
 
           {/* Secciones del payload */}
@@ -160,7 +187,7 @@ const ViewCheck = () => {
                       />
                       <Field
                         label={t("checks.detail.systemName")}
-                        value={metadata.SystemName}
+                        value={check.project_code || check.project_name}
                       />
                       <Field
                         label={t("checks.detail.accountingPeriod")}
@@ -234,23 +261,36 @@ const ViewCheck = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {invoices.map((inv: any, i: number) => (
-                            <tr key={i} className="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                              <td className="px-3 py-2 whitespace-nowrap">
-                                {formatDate(inv.Header?.IssueDate)}
-                                {inv.Header?.DueDate ? ` - ${formatDate(inv.Header.DueDate)}` : ""}
-                              </td>
-                              <td className="px-3 py-2">{inv.Header?.Type?.Name ?? "-"}</td>
-                              <td className="px-3 py-2">{formatAmount(inv.Totals?.TotalPayment)}</td>
-                              <td className="px-3 py-2">{inv.Header?.DocumentId ?? "-"}</td>
-                              <td className="px-3 py-2">
-                                <StatusBadge
-                                  value={inv.Header?.Status ?? null}
-                                  label={inv.Header?.Status ? t(`common.${String(inv.Header.Status).toLowerCase()}`, { defaultValue: inv.Header.Status }) : undefined}
-                                />
-                              </td>
-                            </tr>
-                          ))}
+                          {invoices.map((inv: any, i: number) => {
+                            const docId = inv.Header?.DocumentId;
+                            const failed = docId ? failedMap.get(String(docId)) : undefined;
+                            return (
+                              <Fragment key={i}>
+                                <tr className={`border-b dark:border-gray-600 ${failed ? "bg-red-50 dark:bg-red-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50"}`}>
+                                  <td className="px-3 py-2 whitespace-nowrap">
+                                    {formatDate(inv.Header?.IssueDate)}
+                                    {inv.Header?.DueDate ? ` - ${formatDate(inv.Header.DueDate)}` : ""}
+                                  </td>
+                                  <td className="px-3 py-2">{inv.Header?.Type?.Name ?? "-"}</td>
+                                  <td className="px-3 py-2">{formatAmount(inv.Totals?.TotalPayment)}</td>
+                                  <td className="px-3 py-2">{docId ?? "-"}</td>
+                                  <td className="px-3 py-2">
+                                    <StatusBadge
+                                      value={inv.Header?.Status ?? null}
+                                      label={inv.Header?.Status ? t(`common.${String(inv.Header.Status).toLowerCase()}`, { defaultValue: inv.Header.Status }) : undefined}
+                                    />
+                                  </td>
+                                </tr>
+                                {failed && (
+                                  <tr className="bg-red-50 dark:bg-red-900/20 border-b dark:border-gray-600">
+                                    <td colSpan={5} className="px-3 py-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                                      {t("checks.detail.accountingAlert", { message: failed.errorMessage ?? failed.errorCode })}
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -281,20 +321,33 @@ const ViewCheck = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {transactions.map((tx: any, i: number) => (
-                            <tr key={i} className="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                              <td className="px-3 py-2">{formatDate(tx.Date)}</td>
-                              <td className="px-3 py-2">{tx.PaymentMethod?.Code ?? "-"}</td>
-                              <td className="px-3 py-2">{formatAmount(tx.Amount)}</td>
-                              <td className="px-3 py-2">{tx.RelatedInvoiceId ?? "-"}</td>
-                              <td className="px-3 py-2">
-                                <StatusBadge
-                                  value={tx.Status ?? null}
-                                  label={tx.Status ? t(`common.${String(tx.Status).toLowerCase()}`, { defaultValue: tx.Status }) : undefined}
-                                />
-                              </td>
-                            </tr>
-                          ))}
+                          {transactions.map((tx: any, i: number) => {
+                            const txDocId = tx.RelatedInvoiceId ?? tx.DocumentId;
+                            const failed = txDocId ? failedMap.get(String(txDocId)) : undefined;
+                            return (
+                              <Fragment key={i}>
+                                <tr className={`border-b dark:border-gray-600 ${failed ? "bg-red-50 dark:bg-red-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-700/50"}`}>
+                                  <td className="px-3 py-2">{formatDate(tx.Date)}</td>
+                                  <td className="px-3 py-2">{tx.PaymentMethod?.Code ?? "-"}</td>
+                                  <td className="px-3 py-2">{formatAmount(tx.Amount)}</td>
+                                  <td className="px-3 py-2">{tx.RelatedInvoiceId ?? "-"}</td>
+                                  <td className="px-3 py-2">
+                                    <StatusBadge
+                                      value={tx.Status ?? null}
+                                      label={tx.Status ? t(`common.${String(tx.Status).toLowerCase()}`, { defaultValue: tx.Status }) : undefined}
+                                    />
+                                  </td>
+                                </tr>
+                                {failed && (
+                                  <tr className="bg-red-50 dark:bg-red-900/20 border-b dark:border-gray-600">
+                                    <td colSpan={5} className="px-3 py-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                                      {t("checks.detail.accountingAlert", { message: failed.errorMessage ?? failed.errorCode })}
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
