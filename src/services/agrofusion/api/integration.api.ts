@@ -8,7 +8,7 @@ export const integrationApi = {
     intAgrofusionAxios.get<PaginatedChecksResponse>("integration/accounting-vouchers", { params }),
 
   getCheckDetail: (checkId: string) =>
-    intAgrofusionAxios.get<CheckDetailResponse>(`integration/accounting-vouchers/${checkId}`),
+    intAgrofusionAxios.get<CheckDetailResponse>(`/${checkId}`),
 
   listCheckTypes: () =>
     intAgrofusionAxios.get<CheckTypeListResponse>("integration/accounting-vouchers/types"),
