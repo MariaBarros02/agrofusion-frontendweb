@@ -145,7 +145,17 @@
             "signatureAlg": "Signature algorithm",
             "certificateId": "Certificate ID",
             "certificateSerial": "Certificate serial",
-            "certificateFingerprint": "Certificate fingerprint"
+            "certificateFingerprint": "Certificate fingerprint",
+            "integrityTitle": "Check file against the signature hash",
+            "integritySubtitle": "Pick the original file (for example the signed export before any edits). The system hashes it with the same algorithm recorded on the signature and compares it to the stored hash.",
+            "integrityFileLabel": "File to verify",
+            "integrityAlgoHint": "Hash algorithm used for the file: {{alg}}",
+            "integrityChecking": "Computing file hash…",
+            "integrityMatch": "The document was not altered: the file hash matches the one stored on the signature.",
+            "integrityMismatch": "The document was altered: the file hash does not match the one stored on the signature.",
+            "integrityNoStoredHash": "This signature has no document hash on record; a file cannot be compared.",
+            "integrityInvalidStoredHash": "The stored hash format could not be recognized.",
+            "integrityDigestError": "Could not hash the file (for example without HTTPS on this site, or an oversized file). Try a secure connection or another file."
         },
         "createKey": {
             "title": "Create cryptographic key",

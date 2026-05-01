@@ -149,7 +149,17 @@
             "signatureAlg": "Algoritmo de firma",
             "certificateId": "ID de certificado",
             "certificateSerial": "Serie del certificado",
-            "certificateFingerprint": "Huella del certificado"
+            "certificateFingerprint": "Huella del certificado",
+            "integrityTitle": "Comprobar archivo frente al hash de la firma",
+            "integritySubtitle": "Elige el archivo original (por ejemplo el export firmado antes de cualquier cambio). El sistema calculará su hash con el mismo algoritmo registrado en la firma y lo comparará con el hash almacenado.",
+            "integrityFileLabel": "Archivo a verificar",
+            "integrityAlgoHint": "Algoritmo usado para el hash del archivo: {{alg}}",
+            "integrityChecking": "Calculando hash del archivo…",
+            "integrityMatch": "El documento no se ha editado: el hash del archivo coincide con el almacenado en la firma.",
+            "integrityMismatch": "El documento se editó: el hash del archivo no coincide con el almacenado en la firma.",
+            "integrityNoStoredHash": "Esta firma no tiene hash de documento registrado; no se puede comparar un archivo.",
+            "integrityInvalidStoredHash": "El hash guardado en la firma no tiene un formato reconocido.",
+            "integrityDigestError": "No se pudo calcular el hash del archivo (por ejemplo sin HTTPS en este sitio o archivo demasiado grande). Probá desde una conexión segura u otro archivo."
         },
         "createKey": {
             "title": "Crear clave criptográfica",
