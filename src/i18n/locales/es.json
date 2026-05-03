@@ -1302,7 +1302,24 @@
             "fmtJsonlDesc": "Línea por evento",
             "fmtPdf": "PDF",
             "fmtPdfDesc": "Informe para archivo",
-            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde."
+            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde.",
+            "signingBlocked": {
+                "checking": "Comprobando requisitos de firma digital…",
+                "bannerTitle": "Exportación firmada no disponible",
+                "bannerHint": "Hace falta una clave de firma activa y un certificado válido en el módulo Firma digital.",
+                "more": "Ver detalle",
+                "title": "No se puede exportar con firma",
+                "intro": "Faltan requisitos en el módulo de firma digital (KMS).",
+                "goKms": "Ir a firma digital",
+                "reasonDefault": "Configure una clave y certificado activos en Firma digital o contacte al administrador.",
+                "reasons": {
+                    "NO_PROJECT_CONTEXT": "No hay contexto de proyecto válido para la firma. Revise asignación de proyectos y roles.",
+                    "NO_ACTIVE_SIGNING_KEY": "No hay clave de firma activa y vigente. Cree una clave en Firma digital.",
+                    "NO_ENCRYPTED_PRIVATE_KEY": "La clave no tiene material privado cifrado en el sistema. Debe crearse o reconfigurarse la clave.",
+                    "NO_ACTIVE_CERTIFICATE": "No hay certificado X.509 activo para la clave de firma. Emita o active un certificado.",
+                    "CHECK_FAILED": "No se pudo verificar el estado del KMS. Inténtelo de nuevo más tarde."
+                }
+            }
         },
         "SESSIONS":"Sesiones",
         "TOKENS": "Tokens",
