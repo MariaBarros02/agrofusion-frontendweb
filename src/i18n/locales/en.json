@@ -127,6 +127,8 @@
             "loadError": "Could not load signatures. Check your session and the audit service.",
             "empty": "No signatures registered in the system yet.",
             "missingSignature": "You must pick a signature before validating.",
+            "missingFileForHash": "This signature has a stored hash: choose the file to check before server validation.",
+            "hashMismatchBeforeServer": "The file hash does not match the signature. Fix the file or selection before server validation.",
             "aboutToValidate": "When you click 'Validate signature' the system will automatically verify document integrity, signature and associated certificate, using the state they had at the moment of signing.",
             "resultTitle": "Validation result",
             "signerBlock": "Signer",

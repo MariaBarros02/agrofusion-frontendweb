@@ -131,6 +131,8 @@
             "loadError": "No se pudieron cargar las firmas. Verifica tu sesión y el servicio de auditoría.",
             "empty": "Aún no hay firmas registradas en el sistema.",
             "missingSignature": "Debes seleccionar una firma antes de validar.",
+            "missingFileForHash": "Esta firma tiene hash registrado: elegí el archivo a comprobar antes de validar en servidor.",
+            "hashMismatchBeforeServer": "El hash del archivo no coincide con el de la firma. Corregí el archivo o la selección antes de validar en servidor.",
             "aboutToValidate": "Al pulsar «Validar firma» el sistema verificará automáticamente la integridad del documento, la firma y el certificado asociado, considerando el estado que tenían al momento de firmarse.",
             "resultTitle": "Resultado de la validación",
             "signerBlock": "Firmante",

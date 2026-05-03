@@ -55,6 +55,16 @@ function parseHashAlgForSubtle(label: string | null | undefined): AlgorithmIdent
   return "SHA-256";
 }
 
+async function fileToDigestHex(
+  file: File,
+  storedHashAlg: string | null | undefined,
+): Promise<string> {
+  const alg = parseHashAlgForSubtle(storedHashAlg);
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest(alg, buf);
+  return bufferToHex(digest);
+}
+
 type FileIntegrityState =
   | { kind: "idle" }
   | { kind: "checking" }
@@ -237,10 +247,7 @@ export default function ValidateSignatureFriendly() {
       }
       try {
         setIntegrity({ kind: "checking" });
-        const alg = parseHashAlgForSubtle(storedHashAlg);
-        const buf = await file.arrayBuffer();
-        const digest = await crypto.subtle.digest(alg, buf);
-        const hexFile = bufferToHex(digest);
+        const hexFile = await fileToDigestHex(file, storedHashAlg);
         setIntegrity(hexFile === normalizedStoredHex ? { kind: "match" } : { kind: "mismatch" });
       } catch {
         setIntegrity({ kind: "digestError" });
@@ -258,9 +265,40 @@ export default function ValidateSignatureFriendly() {
       });
       return;
     }
+
+    if (normalizedStoredHex && storedHashRaw?.trim()) {
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        setFeedback({
+          variant: "warning",
+          message: t("kms.validatePresentable.missingFileForHash"),
+        });
+        return;
+      }
+      try {
+        setIntegrity({ kind: "checking" });
+        const hexFile = await fileToDigestHex(file, storedHashAlg);
+        if (hexFile !== normalizedStoredHex) {
+          setIntegrity({ kind: "mismatch" });
+          setFeedback({
+            variant: "warning",
+            message: t("kms.validatePresentable.hashMismatchBeforeServer"),
+          });
+          return;
+        }
+        setIntegrity({ kind: "match" });
+      } catch {
+        setIntegrity({ kind: "digestError" });
+        setFeedback({
+          variant: "error",
+          message: t("kms.validatePresentable.integrityDigestError"),
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     setResult(null);
-    resetIntegrityCheck();
     setFeedback(null);
     try {
       const { data } = await kmsApi.validateSignaturePresentable(selectedId);
@@ -448,25 +486,8 @@ export default function ValidateSignatureFriendly() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                <Button
-                  type="submit"
-                  disabled={loading || !selectedId}
-                  className="w-full bg-blue-600 enabled:hover:bg-blue-700 sm:w-auto sm:min-w-[9rem]"
-                >
-                  {loading ? "…" : t("kms.validatePresentable.validateBtn")}
-                </Button>
-              </div>
             </div>
           </div>
-
-          {selectedSignature && !result && (
-            <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm dark:border-slate-600 dark:bg-slate-800/50">
-              <p className="text-gray-700 dark:text-gray-200">
-                {t("kms.validatePresentable.aboutToValidate")}
-              </p>
-            </div>
-          )}
 
           {selectedSignature && (
             <div
@@ -483,6 +504,11 @@ export default function ValidateSignatureFriendly() {
               <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                 {t("kms.validatePresentable.integritySubtitle")}
               </p>
+              {!result && (
+                <p className="mb-4 rounded-lg border border-teal-200/80 bg-white/60 px-3 py-2 text-sm text-gray-700 dark:border-teal-900/50 dark:bg-slate-900/30 dark:text-gray-200">
+                  {t("kms.validatePresentable.aboutToValidate")}
+                </p>
+              )}
 
               {!storedHashRaw?.trim() ? (
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
@@ -525,6 +551,14 @@ export default function ValidateSignatureFriendly() {
                         </p>
                       </div>
                     )}
+                    {integrity.kind === "mismatch" && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/50 dark:bg-red-950/40">
+                        <p className="flex items-start gap-2 text-sm font-semibold text-red-900 dark:text-red-100">
+                          <XCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+                          {t("kms.validatePresentable.integrityMismatch")}
+                        </p>
+                      </div>
+                    )}
                     {integrity.kind === "digestError" && (
                       <p className="text-sm text-amber-800 dark:text-amber-200">
                         {t("kms.validatePresentable.integrityDigestError")}
@@ -533,6 +567,16 @@ export default function ValidateSignatureFriendly() {
                   </div>
                 </>
               )}
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <Button
+                  type="submit"
+                  disabled={loading || !selectedId}
+                  className="w-full bg-blue-600 enabled:hover:bg-blue-700 sm:w-auto sm:min-w-[9rem]"
+                >
+                  {loading ? "…" : t("kms.validatePresentable.validateBtn")}
+                </Button>
+              </div>
             </div>
           )}
 
