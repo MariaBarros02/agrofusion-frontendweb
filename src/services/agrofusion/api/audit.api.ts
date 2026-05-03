@@ -5,6 +5,7 @@ import type { ListAuditResponse } from "../../../dto/response/listAudit-response
 import type { ListErrorsRequest } from "../../../dto/request/listErrors-request.dto";
 import type { CreateAuditExportRequest } from "../../../dto/request/createAuditExport-request.dto";
 import type { AuditExportJobResponse } from "../../../dto/response/auditExport-response.dto";
+import type { AuditExportSigningReadinessResponse } from "../../../dto/response/auditExportSigningReadiness-response.dto";
 /**
  * Servicio encargado del registro de logs y auditoría del sistema.
  */
@@ -43,6 +44,11 @@ listErrorCodes: () => auditAgrofusionAxios.get("/audit/errors/codes"),
 
   listAuditExports: (params?: { limit?: number }) =>
     auditAgrofusionAxios.get<AuditExportJobResponse[]>("audit/exports", { params }),
+
+  getAuditExportSigningReadiness: () =>
+    auditAgrofusionAxios.get<AuditExportSigningReadinessResponse>(
+      "audit/exports/signing-readiness"
+    ),
 
   deleteAuditExport: (exportId: string) =>
     auditAgrofusionAxios.delete(`audit/exports/${exportId}`),

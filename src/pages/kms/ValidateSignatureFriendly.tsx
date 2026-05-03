@@ -13,6 +13,7 @@ import {
   FileText,
   User as UserIcon,
   Search,
+  Upload,
 } from "lucide-react";
 import {
   kmsApi,
@@ -21,6 +22,57 @@ import {
 } from "../../services/agrofusion/kms.api";
 import { KmsFeedbackModal, type KmsFeedbackVariant } from "../../components/kms/KmsFeedbackModal";
 import { resolveKmsErrorMessage } from "../../components/kms/kmsErrorMessage";
+
+function bufferToHex(buffer: ArrayBuffer): string {
+  return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Normaliza el hash persistido (hex o Base64 del digest) a hex minúsculas. */
+function normalizeDocumentHashToHex(stored: string | null | undefined): string | null {
+  if (!stored?.trim()) return null;
+  const s = stored.trim().replace(/\s+/g, "");
+  const lower = s.toLowerCase();
+  if (/^[0-9a-f]+$/.test(lower) && [64, 96, 128].includes(lower.length)) {
+    return lower;
+  }
+  try {
+    const pad = s.length % 4 === 0 ? "" : "=".repeat(4 - (s.length % 4));
+    const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + pad;
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bufferToHex(bytes.buffer);
+  } catch {
+    return null;
+  }
+}
+
+function parseHashAlgForSubtle(label: string | null | undefined): AlgorithmIdentifier {
+  const n = (label ?? "SHA-256").trim().toUpperCase().replace(/\s+/g, "");
+  if (n === "SHA256" || n === "SHA-256") return "SHA-256";
+  if (n === "SHA384" || n === "SHA-384") return "SHA-384";
+  if (n === "SHA512" || n === "SHA-512") return "SHA-512";
+  return "SHA-256";
+}
+
+async function fileToDigestHex(
+  file: File,
+  storedHashAlg: string | null | undefined,
+): Promise<string> {
+  const alg = parseHashAlgForSubtle(storedHashAlg);
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest(alg, buf);
+  return bufferToHex(digest);
+}
+
+type FileIntegrityState =
+  | { kind: "idle" }
+  | { kind: "checking" }
+  | { kind: "match" }
+  | { kind: "mismatch" }
+  | { kind: "noStoredHash" }
+  | { kind: "invalidStoredHash" }
+  | { kind: "digestError" };
 
 /**
  * RF-INT-18: Presentación al usuario del resultado de validación de firmas.
@@ -53,6 +105,9 @@ export default function ValidateSignatureFriendly() {
     variant: KmsFeedbackVariant;
     message: string;
   } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [integrity, setIntegrity] = useState<FileIntegrityState>({ kind: "idle" });
 
   /** Panel bajo el input: abierto tras cargar, o al enfocar con datos */
   const [listOpen, setListOpen] = useState(false);
@@ -156,6 +211,51 @@ export default function ValidateSignatureFriendly() {
     [signatures, selectedId],
   );
 
+  const resetIntegrityCheck = useCallback(() => {
+    setIntegrity({ kind: "idle" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
+
+  useEffect(() => {
+    resetIntegrityCheck();
+  }, [selectedId, resetIntegrityCheck]);
+
+  const storedHashRaw =
+    result?.datos_tecnicos.hash_documento ?? selectedSignature?.document_hash ?? null;
+  const storedHashAlg =
+    result?.datos_tecnicos.algoritmo_hash ?? selectedSignature?.hash_algorithm ?? null;
+
+  const normalizedStoredHex = useMemo(
+    () => normalizeDocumentHashToHex(storedHashRaw),
+    [storedHashRaw],
+  );
+
+  const onIntegrityFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        setIntegrity({ kind: "idle" });
+        return;
+      }
+      if (!storedHashRaw?.trim()) {
+        setIntegrity({ kind: "noStoredHash" });
+        return;
+      }
+      if (!normalizedStoredHex) {
+        setIntegrity({ kind: "invalidStoredHash" });
+        return;
+      }
+      try {
+        setIntegrity({ kind: "checking" });
+        const hexFile = await fileToDigestHex(file, storedHashAlg);
+        setIntegrity(hexFile === normalizedStoredHex ? { kind: "match" } : { kind: "mismatch" });
+      } catch {
+        setIntegrity({ kind: "digestError" });
+      }
+    },
+    [normalizedStoredHex, storedHashRaw, storedHashAlg],
+  );
+
   const validate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedId) {
@@ -165,6 +265,38 @@ export default function ValidateSignatureFriendly() {
       });
       return;
     }
+
+    if (normalizedStoredHex && storedHashRaw?.trim()) {
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        setFeedback({
+          variant: "warning",
+          message: t("kms.validatePresentable.missingFileForHash"),
+        });
+        return;
+      }
+      try {
+        setIntegrity({ kind: "checking" });
+        const hexFile = await fileToDigestHex(file, storedHashAlg);
+        if (hexFile !== normalizedStoredHex) {
+          setIntegrity({ kind: "mismatch" });
+          setFeedback({
+            variant: "warning",
+            message: t("kms.validatePresentable.hashMismatchBeforeServer"),
+          });
+          return;
+        }
+        setIntegrity({ kind: "match" });
+      } catch {
+        setIntegrity({ kind: "digestError" });
+        setFeedback({
+          variant: "error",
+          message: t("kms.validatePresentable.integrityDigestError"),
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     setResult(null);
     setFeedback(null);
@@ -354,7 +486,89 @@ export default function ValidateSignatureFriendly() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+            </div>
+          </div>
+
+          {selectedSignature && (
+            <div
+              className="mb-6 rounded-2xl border border-teal-100 bg-teal-50/80 p-6 shadow-sm dark:border-teal-900/40 dark:bg-teal-950/30"
+              aria-labelledby="integrity-heading"
+            >
+              <h3
+                id="integrity-heading"
+                className="mb-2 flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white"
+              >
+                <Upload className="h-5 w-5 text-teal-600 dark:text-teal-400" aria-hidden />
+                {t("kms.validatePresentable.integrityTitle")}
+              </h3>
+              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                {t("kms.validatePresentable.integritySubtitle")}
+              </p>
+              {!result && (
+                <p className="mb-4 rounded-lg border border-teal-200/80 bg-white/60 px-3 py-2 text-sm text-gray-700 dark:border-teal-900/50 dark:bg-slate-900/30 dark:text-gray-200">
+                  {t("kms.validatePresentable.aboutToValidate")}
+                </p>
+              )}
+
+              {!storedHashRaw?.trim() ? (
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {t("kms.validatePresentable.integrityNoStoredHash")}
+                </p>
+              ) : !normalizedStoredHex ? (
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {t("kms.validatePresentable.integrityInvalidStoredHash")}
+                </p>
+              ) : (
+                <>
+                  <div className="max-w-xl">
+                    <Label htmlFor="integrity-file">{t("kms.validatePresentable.integrityFileLabel")}</Label>
+                    <input
+                      ref={fileInputRef}
+                      id="integrity-file"
+                      type="file"
+                      onChange={onIntegrityFile}
+                      className="mt-2 block w-full cursor-pointer rounded-lg border border-gray-300 bg-white text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-teal-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:file:bg-teal-700 dark:hover:file:bg-teal-600"
+                    />
+                  </div>
+
+                  {storedHashAlg?.trim() ? (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                      {t("kms.validatePresentable.integrityAlgoHint", { alg: storedHashAlg })}
+                    </p>
+                  ) : null}
+
+                  <div className="mt-4 space-y-3" role="status" aria-live="polite">
+                    {integrity.kind === "checking" && (
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {t("kms.validatePresentable.integrityChecking")}
+                      </p>
+                    )}
+                    {integrity.kind === "match" && (
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900/50 dark:bg-emerald-950/40">
+                        <p className="flex items-start gap-2 text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+                          {t("kms.validatePresentable.integrityMatch")}
+                        </p>
+                      </div>
+                    )}
+                    {integrity.kind === "mismatch" && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/50 dark:bg-red-950/40">
+                        <p className="flex items-start gap-2 text-sm font-semibold text-red-900 dark:text-red-100">
+                          <XCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+                          {t("kms.validatePresentable.integrityMismatch")}
+                        </p>
+                      </div>
+                    )}
+                    {integrity.kind === "digestError" && (
+                      <p className="text-sm text-amber-800 dark:text-amber-200">
+                        {t("kms.validatePresentable.integrityDigestError")}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                 <Button
                   type="submit"
                   disabled={loading || !selectedId}
@@ -363,14 +577,6 @@ export default function ValidateSignatureFriendly() {
                   {loading ? "…" : t("kms.validatePresentable.validateBtn")}
                 </Button>
               </div>
-            </div>
-          </div>
-
-          {selectedSignature && !result && (
-            <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm dark:border-slate-600 dark:bg-slate-800/50">
-              <p className="text-gray-700 dark:text-gray-200">
-                {t("kms.validatePresentable.aboutToValidate")}
-              </p>
             </div>
           )}
 

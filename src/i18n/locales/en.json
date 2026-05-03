@@ -127,6 +127,8 @@
             "loadError": "Could not load signatures. Check your session and the audit service.",
             "empty": "No signatures registered in the system yet.",
             "missingSignature": "You must pick a signature before validating.",
+            "missingFileForHash": "This signature has a stored hash: choose the file to check before server validation.",
+            "hashMismatchBeforeServer": "The file hash does not match the signature. Fix the file or selection before server validation.",
             "aboutToValidate": "When you click 'Validate signature' the system will automatically verify document integrity, signature and associated certificate, using the state they had at the moment of signing.",
             "resultTitle": "Validation result",
             "signerBlock": "Signer",
@@ -145,7 +147,17 @@
             "signatureAlg": "Signature algorithm",
             "certificateId": "Certificate ID",
             "certificateSerial": "Certificate serial",
-            "certificateFingerprint": "Certificate fingerprint"
+            "certificateFingerprint": "Certificate fingerprint",
+            "integrityTitle": "Check file against the signature hash",
+            "integritySubtitle": "Pick the original file (for example the signed export before any edits). The system hashes it with the same algorithm recorded on the signature and compares it to the stored hash.",
+            "integrityFileLabel": "File to verify",
+            "integrityAlgoHint": "Hash algorithm used for the file: {{alg}}",
+            "integrityChecking": "Computing file hash…",
+            "integrityMatch": "The document was not altered: the file hash matches the one stored on the signature.",
+            "integrityMismatch": "The document was altered: the file hash does not match the one stored on the signature.",
+            "integrityNoStoredHash": "This signature has no document hash on record; a file cannot be compared.",
+            "integrityInvalidStoredHash": "The stored hash format could not be recognized.",
+            "integrityDigestError": "Could not hash the file (for example without HTTPS on this site, or an oversized file). Try a secure connection or another file."
         },
         "createKey": {
             "title": "Create cryptographic key",
@@ -1250,7 +1262,24 @@
             "fmtJsonlDesc": "One JSON per line",
             "fmtPdf": "PDF",
             "fmtPdfDesc": "Print-ready",
-            "timeout": "Timed out waiting. Check the report status later."
+            "timeout": "Timed out waiting. Check the report status later.",
+            "signingBlocked": {
+                "checking": "Checking digital signing requirements…",
+                "bannerTitle": "Signed export not available",
+                "bannerHint": "An active signing key and valid certificate are required in the Digital signature module.",
+                "more": "Details",
+                "title": "Cannot export with signature",
+                "intro": "Digital signature (KMS) requirements are missing.",
+                "goKms": "Go to digital signature",
+                "reasonDefault": "Set up an active key and certificate in Digital signature or contact an administrator.",
+                "reasons": {
+                    "NO_PROJECT_CONTEXT": "No valid project context for signing. Check project and role assignments.",
+                    "NO_ACTIVE_SIGNING_KEY": "There is no active, valid signing key. Create one in Digital signature.",
+                    "NO_ENCRYPTED_PRIVATE_KEY": "The key has no encrypted private material stored. Recreate or reconfigure the key.",
+                    "NO_ACTIVE_CERTIFICATE": "There is no active X.509 certificate for the signing key. Issue or activate a certificate.",
+                    "CHECK_FAILED": "Could not verify KMS status. Please try again later."
+                }
+            }
         }
     },
     "externalErrors": {
