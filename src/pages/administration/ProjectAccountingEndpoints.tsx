@@ -59,6 +59,11 @@ const methodBadgeStyles: Record<string, string> = {
   DELETE: "bg-rose-100 text-rose-700",
 };
 
+type AccountingEndpointFormErrors = {
+  api_path?: string;
+  request_url?: string;
+};
+
 const ProjectAccountingEndpoints = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -80,6 +85,7 @@ const ProjectAccountingEndpoints = () => {
     useState<AccountingEndpointListItemResponse | null>(null);
   const [createFormData, setCreateFormData] =
     useState<CreateProjectAccountingInfoEndpointRequest>(EMPTY_CREATE_FORM);
+  const [formErrors, setFormErrors] = useState<AccountingEndpointFormErrors>({});
   const [pendingDelete, setPendingDelete] =
     useState<AccountingEndpointListItemResponse | null>(null);
   const [confirmDeleteChecked, setConfirmDeleteChecked] = useState(false);
@@ -163,6 +169,7 @@ const ProjectAccountingEndpoints = () => {
   const openCreateModal = () => {
     setEditingEndpoint(null);
     setCreateFormData(EMPTY_CREATE_FORM);
+    setFormErrors({});
     setShowModal(true);
   };
 
@@ -187,6 +194,10 @@ const ProjectAccountingEndpoints = () => {
       return "errors.AUTH_INSUFFICIENT_PERMISSIONS";
     }
 
+    if (errorCode === "EXT_ACCOUNTING_ENDPOINT_DUPLICATED") {
+      return "project.accountingEndpoints.duplicateEndpoint";
+    }
+
     const backendMessage = err?.response?.data?.detail?.meta?.message;
     if (backendMessage === "La api ingresada no existe") {
       return "project.accountingEndpoints.invalidApiUrl";
@@ -205,6 +216,8 @@ const ProjectAccountingEndpoints = () => {
       message: t("errors.AUTH_INSUFFICIENT_PERMISSIONS"),
       type: "warning",
     });
+    setPendingDelete(null);
+    setConfirmDeleteChecked(false);
     return true;
   };
 
@@ -248,11 +261,28 @@ const ProjectAccountingEndpoints = () => {
     setShowModal(false);
     setEditingEndpoint(null);
     setCreateFormData(EMPTY_CREATE_FORM);
+    setFormErrors({});
     setIsModalLoading(false);
+  };
+
+  const validateForm = () => {
+    const errors: AccountingEndpointFormErrors = {};
+
+    if (!createFormData.api_path.trim().startsWith("/")) {
+      errors.api_path = "project.accountingEndpoints.form.mustStartWithSlash";
+    }
+
+    if (!createFormData.request_url.trim().startsWith("/")) {
+      errors.request_url = "project.accountingEndpoints.form.mustStartWithSlash";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
     if (!projectId) return;
+    if (!validateForm()) return;
 
     try {
       setIsSaving(true);
@@ -278,6 +308,13 @@ const ProjectAccountingEndpoints = () => {
       });
     } catch (err: any) {
       if (handlePermissionAlert(err)) {
+        return;
+      }
+      if (err?.response?.data?.detail?.code === "EXT_ACCOUNTING_ENDPOINT_DUPLICATED") {
+        setAlert({
+          message: t("project.accountingEndpoints.duplicateEndpoint"),
+          type: "error",
+        });
         return;
       }
       setToasts((prev) => [
@@ -695,6 +732,7 @@ const ProjectAccountingEndpoints = () => {
                 <Label>{t("project.accountingEndpoints.form.apiPath")}</Label>
                 <TextInput
                   placeholder={t("project.accountingEndpoints.form.apiPathPlaceholder")}
+                  color={formErrors.api_path ? "failure" : undefined}
                   value={createFormData.api_path}
                   onChange={(e) =>
                     setCreateFormData((prev) => ({
@@ -703,12 +741,20 @@ const ProjectAccountingEndpoints = () => {
                     }))
                   }
                 />
+                <p
+                  className={`mt-1 text-xs ${
+                    formErrors.api_path ? "text-red-600" : "text-slate-500"
+                  }`}
+                >
+                  {t("project.accountingEndpoints.form.mustStartWithSlash")}
+                </p>
               </div>
 
               <div>
                 <Label>{t("project.accountingEndpoints.form.requestUrl")}</Label>
                 <TextInput
                   placeholder={t("project.accountingEndpoints.form.requestUrlPlaceholder")}
+                  color={formErrors.request_url ? "failure" : undefined}
                   value={createFormData.request_url}
                   onChange={(e) =>
                     setCreateFormData((prev) => ({
@@ -717,6 +763,13 @@ const ProjectAccountingEndpoints = () => {
                     }))
                   }
                 />
+                <p
+                  className={`mt-1 text-xs ${
+                    formErrors.request_url ? "text-red-600" : "text-slate-500"
+                  }`}
+                >
+                  {t("project.accountingEndpoints.form.mustStartWithSlash")}
+                </p>
               </div>
 
               <div>
