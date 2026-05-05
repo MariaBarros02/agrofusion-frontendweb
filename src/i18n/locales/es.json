@@ -512,6 +512,7 @@
             "endpointSaveError": "No se pudo guardar el endpoint contable",
             "endpointDeleteError": "No se pudo eliminar el endpoint contable",
             "invalidApiUrl": "La api ingresada no existe",
+            "duplicateEndpoint": "Ya existe ese endpoint",
             "copyUrl": "Copiar URL",
             "copyError": "No se pudo copiar la URL",
             "transferConnectionExists": "Existe conexión a contabilidad",
@@ -547,7 +548,8 @@
                 "descriptionPlaceholder": "Describe el propósito del endpoint",
                 "authentication": "Autenticación",
                 "authenticationOpen": "SIN AUTENTICACIÓN",
-                "authenticationProtected": "CON AUTENTICACIÓN"
+                "authenticationProtected": "CON AUTENTICACIÓN",
+                "mustStartWithSlash": "Debe empezar con /"
             },
             "filters": {
                 "method": "Método",

@@ -56,10 +56,8 @@ const AlertSimple = ({ message, type = "success", to, onClose }: AlertSimpleProp
   const handleAccept = () => {
     if (to) {
       navigate(to); 
-      
-    } else {
-      onClose?.();
     }
+    onClose?.();
   };
 
   return (
