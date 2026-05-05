@@ -264,6 +264,13 @@ const AuditList = () => {
         if (value === "FAILURE") {
           return (
             <span className="px-3 py-1 text-xs font-medium text-white bg-orange-500 rounded-full">
+              {t("common.failed")}
+            </span>
+          );
+        }
+        if (value === "REJECTED") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-black bg-yellow-400 rounded-full">
               {t("common.rejected")}
             </span>
           );
@@ -460,6 +467,8 @@ useEffect(() => {
     const r = result.toUpperCase();
     if (r === "SUCCESS") return ["success"];
     if (r === "FAILED" || r === "FAILURE") return ["failed"];
+    if (r === "REJECTED") return ["rejected"];
+    if(r === "ERROR") return ["error"];
     return [result.toLowerCase()];
   };
 
