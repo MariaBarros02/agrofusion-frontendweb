@@ -572,6 +572,7 @@
             "previewRange": "Consulta realizada desde {{startDate}} hasta {{endDate}}.",
             "fallbackApiName": "la API seleccionada",
             "fallbackProject": "Proyecto externo",
+            "consulting": "Consultando...",
             "intervals": {
                 "monthly": "Mensual",
                 "yearly": "Anual"
