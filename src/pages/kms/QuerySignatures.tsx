@@ -143,9 +143,7 @@ export default function QuerySignatures() {
 
   useEffect(() => {
     void fetchPage(1);
-    // Carga inicial; los filtros se aplican con el botón «Aplicar».
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchPage]);
 
   const applyFilters = () => {
     void fetchPage(1);
@@ -158,7 +156,6 @@ export default function QuerySignatures() {
     setSignerName("");
     setKeyAlgorithm("");
     setValidationStatus("");
-    setTimeout(() => void fetchPage(1), 0);
   };
 
   const onTablePageChange = (page: number) => {

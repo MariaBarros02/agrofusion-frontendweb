@@ -49,10 +49,10 @@ const calculateEndDate = (
 
   if (!year || !month || !day) return "";
 
-  if (interval === "quincenal") {
-    const endDate = addDaysUtc(year, month, day, 14);
-    return formatDateForInput(endDate);
-  }
+  // if (interval === "quincenal") {
+  //   const endDate = addDaysUtc(year, month, day, 14);
+  //   return formatDateForInput(endDate);
+  // }
 
   if (interval === "mensual") {
     const endDate = new Date(Date.UTC(year, month, day - 1));
@@ -396,9 +396,6 @@ const AccountingTransferRequest = () => {
                     {t("project.transferRequest.intervalPlaceholder")}
                   </option>
 
-                  <option value="quincenal">
-                    {t("project.transferRequest.intervals.biweekly")}
-                  </option>
 
                   <option value="mensual">
                     {t("project.transferRequest.intervals.monthly")}

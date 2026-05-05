@@ -131,6 +131,8 @@
             "loadError": "No se pudieron cargar las firmas. Verifica tu sesión y el servicio de auditoría.",
             "empty": "Aún no hay firmas registradas en el sistema.",
             "missingSignature": "Debes seleccionar una firma antes de validar.",
+            "missingFileForHash": "Esta firma tiene hash registrado: elegí el archivo a comprobar antes de validar en servidor.",
+            "hashMismatchBeforeServer": "El hash del archivo no coincide con el de la firma. Corregí el archivo o la selección antes de validar en servidor.",
             "aboutToValidate": "Al pulsar «Validar firma» el sistema verificará automáticamente la integridad del documento, la firma y el certificado asociado, considerando el estado que tenían al momento de firmarse.",
             "resultTitle": "Resultado de la validación",
             "signerBlock": "Firmante",
@@ -149,7 +151,17 @@
             "signatureAlg": "Algoritmo de firma",
             "certificateId": "ID de certificado",
             "certificateSerial": "Serie del certificado",
-            "certificateFingerprint": "Huella del certificado"
+            "certificateFingerprint": "Huella del certificado",
+            "integrityTitle": "Comprobar archivo frente al hash de la firma",
+            "integritySubtitle": "Elige el archivo original (por ejemplo el export firmado antes de cualquier cambio). El sistema calculará su hash con el mismo algoritmo registrado en la firma y lo comparará con el hash almacenado.",
+            "integrityFileLabel": "Archivo a verificar",
+            "integrityAlgoHint": "Algoritmo usado para el hash del archivo: {{alg}}",
+            "integrityChecking": "Calculando hash del archivo…",
+            "integrityMatch": "El documento no se ha editado: el hash del archivo coincide con el almacenado en la firma.",
+            "integrityMismatch": "El documento se editó: el hash del archivo no coincide con el almacenado en la firma.",
+            "integrityNoStoredHash": "Esta firma no tiene hash de documento registrado; no se puede comparar un archivo.",
+            "integrityInvalidStoredHash": "El hash guardado en la firma no tiene un formato reconocido.",
+            "integrityDigestError": "No se pudo calcular el hash del archivo (por ejemplo sin HTTPS en este sitio o archivo demasiado grande). Probá desde una conexión segura u otro archivo."
         },
         "createKey": {
             "title": "Crear clave criptográfica",
@@ -500,6 +512,7 @@
             "endpointSaveError": "No se pudo guardar el endpoint contable",
             "endpointDeleteError": "No se pudo eliminar el endpoint contable",
             "invalidApiUrl": "La api ingresada no existe",
+            "duplicateEndpoint": "Ya existe ese endpoint",
             "copyUrl": "Copiar URL",
             "copyError": "No se pudo copiar la URL",
             "transferConnectionExists": "Existe conexión a contabilidad",
@@ -535,7 +548,8 @@
                 "descriptionPlaceholder": "Describe el propósito del endpoint",
                 "authentication": "Autenticación",
                 "authenticationOpen": "SIN AUTENTICACIÓN",
-                "authenticationProtected": "CON AUTENTICACIÓN"
+                "authenticationProtected": "CON AUTENTICACIÓN",
+                "mustStartWithSlash": "Debe empezar con /"
             },
             "filters": {
                 "method": "Método",
@@ -560,6 +574,7 @@
             "previewRange": "Consulta realizada desde {{startDate}} hasta {{endDate}}.",
             "fallbackApiName": "la API seleccionada",
             "fallbackProject": "Proyecto externo",
+            "consulting": "Consultando...",
             "intervals": {
                 "monthly": "Mensual",
                 "yearly": "Anual"
@@ -1292,7 +1307,24 @@
             "fmtJsonlDesc": "Línea por evento",
             "fmtPdf": "PDF",
             "fmtPdfDesc": "Informe para archivo",
-            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde."
+            "timeout": "Tiempo de espera agotado. Consulte el estado del informe más tarde.",
+            "signingBlocked": {
+                "checking": "Comprobando requisitos de firma digital…",
+                "bannerTitle": "Exportación firmada no disponible",
+                "bannerHint": "Hace falta una clave de firma activa y un certificado válido en el módulo Firma digital.",
+                "more": "Ver detalle",
+                "title": "No se puede exportar con firma",
+                "intro": "Faltan requisitos en el módulo de firma digital (KMS).",
+                "goKms": "Ir a firma digital",
+                "reasonDefault": "Configure una clave y certificado activos en Firma digital o contacte al administrador.",
+                "reasons": {
+                    "NO_PROJECT_CONTEXT": "No hay contexto de proyecto válido para la firma. Revise asignación de proyectos y roles.",
+                    "NO_ACTIVE_SIGNING_KEY": "No hay clave de firma activa y vigente. Cree una clave en Firma digital.",
+                    "NO_ENCRYPTED_PRIVATE_KEY": "La clave no tiene material privado cifrado en el sistema. Debe crearse o reconfigurarse la clave.",
+                    "NO_ACTIVE_CERTIFICATE": "No hay certificado X.509 activo para la clave de firma. Emita o active un certificado.",
+                    "CHECK_FAILED": "No se pudo verificar el estado del KMS. Inténtelo de nuevo más tarde."
+                }
+            }
         },
         "SESSIONS":"Sesiones",
         "TOKENS": "Tokens",
@@ -1300,7 +1332,7 @@
         "OTP": "OTP",
         "PROJECTS": "Proyectos",
         "MODULES": "Módulos",
-        "SUBMODULOS": "Submódulos",
+        "SUBMODULES": "Submódulos",
         "KMS":"Firma digital",
         "LOGOUT": "Cierre de sesión",
         "ROLES": "Roles",
@@ -1309,7 +1341,8 @@
         "AUTH": "Autenticación",
         "AUDIT_EXPORT": "Exportación de Auditoría",
         "CHECKS": "Contabilidad",
-        "ACCOUNTING_VOUCHERS": "Comprobantes contables"
+        "ACCOUNTING_VOUCHERS": "Comprobantes contables",
+        "EXTERNAL_PROJECTS": "Proyectos externos"
 
     },
     "externalErrors": {
