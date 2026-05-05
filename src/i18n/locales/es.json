@@ -1338,7 +1338,8 @@
         "AUTH": "Autenticación",
         "AUDIT_EXPORT": "Exportación de Auditoría",
         "CHECKS": "Contabilidad",
-        "ACCOUNTING_VOUCHERS": "Comprobantes contables"
+        "ACCOUNTING_VOUCHERS": "Comprobantes contables",
+        "EXTERNAL_PROJECTS": "Proyectos externos"
 
     },
     "externalErrors": {
