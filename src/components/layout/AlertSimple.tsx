@@ -56,14 +56,12 @@ const AlertSimple = ({ message, type = "success", to, onClose }: AlertSimpleProp
   const handleAccept = () => {
     if (to) {
       navigate(to); 
-      
-    } else {
-      onClose?.();
     }
+    onClose?.();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-700/50">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-700/50">
       <Card className="w-[90%] max-w-md md:max-w-lg  p-1 ">
         <div className="flex items-center gap-3">
           <div

@@ -389,6 +389,12 @@ const ProjectsList = () => {
                     ? t("project.list.deactivateDescription")
                     : t("project.list.activateDescription")}
               </p>
+              {pendingStatusChange.newStatus === "DELETED" &&
+                pendingStatusChange.project.accounting_transfer && (
+                  <p className="mb-4 text-sm font-semibold text-amber-600 dark:text-amber-400">
+                    {t("project.list.deleteAaefWarning")}
+                  </p>
+                )}
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="confirm-status-change"

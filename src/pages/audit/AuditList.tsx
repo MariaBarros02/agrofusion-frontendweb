@@ -6,6 +6,8 @@ import TitleTarget from "../../components/layout/TitleTarget";
 
 // Hooks de React
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Modal, ModalBody, ModalFooter, ModalHeader, Button } from "flowbite-react";
 
 // Traducciones (i18n)
 import { useTranslation } from "react-i18next";
@@ -39,6 +41,7 @@ import {
   listEventsService,
   createAuditExportService,
   getAuditExportService,
+  getAuditExportSigningReadinessService,
 } from "../../services/agrofusion/audit.service";
 import { env } from "../../config/env";
 import type {
@@ -112,6 +115,10 @@ const AuditList = () => {
 
   //Traducción
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
+  useSubmoduleAccessStore((s) => s.loaded);
 
   //Datos provenientes del backend para filtros
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
@@ -172,6 +179,14 @@ const AuditList = () => {
     records: number;
   } | null>(null);
   const [redownloadBusy, setRedownloadBusy] = useState(false);
+  const [exportPanelOpen, setExportPanelOpen] = useState(false);
+  /** Si true, el backend enmascara IP/correo en el archivo (no es cifrado, solo ocultación parcial). */
+  const [exportMaskPii, setExportMaskPii] = useState(true);
+
+  /** null = comprobando KMS; false = no se puede firmar export */
+  const [exportSigningReady, setExportSigningReady] = useState<boolean | null>(null);
+  const [exportSigningReason, setExportSigningReason] = useState<string | null>(null);
+  const [exportSigningModalOpen, setExportSigningModalOpen] = useState(false);
 
   const EXPORT_EXT: Record<ExportFormat, string> = {
     CSV: "csv",
@@ -239,6 +254,27 @@ const AuditList = () => {
           );
         }
 
+        if (value === "ERROR") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-full">
+              {t("common.error")}
+            </span>
+          );
+        }
+        if (value === "FAILURE") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-white bg-orange-500 rounded-full">
+              {t("common.failed")}
+            </span>
+          );
+        }
+        if (value === "REJECTED") {
+          return (
+            <span className="px-3 py-1 text-xs font-medium text-black bg-yellow-400 rounded-full">
+              {t("common.rejected")}
+            </span>
+          );
+        }
         return value;
       },
     },
@@ -380,6 +416,33 @@ useEffect(() => {
     setPage(1);
   }, [debouncedSearch]);
 
+  const showContent = canAccessModule("AUDIT");
+
+  useEffect(() => {
+    if (!showContent || notListPerm) {
+      setExportSigningReady(null);
+      setExportSigningReason(null);
+      return;
+    }
+    let cancelled = false;
+    void getAuditExportSigningReadinessService()
+      .then((r) => {
+        if (!cancelled) {
+          setExportSigningReady(r.ready);
+          setExportSigningReason(r.reason_code);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setExportSigningReady(false);
+          setExportSigningReason("CHECK_FAILED");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showContent, notListPerm]);
+
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
@@ -404,10 +467,19 @@ useEffect(() => {
     const r = result.toUpperCase();
     if (r === "SUCCESS") return ["success"];
     if (r === "FAILED" || r === "FAILURE") return ["failed"];
+    if (r === "REJECTED") return ["rejected"];
+    if(r === "ERROR") return ["error"];
     return [result.toLowerCase()];
   };
 
+  const exportSigningCheckPending = exportSigningReady === null;
+  const exportSigningBlocked = exportSigningReady === false;
+
   const handleAuditExport = async () => {
+    if (exportSigningReady !== true) {
+      setExportSigningModalOpen(true);
+      return;
+    }
     setExportMsg(null);
     setExportSuccess(null);
     setExportBusy(true);
@@ -423,6 +495,7 @@ useEffect(() => {
         action_codes: eventType ? [eventType] : undefined,
         outcomes: mapOutcomesForExport(),
         search: debouncedSearch || undefined,
+        mask_pii: exportMaskPii,
       };
       const created = await createAuditExportService(body);
       setExportMsg(t("audit.export.requested"));
@@ -489,12 +562,7 @@ useEffect(() => {
     }
   };
 
-  // Control de acceso 
-  const canAccessModule = useModuleAccessStore((s) => s.canAccessModule);
-  useSubmoduleAccessStore((s) => s.loaded);
-
   const showModuleInactive = !canAccessModule("AUDIT");
-  const showContent = canAccessModule("AUDIT");
 
   return (
     <AppLayoutSB>
@@ -545,28 +613,106 @@ useEffect(() => {
       />
 
       {showContent && !notListPerm && (
-        <div className="mt-4 overflow-hidden border shadow-md rounded-2xl border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
-          <div className="px-5 py-4 border-b border-emerald-100/90 bg-emerald-600/10 dark:border-emerald-900/40 dark:bg-emerald-900/20">
-            <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-              {t("audit.export.title")}
-            </h3>
-            <p className="mt-1 text-sm text-emerald-800/80 dark:text-emerald-200/70">
+        <div className="my-4 overflow-hidden border shadow-md rounded-2xl border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50/40 to-white dark:border-emerald-900/50 dark:from-gray-800 dark:via-emerald-950/30 dark:to-gray-800">
+          <button
+            type="button"
+            onClick={() =>
+              setExportPanelOpen((o) => {
+                const next = !o;
+                if (next && exportSigningReady === false) {
+                  setExportSigningModalOpen(true);
+                }
+                return next;
+              })
+            }
+            aria-expanded={exportPanelOpen}
+            className="flex items-center justify-between w-full gap-3 px-5 py-4 text-left transition border-b border-emerald-100/90 bg-emerald-600/10 hover:bg-emerald-600/15 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30"
+          >
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
+                {t("audit.export.title")}
+              </h3>
+              <p className="mt-0.5 text-xs text-emerald-800/70 dark:text-emerald-200/60">
+                {exportPanelOpen
+                  ? t("audit.export.collapseHint")
+                  : t("audit.export.expandHint")}
+              </p>
+            </div>
+            <span
+              className={`shrink-0 text-emerald-700 transition-transform dark:text-emerald-300 ${
+                exportPanelOpen ? "rotate-180" : ""
+              }`}
+              aria-hidden
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </button>
+          {exportPanelOpen && (
+          <div className="p-5 space-y-5">
+            <p className="text-sm text-emerald-800/85 dark:text-emerald-200/75">
               {t("audit.export.subtitle")}
             </p>
-          </div>
-          <div className="p-5 space-y-5">
+            {exportSigningCheckPending && (
+              <p className="text-sm text-amber-800 dark:text-amber-200/90">
+                {t("audit.export.signingBlocked.checking")}
+              </p>
+            )}
+            {exportSigningBlocked && (
+              <div className="flex flex-col gap-2 px-4 py-3 border rounded-xl border-amber-300/80 bg-amber-50/90 dark:border-amber-700/60 dark:bg-amber-950/40">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                  {t("audit.export.signingBlocked.bannerTitle")}
+                </p>
+                <p className="text-xs text-amber-900/85 dark:text-amber-100/85">
+                  {t("audit.export.signingBlocked.bannerHint")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setExportSigningModalOpen(true)}
+                  className="self-start text-xs font-semibold underline text-amber-900 dark:text-amber-200"
+                >
+                  {t("audit.export.signingBlocked.more")}
+                </button>
+              </div>
+            )}
+            <label className="flex items-start gap-3 px-4 py-3 border cursor-pointer rounded-xl border-slate-200/90 bg-white/60 dark:border-slate-600 dark:bg-gray-900/40">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                checked={exportMaskPii}
+                onChange={(e) => setExportMaskPii(e.target.checked)}
+                disabled={exportBusy || exportSigningReady !== true}
+              />
+              <span className="text-sm text-slate-700 dark:text-slate-200">
+                <span className="font-medium">{t("audit.export.maskPiiLabel")}</span>
+                <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {t("audit.export.maskPiiHint")}
+                </span>
+              </span>
+            </label>
             <div>
               <p className="mb-3 text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400">
                 {t("audit.export.format")}
               </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4z">
                 {FORMAT_OPTIONS.map((opt) => {
                   const active = exportFormat === opt.id;
                   return (
                     <button
                       key={opt.id}
                       type="button"
-                      disabled={exportBusy}
+                      disabled={exportBusy || exportSigningReady !== true}
                       onClick={() => setExportFormat(opt.id)}
                       className={`rounded-xl border bg-gradient-to-br p-3 text-left transition-all ring-2 ring-transparent ${
                         opt.accent
@@ -592,7 +738,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => void handleAuditExport()}
-                disabled={exportBusy}
+                disabled={exportBusy || exportSigningReady !== true}
                 className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-55"
               >
                 {exportBusy && (
@@ -657,6 +803,7 @@ useEffect(() => {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 
@@ -716,6 +863,36 @@ useEffect(() => {
             )}
         </>
       )}
+
+      <Modal
+        show={exportSigningModalOpen}
+        onClose={() => setExportSigningModalOpen(false)}
+        size="md"
+      >
+        <ModalHeader>{t("audit.export.signingBlocked.title")}</ModalHeader>
+        <ModalBody>
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            {exportSigningReason
+              ? t(`audit.export.signingBlocked.reasons.${exportSigningReason}`, {
+                  defaultValue: t("audit.export.signingBlocked.reasonDefault"),
+                })
+              : t("audit.export.signingBlocked.intro")}
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="gray" onClick={() => setExportSigningModalOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            onClick={() => {
+              setExportSigningModalOpen(false);
+              navigate("/kms/crear-clave");
+            }}
+          >
+            {t("audit.export.signingBlocked.goKms")}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </AppLayoutSB>
   );
 };

@@ -4,7 +4,7 @@ import { FiFilter } from "react-icons/fi";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useTranslation } from "react-i18next";
-
+import { useEffect, useRef } from "react";
 interface User {
   id: string;
   name: string;
@@ -110,12 +110,29 @@ const AuditFilters = ({
 }: Props) => {
   const { t } = useTranslation();
   const baseKey = type === "audit" ? "audit" : "externalErrors";
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      userDropdownRef.current &&
+      !userDropdownRef.current.contains(event.target as Node)
+    ) {
+      setShowUserDropdown(false);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [setShowUserDropdown]);
   return (
     <div className="p-3 mb-3 bg-white border shadow-sm sm:p-4 dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
       <div className="grid min-w-0 grid-cols-1 justify-items-center gap-x-2 gap-y-1.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 xl:justify-items-stretch">
         {/* Buscar */}
-        <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-1 xl:row-start-1">
+        <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-1 xl:row-start-1">
           <Label>{t(`${baseKey}.filters.search`)}</Label>
           <TextInput
             icon={HiSearch}
@@ -150,7 +167,7 @@ const AuditFilters = ({
         {type === "audit" && (
           <>
             {/* Usuario */}
-            <div className="relative flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-1">
+            <div ref={userDropdownRef} className="relative flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-2 xl:row-start-1">
               <Label>{t(`${baseKey}.filters.user`)}</Label>
 
               <TextInput
@@ -158,13 +175,17 @@ const AuditFilters = ({
                 placeholder={t("audit.filters.userPlaceholder")}
                 value={userSearch}
                 onChange={(e) => {
-                  setUserSearch(e.target.value);
-                  setShowUserDropdown(true);
+
+                    const value = e.target.value;
+                    setUserSearch(value);
+                    setUserId("");
+                    setShowUserDropdown(!!value.trim());
+
                 }}
               />
 
               {showUserDropdown && userSearch && filteredUsers.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow dark:bg-gray-700 dark:border-gray-600">
+                <div className="absolute left-0 right-0 z-20 w-full mt-1 bg-white border rounded-lg shadow top-full dark:bg-gray-700 dark:border-gray-600">
                   {filteredUsers.slice(0, 5).map((user) => (
                     <div
                       key={user.id}
@@ -183,7 +204,7 @@ const AuditFilters = ({
             </div>
 
             {/* Origen */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-3 xl:row-start-1">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-3 xl:row-start-1">
               <Label>{t("audit.filters.origin")}</Label>
 
               <Select
@@ -202,7 +223,7 @@ const AuditFilters = ({
             </div>
 
             {/* Resultado */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-2">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-2 xl:row-start-2">
               <Label>{t("audit.filters.result")}</Label>
 
               <Select
@@ -212,12 +233,14 @@ const AuditFilters = ({
               >
                 <option value="">{t("audit.filters.all")}</option>
                 <option value="SUCCESS">{t("common.success")}</option>
-                <option value="FAILED">{t("common.rejected")}</option>
+                <option value="FAILURE">{t("common.failed")}</option>
+                <option value="REJECTED">{t("common.rejected")}</option>
+                <option value="ERROR">{t("common.error")}</option>
               </Select>
             </div>
 
             {/* Evento */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-4 xl:row-start-1">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-4 xl:row-start-1">
               <Label className="text-sm font-medium">
                 {t("audit.filters.event")}
               </Label>
@@ -244,7 +267,7 @@ const AuditFilters = ({
         {type === "errors" && (
           <>
             {/* Proyecto */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-1">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-2 xl:row-start-1">
               <Label>{t("externalErrors.filters.project")}</Label>
               <TextInput
                 sizing="sm"
@@ -255,7 +278,7 @@ const AuditFilters = ({
             </div>
 
             {/* Severidad */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-3 xl:row-start-1">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-3 xl:row-start-1">
               <Label>{t("externalErrors.filters.severity")}</Label>
 
               <Select
@@ -275,7 +298,7 @@ const AuditFilters = ({
             </div>
 
             {/* Componente */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-4 xl:row-start-1">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-4 xl:row-start-1">
               <Label>{t("externalErrors.filters.component")}</Label>
               <Select
                 sizing="sm"
@@ -293,7 +316,7 @@ const AuditFilters = ({
             </div>
 
             {/* Código */}
-            <div className="flex flex-col min-w-0 w-full max-w-xs xl:max-w-none xl:col-start-2 xl:row-start-2">
+            <div className="flex flex-col w-full max-w-xs min-w-0 xl:max-w-none xl:col-start-2 xl:row-start-2">
               <Label>{t("externalErrors.filters.code")}</Label>
               <Select
                 sizing="sm"

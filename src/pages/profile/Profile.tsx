@@ -420,6 +420,7 @@ const Profile = () => {
       const response = await getExternalProjectUsersService(
         userDetails?.email || "",
       );
+      console.log(response)
 
       if (response.results && Object.keys(response.results).length > 0) {
         setExternalUsers(response.results);

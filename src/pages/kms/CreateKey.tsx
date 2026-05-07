@@ -19,8 +19,6 @@ export default function CreateKey() {
     variant: KmsFeedbackVariant;
     message: string;
   } | null>(null);
-  const [created, setCreated] = useState<Record<string, unknown> | null>(null);
-
   const [keyAlias, setKeyAlias] = useState("");
   const [algorithm, setAlgorithm] = useState("RSA-2048");
   const [keyPurpose, setKeyPurpose] = useState("signing");
@@ -29,16 +27,14 @@ export default function CreateKey() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
-    setCreated(null);
     setLoading(true);
     try {
-      const { data } = await kmsApi.createKey({
+      await kmsApi.createKey({
         key_alias: keyAlias.trim(),
         algorithm,
         key_purpose: keyPurpose,
         valid_to: validTo ? new Date(validTo).toISOString() : null,
       });
-      setCreated(data as Record<string, unknown>);
       setFeedback({
         variant: "success",
         message: t("kms.createKey.success"),
@@ -96,12 +92,6 @@ export default function CreateKey() {
               />
             </div>
           </div>
-
-          {created && (
-            <pre className="mt-6 max-h-64 overflow-auto rounded-lg bg-slate-900 p-4 text-xs text-sky-200">
-              {JSON.stringify(created, null, 2)}
-            </pre>
-          )}
 
           <div className="mt-8 flex flex-wrap justify-end gap-3">
             <Button color="light" type="button" onClick={() => navigate("/kms")}>

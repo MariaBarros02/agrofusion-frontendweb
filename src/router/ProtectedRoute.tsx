@@ -11,7 +11,7 @@ import type { JSX } from "react";
  */
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
   const isAuth = useAuthStore((state) => state.isAuthenticated);
-  const  isHydrated  = useAuthStore((state) => state.isAuthenticated);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   useEffect(() => {
     if (isAuth) {

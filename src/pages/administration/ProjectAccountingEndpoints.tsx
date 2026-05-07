@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Label,
@@ -38,6 +38,7 @@ import {
   validateAccountingTransferConnectionService,
 } from "../../services/agrofusion/auth.service";
 import AlertConfirmation from "../../components/layout/AlertConfirmation";
+import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
 import ToastSimple, { type ToastData } from "../../components/layout/ToastSimple";
 
 const EMPTY_CREATE_FORM: CreateProjectAccountingInfoEndpointRequest = {
@@ -58,8 +59,14 @@ const methodBadgeStyles: Record<string, string> = {
   DELETE: "bg-rose-100 text-rose-700",
 };
 
+type AccountingEndpointFormErrors = {
+  api_path?: string;
+  request_url?: string;
+};
+
 const ProjectAccountingEndpoints = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
 
   const [search, setSearch] = useState("");
@@ -78,9 +85,11 @@ const ProjectAccountingEndpoints = () => {
     useState<AccountingEndpointListItemResponse | null>(null);
   const [createFormData, setCreateFormData] =
     useState<CreateProjectAccountingInfoEndpointRequest>(EMPTY_CREATE_FORM);
+  const [formErrors, setFormErrors] = useState<AccountingEndpointFormErrors>({});
   const [pendingDelete, setPendingDelete] =
     useState<AccountingEndpointListItemResponse | null>(null);
   const [confirmDeleteChecked, setConfirmDeleteChecked] = useState(false);
+  const [alert, setAlert] = useState<AlertState>(null);
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [copiedEndpointId, setCopiedEndpointId] = useState<string | null>(null);
 
@@ -160,6 +169,7 @@ const ProjectAccountingEndpoints = () => {
   const openCreateModal = () => {
     setEditingEndpoint(null);
     setCreateFormData(EMPTY_CREATE_FORM);
+    setFormErrors({});
     setShowModal(true);
   };
 
@@ -184,12 +194,31 @@ const ProjectAccountingEndpoints = () => {
       return "errors.AUTH_INSUFFICIENT_PERMISSIONS";
     }
 
+    if (errorCode === "EXT_ACCOUNTING_ENDPOINT_DUPLICATED") {
+      return "project.accountingEndpoints.duplicateEndpoint";
+    }
+
     const backendMessage = err?.response?.data?.detail?.meta?.message;
     if (backendMessage === "La api ingresada no existe") {
       return "project.accountingEndpoints.invalidApiUrl";
     }
 
     return fallbackKey;
+  };
+
+  const handlePermissionAlert = (err: any) => {
+    const errorCode = err?.response?.data?.detail?.code;
+    if (errorCode !== "AUTH_INSUFFICIENT_PERMISSIONS") {
+      return false;
+    }
+
+    setAlert({
+      message: t("errors.AUTH_INSUFFICIENT_PERMISSIONS"),
+      type: "warning",
+    });
+    setPendingDelete(null);
+    setConfirmDeleteChecked(false);
+    return true;
   };
 
   const openEditModal = async (endpoint: AccountingEndpointListItemResponse) => {
@@ -206,6 +235,9 @@ const ProjectAccountingEndpoints = () => {
       );
       setCreateFormData(mapDetailToForm(detail));
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
       setShowModal(false);
       setEditingEndpoint(null);
       setCreateFormData(EMPTY_CREATE_FORM);
@@ -229,11 +261,28 @@ const ProjectAccountingEndpoints = () => {
     setShowModal(false);
     setEditingEndpoint(null);
     setCreateFormData(EMPTY_CREATE_FORM);
+    setFormErrors({});
     setIsModalLoading(false);
+  };
+
+  const validateForm = () => {
+    const errors: AccountingEndpointFormErrors = {};
+
+    if (!createFormData.api_path.trim().startsWith("/")) {
+      errors.api_path = "project.accountingEndpoints.form.mustStartWithSlash";
+    }
+
+    if (!createFormData.request_url.trim().startsWith("/")) {
+      errors.request_url = "project.accountingEndpoints.form.mustStartWithSlash";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
     if (!projectId) return;
+    if (!validateForm()) return;
 
     try {
       setIsSaving(true);
@@ -249,17 +298,25 @@ const ProjectAccountingEndpoints = () => {
 
       closeModal();
       await getEndpoints(pagination?.page ?? 1);
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: editingEndpoint
+      setAlert({
+        message: t(
+          editingEndpoint
             ? "project.accountingEndpoints.endpointUpdated"
             : "project.accountingEndpoints.endpointCreated",
-          type: "success",
-        },
-      ]);
+        ),
+        type: "success",
+      });
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
+      if (err?.response?.data?.detail?.code === "EXT_ACCOUNTING_ENDPOINT_DUPLICATED") {
+        setAlert({
+          message: t("project.accountingEndpoints.duplicateEndpoint"),
+          type: "error",
+        });
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -287,15 +344,14 @@ const ProjectAccountingEndpoints = () => {
       setPendingDelete(null);
       setConfirmDeleteChecked(false);
       await getEndpoints(1);
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: "project.accountingEndpoints.endpointDeleted",
-          type: "success",
-        },
-      ]);
+      setAlert({
+        message: t("project.accountingEndpoints.endpointDeleted"),
+        type: "success",
+      });
     } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return;
+      }
       setToasts((prev) => [
         ...prev,
         {
@@ -336,18 +392,28 @@ const ProjectAccountingEndpoints = () => {
 
   const handleTransferValidation = async () => {
     try {
-      const result = await validateAccountingTransferConnectionService();
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          messageKey: result.exists
-            ? "project.accountingEndpoints.transferConnectionExists"
-            : "project.accountingEndpoints.transferConnectionMissing",
-          type: result.exists ? "success" : "warning",
-        },
-      ]);
-    } catch {
+      await validateAccountingTransferConnectionService();
+      return true;
+    } catch (err: any) {
+      if (handlePermissionAlert(err)) {
+        return false;
+      }
+
+      const errorCode = err?.response?.data?.detail?.code;
+      const backendMessage = err?.response?.data?.detail?.meta?.message;
+
+      if (
+        errorCode === "ACCOUNTING_TRANSFER_CONNECTION_NOT_FOUND" ||
+        backendMessage ===
+          "No existe una conexión a un sistema de contabilidad. Agrega la conexión en el módulo de comprobantes"
+      ) {
+        setAlert({
+          message: t("project.accountingEndpoints.transferConnectionMissing"),
+          type: "warning",
+        });
+        return false;
+      }
+
       setToasts((prev) => [
         ...prev,
         {
@@ -356,7 +422,29 @@ const ProjectAccountingEndpoints = () => {
           type: "error",
         },
       ]);
+      return false;
     }
+  };
+
+  const handleTransfer = async (endpoint: AccountingEndpointListItemResponse) => {
+    if (!projectId) return;
+
+    const shouldContinue = await handleTransferValidation();
+    if (!shouldContinue) return;
+
+    const targetPath =
+      canUseAdministrationFlow && !canUseDashboardFlow
+        ? `/administration/projects/${projectId}/accounting-transfer-request`
+        : `/projects/${projectId}/accounting-transfer-request`;
+
+    navigate(targetPath, {
+      state: {
+        apiName: endpoint.api_name,
+        projectCode: endpoint.external_project_code,
+        endpointId: endpoint.external_endpoint_id,
+        urlEndpoint: endpoint.url_endpoint,
+      },
+    });
   };
 
   const columns: Column<AccountingEndpointListItemResponse>[] = [
@@ -452,7 +540,7 @@ const ProjectAccountingEndpoints = () => {
           icon: <FiSend />,
           className: "bg-blue-600 text-white hover:bg-blue-500",
           disabled: (row) => row.is_deleted,
-          onClick: () => handleTransferValidation(),
+          onClick: (row) => handleTransfer(row),
         },
       ],
     },
@@ -644,6 +732,7 @@ const ProjectAccountingEndpoints = () => {
                 <Label>{t("project.accountingEndpoints.form.apiPath")}</Label>
                 <TextInput
                   placeholder={t("project.accountingEndpoints.form.apiPathPlaceholder")}
+                  color={formErrors.api_path ? "failure" : undefined}
                   value={createFormData.api_path}
                   onChange={(e) =>
                     setCreateFormData((prev) => ({
@@ -652,12 +741,20 @@ const ProjectAccountingEndpoints = () => {
                     }))
                   }
                 />
+                <p
+                  className={`mt-1 text-xs ${
+                    formErrors.api_path ? "text-red-600" : "text-slate-500"
+                  }`}
+                >
+                  {t("project.accountingEndpoints.form.mustStartWithSlash")}
+                </p>
               </div>
 
               <div>
                 <Label>{t("project.accountingEndpoints.form.requestUrl")}</Label>
                 <TextInput
                   placeholder={t("project.accountingEndpoints.form.requestUrlPlaceholder")}
+                  color={formErrors.request_url ? "failure" : undefined}
                   value={createFormData.request_url}
                   onChange={(e) =>
                     setCreateFormData((prev) => ({
@@ -666,6 +763,13 @@ const ProjectAccountingEndpoints = () => {
                     }))
                   }
                 />
+                <p
+                  className={`mt-1 text-xs ${
+                    formErrors.request_url ? "text-red-600" : "text-slate-500"
+                  }`}
+                >
+                  {t("project.accountingEndpoints.form.mustStartWithSlash")}
+                </p>
               </div>
 
               <div>
@@ -754,6 +858,15 @@ const ProjectAccountingEndpoints = () => {
           setConfirmDeleteChecked(false);
         }}
       />
+
+      {alert && (
+        <AlertSimple
+          message={alert.message}
+          type={alert.type}
+          to={alert.to}
+          onClose={() => setAlert(null)}
+        />
+      )}
 
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button, Label, Select, TextInput, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 import { HiSearch, HiCalendar } from "react-icons/hi";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,6 +24,7 @@ import type {
 
 const ListChecks = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [state, setState] = useState("");
@@ -43,6 +45,7 @@ const ListChecks = () => {
   const [connectionPath, setConnectionPath] = useState("");
   const [connectionMethodTermId, setConnectionMethodTermId] = useState("");
   const [savingConnection, setSavingConnection] = useState(false);
+  const [connectionApiKey, setConnectionApiKey] = useState("");
 
   const getChecks = useCallback(async (pageParam = 1) => {
       try {
@@ -113,6 +116,11 @@ const ListChecks = () => {
       setConnectionMode(isEdit ? "edit" : "create");
       setConnectionPath(isEdit ? accountingConnection.path || "" : "");
       setConnectionMethodTermId(isEdit ? accountingConnection.method_term_id || "" : "");
+      setConnectionApiKey(
+        isEdit
+          ? accountingConnection?.params_template?.api_key || ""
+          : "",
+      );
       setShowConnectionModal(true);
     };
 
@@ -121,7 +129,7 @@ const ListChecks = () => {
         const response = await getAccountingConnectionService();
         setConnectionExists(response.exists);
         setAccountingConnection(response.exists ? response : null);
-      } catch (error) {
+      } catch {
         setConnectionExists(false);
         setAccountingConnection(null);
       }
@@ -131,16 +139,46 @@ const ListChecks = () => {
       setShowConnectionModal(false);
       setConnectionPath("");
       setConnectionMethodTermId("");
+      setConnectionApiKey("");
       setSavingConnection(false);
     };
     
     const handleSaveConnection = async () => {
+      if (!connectionPath.trim()) {
+        setAlert({
+          message: t("checks.requestUrlRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
+      if (!connectionMethodTermId) {
+        setAlert({
+          message: t("checks.requestMethodRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
+      if (!connectionApiKey.trim()) {
+        setAlert({
+          message: t("checks.apiKeyRequired"),
+          type: "warning",
+        });
+        return;
+      }
+    
       const payload = {
-        path: connectionPath,
+        path: connectionPath.trim(),
         method_term_id: connectionMethodTermId,
+        params_template: {
+          api_key: connectionApiKey.trim(),
+        },
       };
     
       try {
+        setSavingConnection(true);
+    
         if (connectionMode === "edit" && accountingConnection?.external_endpoint_id) {
           await updateAccountingConnectionService(
             accountingConnection.external_endpoint_id,
@@ -173,6 +211,11 @@ const ListChecks = () => {
         } else if (backendDetail === "ACCOUNTING_CONNECTION_ALREADY_EXISTS") {
           setAlert({
             message: t("checks.accountingConnectionAlreadyExists"),
+            type: "warning",
+          });
+        } else if (backendDetail === "ACCOUNTING_CONNECTION_API_KEY_REQUIRED") {
+          setAlert({
+            message: t("checks.apiKeyRequired"),
             type: "warning",
           });
         } else {
@@ -258,20 +301,6 @@ const ListChecks = () => {
             : "-",
       },
       {
-        key: "amount",
-        label: t("checks.columns.amount"),
-        type: "text",
-        width: "140px",
-        format: (value: number) =>
-          value != null
-            ? new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-                maximumFractionDigits: 0,
-              }).format(value)
-            : "-",
-      },
-      {
         key: "issued_by",
         label: t("checks.columns.issuedBy"),
         type: "text",
@@ -286,7 +315,7 @@ const ListChecks = () => {
           {
             label: t("checks.view"),
             onClick: (row) => {
-              console.log("abrir detalle", row.id);
+              navigate(`/accounting-vouchers/${row.id}`);
             },
           },
           {
@@ -304,9 +333,9 @@ const ListChecks = () => {
     <AppLayoutSB>
       <TitleTarget title={t("checks.title")} description={t("checks.description")} />
 
-      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex flex-wrap flex-1 gap-2 overflow-visible">
-          <div className="w-72">
+      <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
+        <div className="flex flex-wrap flex-1 gap-2 mb-3 overflow-visible">
+          <div className="w-60">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -321,7 +350,7 @@ const ListChecks = () => {
             <Label className="text-xs">{t("audit.filters.date")}</Label>
 
             <div className="relative">
-              <HiCalendar className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400 pointer-events-none dark:text-gray-300" />
+              <HiCalendar className="absolute z-10 text-gray-400 -translate-y-1/2 pointer-events-none left-3 top-1/2 dark:text-gray-300" />
 
               <DatePicker
                 selectsRange
@@ -337,7 +366,7 @@ const ListChecks = () => {
                 popperPlacement="bottom-start"
                 popperClassName="z-50"
                 portalId="root"
-                className="w-72 h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                className="w-60 h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
           </div>
@@ -397,7 +426,7 @@ const ListChecks = () => {
           </Button>
           <Button
             size="xs"
-            className="bg-green-600 text-white hover:bg-green-700"
+            className="text-white bg-green-600 hover:bg-green-700"
             onClick={handleOpenConnectionModal}
           >
             {connectionExists
@@ -451,7 +480,7 @@ const ListChecks = () => {
         <ModalBody>
           <div className="space-y-4">
             <div>
-              <div className="mb-2 block">
+              <div className="block mb-2">
                 <Label htmlFor="connectionPath">{t("checks.requestUrl")}</Label>
               </div>
               <TextInput
@@ -463,7 +492,7 @@ const ListChecks = () => {
             </div>
 
             <div>
-              <div className="mb-2 block">
+              <div className="block mb-2">
                 <Label htmlFor="connectionMethod">{t("checks.requestMethod")}</Label>
               </div>
               <Select
@@ -476,6 +505,19 @@ const ListChecks = () => {
                 <option value="d6e3e5be-c29a-45de-9aa3-2b61af6537f6">POST</option>
               </Select>
             </div>
+            <div>
+              <div className="block mb-2">
+              <Label htmlFor="connectionApiKey">
+                {t("checks.apiKey")} <span className="text-red-500">*</span>
+              </Label>
+              </div>
+              <TextInput
+                id="connectionApiKey"
+                value={connectionApiKey}
+                onChange={(e) => setConnectionApiKey(e.target.value)}
+                placeholder={t("checks.apiKeyPlaceholder")}
+              />
+            </div>
           </div>
         </ModalBody>
 
@@ -483,7 +525,16 @@ const ListChecks = () => {
           <Button color="gray" onClick={handleCloseConnectionModal}>
             {t("common.cancel")}
           </Button>
-          <Button color="blue" onClick={handleSaveConnection} isProcessing={savingConnection}>
+          <Button
+            color="blue"
+            onClick={handleSaveConnection}
+            isProcessing={savingConnection}
+            disabled={
+              !connectionPath.trim() ||
+              !connectionMethodTermId ||
+              !connectionApiKey.trim()
+            }
+          >
             {t("common.save")}
           </Button>
         </ModalFooter>

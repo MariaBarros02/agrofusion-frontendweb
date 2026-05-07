@@ -16,7 +16,10 @@ export interface ProjectListResponse {
   created_at: string | null;
   /** Responsable (usuario creador del registro) */
   responsible: string | null;
+  /** Indica si el proyecto tiene lotes AAEF en tránsito (processing o sent) */
+  accounting_transfer: boolean;
 }
+
 
 /** Respuesta paginada del listado de proyectos externos */
 export interface PaginatedProjectsResponse {
