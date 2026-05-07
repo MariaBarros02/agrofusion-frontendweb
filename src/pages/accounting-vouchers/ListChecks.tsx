@@ -11,6 +11,11 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
 import DataTable, { type Column } from "../../components/DataTable";
 import {listChecksService, listCheckTypesService,} from "../../services/agrofusion/integration.service";
+import {
+  checkSigningReadinessService,
+  exportCheckVoucherService,
+} from "../../services/agrofusion/audit.service";
+import { env } from "../../config/env";
 import {getAccountingConnectionService, createAccountingConnectionService, updateAccountingConnectionService,} from "../../services/agrofusion/auth.service";
 import type { listChecksRequest } from "../../dto/request/listChecks-request.dto";
 import type { CheckTypeOptionResponse } from "../../dto/response/listCheckTypes-response.dto";
@@ -46,6 +51,12 @@ const ListChecks = () => {
   const [connectionMethodTermId, setConnectionMethodTermId] = useState("");
   const [savingConnection, setSavingConnection] = useState(false);
   const [connectionApiKey, setConnectionApiKey] = useState("");
+
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportCheckId, setExportCheckId] = useState<string | null>(null);
+  const [exportFormat, setExportFormat] = useState<"JSON" | "CSV" | "XML">("JSON");
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportMsg, setExportMsg] = useState<{ type: "warning" | "error" | "success"; text: string } | null>(null);
 
   const getChecks = useCallback(async (pageParam = 1) => {
       try {
@@ -234,6 +245,63 @@ const ListChecks = () => {
       }
     };
 
+    const handleExportClick = async (row: CheckListItemResponse) => {
+      setExportMsg(null);
+      setExportCheckId(row.id);
+      setExportFormat("JSON");
+
+      try {
+        const readiness = await checkSigningReadinessService();
+        if (readiness?.ready === false) {
+          setExportMsg({ type: "warning", text: t("checks.exportModal.noSigningKey") });
+        }
+      } catch {
+        // si el servicio falla, se permite exportar igualmente
+      }
+
+      setShowExportModal(true);
+    };
+
+    const downloadExportFile = (blob: Blob, filename: string) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    const handleDoExport = async () => {
+      if (!exportCheckId) return;
+      setExportBusy(true);
+      setExportMsg(null);
+      try {
+        const result = await exportCheckVoucherService(exportCheckId, exportFormat);
+        if (result.status === "COMPLETED" && result.download_token) {
+          const base = (env.VITE_API_AUDIT_AF_URL || "").replace(/\/$/, "");
+          const url = `${base}/audit/exports/${result.export_id}/download?token=${encodeURIComponent(result.download_token)}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("download_failed");
+          const blob = await res.blob();
+          const filename = result.download_filename || `${result.export_name || "lote_contable"}.zip`;
+          downloadExportFile(blob, filename);
+          setExportMsg({ type: "success", text: t("checks.exportModal.success") });
+          setShowExportModal(false);
+        }
+      } catch (err: any) {
+        const code = err?.response?.data?.detail?.code;
+        if (code === "AUTH_INSUFFICIENT_PERMISSIONS") {
+          setExportMsg({ type: "warning", text: t("checks.exportModal.noPermission") });
+        } else {
+          setExportMsg({ type: "error", text: code || t("checks.exportModal.error") });
+        }
+      } finally {
+        setExportBusy(false);
+      }
+    };
+
     useEffect(() => {
       getCheckTypes();
       getChecks(1);
@@ -322,7 +390,7 @@ const ListChecks = () => {
             label: t("checks.export"),
             className: "bg-blue-600 text-white border-blue-600 hover:bg-blue-700",
             onClick: (row) => {
-              console.log("exportar", row.id);
+              void handleExportClick(row);
             },
           },
         ],
@@ -546,6 +614,63 @@ const ListChecks = () => {
           onClose={() => setAlert(null)}
         />
       )}
+
+      <Modal show={showExportModal} onClose={() => { setShowExportModal(false); setExportMsg(null); }} size="md">
+        <ModalHeader>{t("checks.exportModal.title")}</ModalHeader>
+        <ModalBody>
+          <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            {t("checks.exportModal.subtitle")}
+          </p>
+
+          {exportMsg && (
+            <div className={`mb-4 rounded-lg p-3 text-sm font-medium ${
+              exportMsg.type === "warning"
+                ? "bg-amber-50 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                : exportMsg.type === "error"
+                ? "bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                : "bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+            }`}>
+              {exportMsg.text}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label className="text-xs">{t("checks.exportModal.formatLabel")}</Label>
+            {(["JSON", "CSV", "XML"] as const).map((fmt) => (
+              <button
+                key={fmt}
+                type="button"
+                onClick={() => setExportFormat(fmt)}
+                className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all ${
+                  exportFormat === fmt
+                    ? "border-blue-500 bg-blue-50 ring-1 ring-blue-400 dark:bg-blue-900/20"
+                    : "border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700/50"
+                }`}
+              >
+                <div className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center border-blue-500">
+                  {exportFormat === fmt && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{t(`checks.exportModal.fmt${fmt === "JSON" ? "Json" : fmt === "CSV" ? "Csv" : "Xml"}`)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t(`checks.exportModal.fmt${fmt === "JSON" ? "Json" : fmt === "CSV" ? "Csv" : "Xml"}Desc`)}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="gray" onClick={() => { setShowExportModal(false); setExportMsg(null); }}>
+            {t("checks.exportModal.cancel")}
+          </Button>
+          <Button
+            color="blue"
+            onClick={handleDoExport}
+            disabled={exportBusy}
+          >
+            {exportBusy ? t("checks.exportModal.downloading") : t("checks.exportModal.exportBtn")}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </AppLayoutSB>
   );
 };

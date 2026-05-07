@@ -171,3 +171,21 @@ export const listAuditExportsService = async (
   const { data } = await auditApi.listAuditExports({ limit });
   return data;
 };
+
+export const checkSigningReadinessService = async () => {
+  const { data } = await auditApi.checkSigningReadiness();
+  return data;
+};
+
+export const exportCheckVoucherService = async (
+  checkId: string,
+  format: "JSON" | "CSV" | "XML"
+) => {
+  const { data } = await auditApi.exportCheckVoucher({ check_id: checkId, format });
+  return data;
+};
+
+export const getCheckExportService = async (exportId: string) => {
+  const { data } = await auditApi.getCheckExport(exportId);
+  return data;
+};
