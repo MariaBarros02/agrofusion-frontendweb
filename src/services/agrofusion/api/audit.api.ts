@@ -79,11 +79,11 @@ listErrorCodes: () => auditAgrofusionAxios.get("/audit/errors/codes"),
     auditAgrofusionAxios.delete(`audit/exports/${exportId}`),
 
   checkSigningReadiness: () =>
-    auditAgrofusionAxios.get<SigningReadinessResponse>("audit/exports/signing-readiness"),
+    auditAgrofusionAxios.get<SigningReadinessResponse>("audit/checks/signing-readiness"),
 
   exportCheckVoucher: (body: CreateCheckExportRequest) =>
     auditAgrofusionAxios.post<CheckExportResponse>("audit/checks/export", body),
 
   getCheckExport: (exportId: string) =>
-    auditAgrofusionAxios.get<CheckExportResponse>(`audit/exports/${exportId}`),
+    auditAgrofusionAxios.get<CheckExportResponse>(`audit/checks/exports/${exportId}`),
 };

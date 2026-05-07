@@ -281,7 +281,7 @@ const ListChecks = () => {
         const result = await exportCheckVoucherService(exportCheckId, exportFormat);
         if (result.status === "COMPLETED" && result.download_token) {
           const base = (env.VITE_API_AUDIT_AF_URL || "").replace(/\/$/, "");
-          const url = `${base}/audit/exports/${result.export_id}/download?token=${encodeURIComponent(result.download_token)}`;
+          const url = `${base}/audit/checks/exports/${result.export_id}/download?token=${encodeURIComponent(result.download_token)}`;
           const res = await fetch(url);
           if (!res.ok) throw new Error("download_failed");
           const blob = await res.blob();
