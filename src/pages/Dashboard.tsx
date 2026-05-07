@@ -63,7 +63,7 @@ const Dashboard = () => {
       const projectSlug = project.instance_code.toLowerCase();
 
       window.open(
-        `https://www.inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
+        `https://inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
         "_blank"
       );
       return;
