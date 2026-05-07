@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -17,6 +18,7 @@ import { consultAccountingInfoService } from "../../services/agrofusion/accounti
 import type { AlertState } from "../../components/layout/AlertSimple";
 import type { AccountingConsultRequest } from "../../dto/request/accountingConsult-request.dto";
 import type { AccountingConsultResponse } from "../../dto/response/accountingConsult-response.dto";
+import { accountingTransferService } from "../../services/agrofusion/integration.service";
 
 type TransferLocationState = {
   apiName?: string;
@@ -185,6 +187,7 @@ const AccountingTransferRequest = () => {
   const [hasConsulted, setHasConsulted] = useState(false);
 
   const [loadingConsult, setLoadingConsult] = useState(false);
+  const [loadingTransfer, setLoadingTransfer] = useState(false); 
   const [alert, setAlert] = useState<AlertState>(null);
   const [consultResult, setConsultResult] =
     useState<AccountingConsultResponse | null>(null);
@@ -321,9 +324,33 @@ const AccountingTransferRequest = () => {
     }
   };
 
+  const transferConsult = async () => {
+    try {
+      setLoadingTransfer(true);
+      await accountingTransferService({
+        external_project_id: projectId as string,
+        external_endpoint_id: state?.endpointId as string,
+        normalized_json: consultResult as AccountingConsultResponse
+      });
+      setAlert({
+          message: t(`transfer.success`),
+          type: "success",
+          to:"/accounting-vouchers"
+        });
+    }catch (error:any){
+        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+        setAlert({
+          message: t(`errors.${errorCode}`),
+          type: errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning": "error",
+        });
+    }finally{
+      setLoadingTransfer(false);
+    }
+  }
+
   return (
     <AppLayoutSB>
-      <div className="mb-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-600 dark:bg-gray-700">
+      <div className="p-6 mb-4 bg-white border shadow-sm rounded-2xl dark:border-gray-600 dark:bg-gray-700">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           {t("project.transferRequest.title", {
             apiName,
@@ -341,7 +368,7 @@ const AccountingTransferRequest = () => {
 
       {showContent && (
         <>
-          <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-600 dark:bg-gray-700">
+          <div className="p-6 bg-white border shadow-sm rounded-2xl dark:border-gray-600 dark:bg-gray-700">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
               <div>
                 <Label htmlFor="transfer-start-date">
@@ -422,8 +449,8 @@ const AccountingTransferRequest = () => {
             </div>
           </div>
 
-          <div className="mt-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-600 dark:bg-gray-700">
-            <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="p-6 mt-4 bg-white border shadow-sm rounded-2xl dark:border-gray-600 dark:bg-gray-700">
+            <div className="flex items-center justify-between gap-3 mb-5">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {t("project.transferRequest.resultTitle")}
               </h2>
@@ -437,8 +464,8 @@ const AccountingTransferRequest = () => {
 
             {hasConsulted && consultResult ? (
               <div className="space-y-6">
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-gray-600 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-gray-600">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:border-gray-600 dark:bg-gray-800">
+                  <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200 dark:border-gray-600">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                         {t("project.transferRequest.result.normalizedJson")}
@@ -449,14 +476,14 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    <span className="px-3 py-1 text-xs font-medium tracking-wide uppercase rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                       {t("project.transferRequest.result.metadata")}
                     </span>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.date")}
                       </p>
 
@@ -465,8 +492,8 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.action")}
                       </p>
 
@@ -477,18 +504,18 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.identification")}
                       </p>
 
-                      <p className="mt-2 break-all text-sm font-medium text-slate-900 dark:text-white">
+                      <p className="mt-2 text-sm font-medium break-all text-slate-900 dark:text-white">
                         {consultResult.metadata.ExchangeId}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.system")}
                       </p>
 
@@ -497,8 +524,8 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.result")}
                       </p>
 
@@ -509,8 +536,8 @@ const AccountingTransferRequest = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-gray-600 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-gray-600">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:border-gray-600 dark:bg-gray-800">
+                  <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200 dark:border-gray-600">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                         {t(
@@ -523,14 +550,14 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    <span className="px-3 py-1 text-xs font-medium tracking-wide uppercase rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                       {t("project.transferRequest.result.summary")}
                     </span>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.total")}
                       </p>
 
@@ -542,8 +569,8 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.totalDocuments")}
                       </p>
 
@@ -552,8 +579,8 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.invoicesCount")}
                       </p>
 
@@ -562,8 +589,8 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-gray-700">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700">
+                      <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                         {t("project.transferRequest.result.paymentsCount")}
                       </p>
 
@@ -573,8 +600,8 @@ const AccountingTransferRequest = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-gray-600 dark:bg-gray-700">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                  <div className="p-4 mt-4 border rounded-xl border-slate-200 bg-slate-50 dark:border-gray-600 dark:bg-gray-700">
+                    <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                       {t("project.transferRequest.result.queriedPeriod")}
                     </p>
 
@@ -587,8 +614,8 @@ const AccountingTransferRequest = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-gray-600 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-gray-600">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:border-gray-600 dark:bg-gray-800">
+                  <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200 dark:border-gray-600">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                         {t("project.transferRequest.result.invoicesTitle")}
@@ -601,7 +628,7 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    <span className="px-3 py-1 text-xs font-medium tracking-wide uppercase rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                       {t("project.transferRequest.result.invoicesBadge")}
                     </span>
                   </div>
@@ -611,10 +638,10 @@ const AccountingTransferRequest = () => {
                       consultResult.invoices.map((invoice) => (
                         <div
                           key={invoice.Header.DocumentId}
-                          className="grid gap-4 rounded-xl border border-slate-200 p-4 dark:border-gray-600 md:grid-cols-2 xl:grid-cols-5"
+                          className="grid gap-4 p-4 border rounded-xl border-slate-200 dark:border-gray-600 md:grid-cols-2 xl:grid-cols-5"
                         >
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.date")}
                             </p>
 
@@ -627,7 +654,7 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.type")}
                             </p>
 
@@ -637,7 +664,7 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.amount")}
                             </p>
 
@@ -650,17 +677,17 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.reference")}
                             </p>
 
-                            <p className="mt-1 break-all text-sm text-slate-900 dark:text-white">
+                            <p className="mt-1 text-sm break-all text-slate-900 dark:text-white">
                               {invoice.Header.DocumentId}
                             </p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.status")}
                             </p>
 
@@ -675,15 +702,15 @@ const AccountingTransferRequest = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500 dark:border-gray-600 dark:text-slate-300">
+                      <div className="px-4 py-6 text-sm text-center border border-dashed rounded-xl border-slate-300 text-slate-500 dark:border-gray-600 dark:text-slate-300">
                         {t("project.transferRequest.result.invoiceEmpty")}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-gray-600 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-gray-600">
+                <div className="p-5 bg-white border shadow-sm rounded-2xl border-slate-200 dark:border-gray-600 dark:bg-gray-800">
+                  <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200 dark:border-gray-600">
                     <div>
                       <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                         {t("project.transferRequest.result.paymentsTitle")}
@@ -696,7 +723,7 @@ const AccountingTransferRequest = () => {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                    <span className="px-3 py-1 text-xs font-medium tracking-wide uppercase rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200">
                       {t("project.transferRequest.result.transactionsBadge")}
                     </span>
                   </div>
@@ -706,10 +733,10 @@ const AccountingTransferRequest = () => {
                       consultResult.transactions.map((transaction) => (
                         <div
                           key={transaction.DocumentId}
-                          className="grid gap-4 rounded-xl border border-slate-200 p-4 dark:border-gray-600 md:grid-cols-2 xl:grid-cols-5"
+                          className="grid gap-4 p-4 border rounded-xl border-slate-200 dark:border-gray-600 md:grid-cols-2 xl:grid-cols-5"
                         >
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.date")}
                             </p>
 
@@ -719,7 +746,7 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.paymentMethod")}
                             </p>
 
@@ -729,7 +756,7 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.amount")}
                             </p>
 
@@ -744,17 +771,17 @@ const AccountingTransferRequest = () => {
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.reference")}
                             </p>
 
-                            <p className="mt-1 break-all text-sm text-slate-900 dark:text-white">
+                            <p className="mt-1 text-sm break-all text-slate-900 dark:text-white">
                               {transaction.RelatedInvoiceId || "-"}
                             </p>
                           </div>
 
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
                               {t("project.transferRequest.result.status")}
                             </p>
 
@@ -769,7 +796,7 @@ const AccountingTransferRequest = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500 dark:border-gray-600 dark:text-slate-300">
+                      <div className="px-4 py-6 text-sm text-center border border-dashed rounded-xl border-slate-300 text-slate-500 dark:border-gray-600 dark:text-slate-300">
                         {t("project.transferRequest.result.paymentEmpty")}
                       </div>
                     )}
@@ -777,7 +804,7 @@ const AccountingTransferRequest = () => {
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center dark:border-gray-500 dark:bg-gray-800">
+              <div className="px-6 py-10 text-center border border-dashed rounded-2xl border-slate-300 bg-slate-50 dark:border-gray-500 dark:bg-gray-800">
                 <p className="text-sm text-slate-500 dark:text-slate-300">
                   {t("project.transferRequest.emptyState")}
                 </p>
@@ -785,13 +812,13 @@ const AccountingTransferRequest = () => {
             )}
           </div>
 
-          <div className="mt-4 flex justify-end gap-3">
+          <div className="flex justify-end gap-3 mt-4">
             <Button color="light" onClick={() => navigate(goBackPath)}>
               <FiArrowLeft className="mr-2" />
               {t("common.cancel")}
             </Button>
 
-            <Button color="blue" disabled={!consultResult}>
+            <Button color="blue" disabled={!consultResult || loadingTransfer} onClick={() => {transferConsult()}} >
               <FiSend className="mr-2" />
               {t("project.transferRequest.transfer")}
             </Button>

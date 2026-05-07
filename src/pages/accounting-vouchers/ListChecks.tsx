@@ -273,6 +273,13 @@ const ListChecks = () => {
         type: "text",
         width: "170px",
       },
+      
+      {
+        key : "accounting_entry_id",
+        label: t("checks.columns.accountingEntryId"),
+        type: "text",
+        width: "170px",
+      },
       {
         key: "project_name",
         label: t("checks.columns.project"),

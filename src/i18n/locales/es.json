@@ -788,6 +788,9 @@
             "paginationText": "módulos"
         }
     },
+    "transfer": {
+        "success": "Se ha enviado el lote contable a contabilidad. Verifica su estado en el módulo de comprobantes."
+    },
     "submodule": {
         "title": "Gestión de submódulos",
         "description": "Consulta y administra los submódulos del sistema",
@@ -1225,7 +1228,10 @@
         "EXTERNAL_ENDPOINT_NOT_FOUND": "No se encontró el punto final externo configurado.",
         "ACCOUNTING_ENDPOINT_NOT_FOUND": "No se encontró el endpoint contable asociado al proyecto.",
         "ACCOUNTING_TRANSFER_PERIOD_ALREADY_EXISTS": "Ya existe una transferencia contable para este periodo. Solo se permite una por cada periodo.",
-        "UNKNOWN_ERROR": "Ocurrió un error inesperado."
+        "UNKNOWN_ERROR": "Ocurrió un error inesperado.",
+        "ACCOUNTING_TRANSFER_ENDPOINT_NOT_FOUND": "No se encontró el endpoint de transferencia contable, añadelo en la pestaña comprobantes contables",
+        "ACCOUNTING_TRANSFER_ENDPOINT_URL_EMPTY": "La URL del endpoint de transferencia contable no puede estar vacía.",
+        "ACCOUNTING_TRANSFER_ENDPOINT_URL_INVALID": "La URL del endpoint de transferencia contable no es válida. Debe comenzar con http:// o https://"
     },
     "moduleRouteGuard": {
         "preparing": "Preparando contenido..."
@@ -1459,6 +1465,7 @@
         "columns": {
           "id": "ID",
           "transactionType": "Tipo de comprobante",
+          "accountingEntryId": "Codigo contable",
           "project": "Proyecto",
           "state": "Estado",
           "issuedAt": "Fecha de emisión",
