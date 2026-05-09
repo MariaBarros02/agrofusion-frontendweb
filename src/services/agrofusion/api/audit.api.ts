@@ -5,7 +5,37 @@ import type { ListAuditResponse } from "../../../dto/response/listAudit-response
 import type { ListErrorsRequest } from "../../../dto/request/listErrors-request.dto";
 import type { CreateAuditExportRequest } from "../../../dto/request/createAuditExport-request.dto";
 import type { AuditExportJobResponse } from "../../../dto/response/auditExport-response.dto";
-import type { AuditExportSigningReadinessResponse } from "../../../dto/response/auditExportSigningReadiness-response.dto";
+
+export type CheckExportFormat = "JSON" | "CSV" | "XML";
+
+export type CreateCheckExportRequest = {
+  check_id: string;
+  format: CheckExportFormat;
+};
+
+export type CheckExportResponse = {
+  export_id: string;
+  check_id: string;
+  status: string;
+  format: string;
+  export_name?: string | null;
+  requested_at?: string;
+  completed_at?: string;
+  expires_at?: string;
+  file_size_bytes?: number | null;
+  file_hash?: string | null;
+  digital_signature?: string | null;
+  error_message?: string | null;
+  download_token?: string | null;
+  download_filename?: string | null;
+};
+
+export type SigningReadinessResponse = {
+  ready: boolean;
+  message?: string | null;
+  key_id?: string | null;
+  key_alias?: string | null;
+};
 /**
  * Servicio encargado del registro de logs y auditoría del sistema.
  */
@@ -45,11 +75,15 @@ listErrorCodes: () => auditAgrofusionAxios.get("/audit/errors/codes"),
   listAuditExports: (params?: { limit?: number }) =>
     auditAgrofusionAxios.get<AuditExportJobResponse[]>("audit/exports", { params }),
 
-  getAuditExportSigningReadiness: () =>
-    auditAgrofusionAxios.get<AuditExportSigningReadinessResponse>(
-      "audit/exports/signing-readiness"
-    ),
-
   deleteAuditExport: (exportId: string) =>
     auditAgrofusionAxios.delete(`audit/exports/${exportId}`),
+
+  checkSigningReadiness: () =>
+    auditAgrofusionAxios.get<SigningReadinessResponse>("audit/checks/signing-readiness"),
+
+  exportCheckVoucher: (body: CreateCheckExportRequest) =>
+    auditAgrofusionAxios.post<CheckExportResponse>("audit/checks/export", body),
+
+  getCheckExport: (exportId: string) =>
+    auditAgrofusionAxios.get<CheckExportResponse>(`audit/checks/exports/${exportId}`),
 };
