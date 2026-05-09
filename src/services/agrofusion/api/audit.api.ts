@@ -5,6 +5,7 @@ import type { ListAuditResponse } from "../../../dto/response/listAudit-response
 import type { ListErrorsRequest } from "../../../dto/request/listErrors-request.dto";
 import type { CreateAuditExportRequest } from "../../../dto/request/createAuditExport-request.dto";
 import type { AuditExportJobResponse } from "../../../dto/response/auditExport-response.dto";
+import type { AuditExportSigningReadinessResponse } from "../../../dto/response/auditExportSigningReadiness-response.dto";
 
 export type CheckExportFormat = "JSON" | "CSV" | "XML";
 
@@ -86,4 +87,9 @@ listErrorCodes: () => auditAgrofusionAxios.get("/audit/errors/codes"),
 
   getCheckExport: (exportId: string) =>
     auditAgrofusionAxios.get<CheckExportResponse>(`audit/checks/exports/${exportId}`),
+    getAuditExportSigningReadiness: () =>
+    auditAgrofusionAxios.get<AuditExportSigningReadinessResponse>(
+      "audit/exports/signing-readiness"
+    ),
+
 };
