@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { integrationApi } from "./api/integration.api";
 import type { listChecksRequest } from "../../dto/request/listChecks-request.dto";
 import type { CheckDetailResponse, PaginatedChecksResponse } from "../../dto/response/listChecks-response.dto";
 import type { CheckTypeListResponse } from "../../dto/response/listCheckTypes-response.dto";
+import type { AccountingTransferRequest } from "../../dto/request/accountingTransfer-request.dto";
 
 export const listChecksService = async (
   payload: listChecksRequest,
@@ -19,5 +21,11 @@ export const getCheckDetailService = async (
 
 export const listCheckTypesService = async (): Promise<CheckTypeListResponse> => {
   const { data } = await integrationApi.listCheckTypes();
+  return data;
+};
+
+export const accountingTransferService = async (consult: AccountingTransferRequest): Promise<any> => {
+  const { data } = await integrationApi.transferConsult(consult);
+  console.log(data)
   return data;
 };

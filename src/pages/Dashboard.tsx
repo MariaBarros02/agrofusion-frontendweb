@@ -63,7 +63,7 @@ const Dashboard = () => {
       const projectSlug = project.instance_code.toLowerCase();
 
       window.open(
-        `https://www.inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
+        `https://inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
         "_blank"
       );
       return;
@@ -237,7 +237,7 @@ const Dashboard = () => {
                       })}
                     </div>
                     <Link
-                      className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 hover:underline"
+                      className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:underline"
                       to={`/projects/${project.external_project_id}/accounting-endpoints`}
                     >
                       <FiLink />
