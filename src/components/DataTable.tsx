@@ -35,6 +35,7 @@ const statusColors: Record<string, string> = {
 
   PENDING: "bg-orange-400 text-white",
   PROCESSING: "bg-blue-500 text-white",
+  PARTIAL: "bg-orange-400 text-white",
   SENT: "bg-green-500 text-white",
   FAILED: "bg-red-500 text-white",
   CANCELLED: "bg-gray-500 text-white",

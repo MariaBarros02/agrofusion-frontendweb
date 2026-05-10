@@ -165,7 +165,8 @@ const getStatusBadgeClasses = (status?: string | null) => {
     normalized.includes("cancel") ||
     normalized.includes("reject") ||
     normalized.includes("error") ||
-    normalized.includes("fail")
+    normalized.includes("fail") ||
+    normalized.includes("refused")
   ) {
     return "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300";
   }
@@ -340,7 +341,7 @@ const AccountingTransferRequest = () => {
     }catch (error:any){
         const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
         setAlert({
-          message: t(`errors.${errorCode}`),
+          message: `${t(`errors.${errorCode}`)} ${error.response?.data?.detail?.meta?.message || ''}`,
           type: errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning": "error",
         });
     }finally{
