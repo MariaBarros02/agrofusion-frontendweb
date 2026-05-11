@@ -159,7 +159,13 @@ const ViewCheck = () => {
               value={`${check.retry_count}/3`}
             />
           </div>
+          
+            {check.error_message && (
+              <p className="text-sm mb-3 bg-red-100 rounded-xl p-3 text-red-500 dark:text-red-400">{t("checks.detail.errorMessage")}</p>
+            )}
+        
 
+        
           {/* Secciones del payload */}
           <div className="mt-4">
             <div className="border border-gray-200 dark:border-gray-600 rounded-xl divide-y divide-gray-200 dark:divide-gray-600">

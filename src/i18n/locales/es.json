@@ -1451,6 +1451,7 @@
       "systemName": "Sistema",
       "shipment": "Número de envíos",
       "version": "Versión",
+      "errorMessage": "El lote ha sido marcado como fallido porque no se recibió respuesta de contabilidad (ACK) después de 3 reintentos (90 min totales).",
       "accountingPeriod": "Período contable",
       "state": "Estado",
       "total": "Total",
