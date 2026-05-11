@@ -1449,6 +1449,8 @@
       "actionValue": "Lote contable enviado",
       "exchangeId": "Identificación",
       "systemName": "Sistema",
+      "shipment": "Número de envíos",
+      "version": "Versión",
       "accountingPeriod": "Período contable",
       "state": "Estado",
       "total": "Total",
