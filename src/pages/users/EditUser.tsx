@@ -505,7 +505,7 @@ const EditUser = () => {
 
           <form onSubmit={formik.handleSubmit}>
             <div className="p-4 py-10 mt-2 font-semibold border dark:border-gray-600 rounded-2xl">
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+              <div className="grid sm:grid-cols-2 gap-2 md:grid-cols-3">
                 <div className="w-full">
                   <div className="block mb-2">
                     <Label htmlFor="name">{t("editUser.name")}*</Label>

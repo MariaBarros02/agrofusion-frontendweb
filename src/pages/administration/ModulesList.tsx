@@ -225,7 +225,7 @@ const ModulesList = () => {
       {/* Filtros - siempre visibles */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex flex-wrap items-end gap-2 flex-1 overflow-x-auto">
-          <div className="w-72">
+          <div className="md:w-72 w-full">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -235,7 +235,7 @@ const ModulesList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -250,7 +250,7 @@ const ModulesList = () => {
               <option value="INACTIVE">{t("common.inactive")}</option>
             </Select>
           </div>
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">
               {t("module.list.associatedProject")}
             </Label>

@@ -2,14 +2,17 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { NavSideBar } from "./NavSideBar";
 import { HiMenu } from "react-icons/hi";
+import { useAuthStore } from "../../store/auth.store";
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 export default function AppLayoutSB({ children }: AppLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const sidebarOpen = useAuthStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useAuthStore((state) => state.setSidebarOpen);
 
+  
   return (
     <div className="flex overflow-y-hidden bg-[#F8FAFC] dark:bg-slate-800 dark:text-white">
       

@@ -155,8 +155,8 @@ const ViewCheck = () => {
               }
             />
             <Field
-              label={t("checks.detail.accountingStatus")}
-              value={accountingStatusValue}
+              label={t("checks.detail.shipment")}
+              value={`${check.retry_count}/3`}
             />
           </div>
 
@@ -185,8 +185,8 @@ const ViewCheck = () => {
                         value={metadata.ExchangeId}
                       />
                       <Field
-                        label={t("checks.detail.systemName")}
-                        value={check.project_code || check.project_name}
+                        label={t("checks.detail.version")}
+                        value={metadata.StandardVersion}
                       />
                       <Field
                         label={t("checks.detail.accountingPeriod")}
@@ -196,8 +196,10 @@ const ViewCheck = () => {
                             : undefined
                         }
                       />
-                      <Field label={t("checks.detail.state")} value={t(`common.${String(check.state).toLowerCase()}`, { defaultValue: check.state })} />
-                    </div>
+            <Field
+              label={t("checks.detail.accountingStatus")}
+              value={accountingStatusValue}
+            />                    </div>
                   ) : (
                     <p className="text-sm text-gray-400 dark:text-gray-500">-</p>
                   )}
