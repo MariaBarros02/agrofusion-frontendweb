@@ -153,7 +153,7 @@ const RoleView = () => {
                   </div>
                 </div>
                 <div className="mt-5 ">
-                  <div className="flex justify-between">
+                  <div className="md:flex justify-between">
                   <p className="mb-2 text-sm font-bold text-gray-500">
                     {t("viewRole.permissions")}
                   </p>

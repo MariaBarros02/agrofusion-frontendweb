@@ -643,7 +643,7 @@ const AccountingTransferRequest = () => {
                         >
                           <div>
                             <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
-                              {t("project.transferRequest.result.date")}
+                              {t("project.transferRequest.result.dateInvoice")}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-900 dark:text-white">
@@ -738,7 +738,7 @@ const AccountingTransferRequest = () => {
                         >
                           <div>
                             <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
-                              {t("project.transferRequest.result.date")}
+                              {t("project.transferRequest.result.dateTransaction")}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-900 dark:text-white">

@@ -332,14 +332,14 @@ const ListChecks = () => {
         key: "id",
         label: t("checks.columns.id"),
         type: "text",
-        width: "90px",
+        width: "70px",
         format: (value: string) => value?.slice(0, 7),
       },
       {
         key: "transaction_type",
         label: t("checks.columns.transactionType"),
         type: "text",
-        width: "170px",
+        width: "130px",
       },
       
       {
@@ -352,7 +352,7 @@ const ListChecks = () => {
         key: "project_name",
         label: t("checks.columns.project"),
         type: "text",
-        width: "150px",
+        width: "100px",
         format: (_: unknown, row) => row.project_code || row.project_name || "-",
       },
       {
@@ -410,7 +410,7 @@ const ListChecks = () => {
 
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
         <div className="flex flex-wrap flex-1 gap-2 mb-3 overflow-visible">
-          <div className="w-60">
+          <div className="md:w-60 w-full">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -421,10 +421,10 @@ const ListChecks = () => {
             />
           </div>
 
-          <div>
+          <div className="">
             <Label className="text-xs">{t("audit.filters.date")}</Label>
 
-            <div className="relative">
+            <div className="relative ">
               <HiCalendar className="absolute z-10 text-gray-400 -translate-y-1/2 pointer-events-none left-3 top-1/2 dark:text-gray-300" />
 
               <DatePicker
@@ -441,12 +441,12 @@ const ListChecks = () => {
                 popperPlacement="bottom-start"
                 popperClassName="z-50"
                 portalId="root"
-                className="w-60 h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                className="md:w-60 w-full h-[34px] rounded-lg border border-gray-300 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               />
             </div>
           </div>
 
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">{t("checks.filters.type")}</Label>
             <Select
               icon={FiFileText}
@@ -463,7 +463,7 @@ const ListChecks = () => {
             </Select>
           </div>
 
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
