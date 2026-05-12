@@ -9,7 +9,9 @@ import TitleTarget from "../../components/layout/TitleTarget";
 import AlertSimple, { type AlertState } from "../../components/layout/AlertSimple";
 import { getCheckDetailService } from "../../services/agrofusion/integration.service";
 import type { CheckDetailResponse } from "../../dto/response/listChecks-response.dto";
-
+import { consultAccountingDiffService } from "../../services/agrofusion/integration.service";
+import type { CheckRefreshResponse } from "../../dto/response/accountingDiff-response.dto";
+import AccountingUpdateModal from "../../components/accounting/modals/AccountingUpdateModal";
 const formatDate = (value?: string | null) => {
   if (!value) return "-";
   return new Date(value).toLocaleString("es-CO", {
@@ -60,10 +62,10 @@ const StatusBadge = ({ value, label }: { value?: string | null; label?: string }
 
 const Field = ({ label, value }: { label: string; value?: string | number | null }) => (
   <div className="flex flex-col gap-0.5">
-    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+    <span className="text-xs font-semibold tracking-wide text-gray-500 uppercase dark:text-gray-400">
       {label}
     </span>
-    <span className="text-sm font-medium text-gray-900 dark:text-white break-words">
+    <span className="text-sm font-medium text-gray-900 break-words dark:text-white">
       {value ?? "-"}
     </span>
   </div>
@@ -76,7 +78,37 @@ const ViewCheck = () => {
   const [check, setCheck] = useState<CheckDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState<AlertState>(null);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [loadingDiff, setLoadingDiff] = useState(false);
+  const [diffResult, setDiffResult] = useState<CheckRefreshResponse | null>(null);
+  const handleOpenUpdateModal = async () => {
+    setLoadingDiff(true);
 
+    try {
+      const response = await consultAccountingDiffService(checkId ? checkId : "");
+      console.log("Diff result:", response);
+      if (!response.has_changes) {
+        setAlert({
+          message: t("checks.detail.noDiff"),
+          type: "warning",
+        });
+        return
+      }
+      setDiffResult(response);
+      setOpenUpdateModal(true);
+
+    } catch (error: any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+
+      setAlert({
+          message: t(`errors.${errorCode}`),
+          type:
+            errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning" : "error",
+        });
+    } finally {
+      setLoadingDiff(false);
+    }
+  };
   useEffect(() => {
     const loadCheck = async () => {
       try {
@@ -135,7 +167,7 @@ const ViewCheck = () => {
         <div className="p-5 mt-2 bg-white border shadow-sm dark:border-gray-600 dark:bg-gray-700 rounded-2xl">
 
           {/* Resumen principal */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4 pb-5 border-b border-gray-100 dark:border-gray-600">
+          <div className="grid grid-cols-2 pb-5 border-b border-gray-100 gap-x-6 gap-y-4 md:grid-cols-4 dark:border-gray-600">
             <Field label={t("checks.columns.id")} value={check.id} />
             <Field label={t("checks.columns.transactionType")} value={check.transaction_type} />
             <Field label={t("checks.columns.project")} value={check.project_code || check.project_name} />
@@ -161,14 +193,14 @@ const ViewCheck = () => {
           </div>
           
             {check.error_message && (
-              <p className="text-sm mb-3 bg-red-100 rounded-xl p-3 text-red-500 dark:text-red-400">{t("checks.detail.errorMessage")}</p>
+              <p className="p-3 mb-3 text-sm text-red-500 bg-red-100 rounded-xl dark:text-red-400">{t("checks.detail.errorMessage")}</p>
             )}
         
 
         
           {/* Secciones del payload */}
           <div className="mt-4">
-            <div className="border border-gray-200 dark:border-gray-600 rounded-xl divide-y divide-gray-200 dark:divide-gray-600">
+            <div className="border border-gray-200 divide-y divide-gray-200 dark:border-gray-600 rounded-xl dark:divide-gray-600">
 
               {/* Sección: Metadata */}
               <AccordionPanel alwaysOpen isOpen={true} arrowIcon={HiChevronDown}>
@@ -258,7 +290,7 @@ const ViewCheck = () => {
                   {invoices && invoices.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
                             <th className="px-3 py-2">{t("checks.detail.invoiceDate")}</th>
                             <th className="px-3 py-2">{t("checks.detail.invoiceType")}</th>
@@ -289,7 +321,7 @@ const ViewCheck = () => {
                                   </td>
                                 </tr>
                                 {failed && (
-                                  <tr className="bg-red-50 dark:bg-red-900/20 border-b dark:border-gray-600">
+                                  <tr className="border-b bg-red-50 dark:bg-red-900/20 dark:border-gray-600">
                                     <td colSpan={5} className="px-3 py-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                                       {t("checks.detail.accountingAlert", { message: failed.errorMessage ?? failed.errorCode })}
                                     </td>
@@ -318,7 +350,7 @@ const ViewCheck = () => {
                   {transactions && transactions.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-                        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
                             <th className="px-3 py-2">{t("checks.detail.transactionDate")}</th>
                             <th className="px-3 py-2">{t("checks.detail.paymentMethod")}</th>
@@ -346,7 +378,7 @@ const ViewCheck = () => {
                                   </td>
                                 </tr>
                                 {failed && (
-                                  <tr className="bg-red-50 dark:bg-red-900/20 border-b dark:border-gray-600">
+                                  <tr className="border-b bg-red-50 dark:bg-red-900/20 dark:border-gray-600">
                                     <td colSpan={5} className="px-3 py-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                                       {t("checks.detail.accountingAlert", { message: failed.errorMessage ?? failed.errorCode })}
                                     </td>
@@ -370,7 +402,7 @@ const ViewCheck = () => {
           </div>
 
           {/* Botones de acción */}
-          <div className="flex justify-end gap-3 mt-5 pt-4 border-t border-gray-100 dark:border-gray-600">
+          <div className="flex justify-end gap-3 pt-4 mt-5 border-t border-gray-100 dark:border-gray-600">
             <Button
               color="light"
               onClick={() => navigate("/accounting-vouchers")}
@@ -379,13 +411,21 @@ const ViewCheck = () => {
             </Button>
             <Button
               color="blue"
-              disabled={!isCurrentMonth(check)}
+//              disabled={!isCurrentMonth(check)}
+              onClick={handleOpenUpdateModal}
             >
               {t("common.update")}
             </Button>
           </div>
         </div>
       )}
+      <AccountingUpdateModal
+        open={openUpdateModal}
+        onClose={() => setOpenUpdateModal(false)}
+        loading={loadingDiff}
+        data={diffResult}
+        transfer_id={checkId}
+      />
 
       {alert && (
         <AlertSimple

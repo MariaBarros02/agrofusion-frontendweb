@@ -37,9 +37,9 @@ const formatDateForInput = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const addDaysUtc = (year: number, month: number, day: number, days: number) => {
-  return new Date(Date.UTC(year, month - 1, day + days));
-};
+// const addDaysUtc = (year: number, month: number, day: number, days: number) => {
+//   return new Date(Date.UTC(year, month - 1, day + days));
+// };
 
 const calculateEndDate = (
   startDateValue: string,
@@ -188,7 +188,7 @@ const AccountingTransferRequest = () => {
   const [hasConsulted, setHasConsulted] = useState(false);
 
   const [loadingConsult, setLoadingConsult] = useState(false);
-  const [loadingTransfer, setLoadingTransfer] = useState(false); 
+  const [loadingTransfer, setLoadingTransfer] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
   const [consultResult, setConsultResult] =
     useState<AccountingConsultResponse | null>(null);
@@ -331,23 +331,39 @@ const AccountingTransferRequest = () => {
       await accountingTransferService({
         external_project_id: projectId as string,
         external_endpoint_id: state?.endpointId as string,
-        normalized_json: consultResult as AccountingConsultResponse
+        normalized_json: consultResult as AccountingConsultResponse,
       });
       setAlert({
-          message: t(`transfer.success`),
-          type: "success",
-          to:"/accounting-vouchers"
-        });
-    }catch (error:any){
-        const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
-        setAlert({
-          message: `${t(`errors.${errorCode}`)} ${error.response?.data?.detail?.meta?.message || ''}`,
-          type: errorCode == "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning": "error",
-        });
-    }finally{
+        message: t(`transfer.success`),
+        type: "success",
+        to: "/accounting-vouchers",
+      });
+    } catch (error: any) {
+      const errorCode = error.response?.data?.detail?.code ?? "UNKNOWN_ERROR";
+
+      let meta = error.response?.data?.detail?.meta;
+
+      // Si viene como texto, intenta convertirlo
+      if (typeof meta === "string") {
+        try {
+          meta = JSON.parse(meta);
+        } catch {
+          // Si falla el parseo, deja el valor original
+        }
+      }
+
+      console.log(error);
+      console.log(meta?.message);
+
+      setAlert({
+        message: `${t(`errors.${errorCode}`)} ${meta?.message || ""}`,
+        type:
+          errorCode === "AUTH_INSUFFICIENT_PERMISSIONS" ? "warning" : "error",
+      });
+    } finally {
       setLoadingTransfer(false);
     }
-  }
+  };
 
   return (
     <AppLayoutSB>
@@ -423,7 +439,6 @@ const AccountingTransferRequest = () => {
                   <option value="">
                     {t("project.transferRequest.intervalPlaceholder")}
                   </option>
-
 
                   <option value="mensual">
                     {t("project.transferRequest.intervals.monthly")}
@@ -738,7 +753,9 @@ const AccountingTransferRequest = () => {
                         >
                           <div>
                             <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
-                              {t("project.transferRequest.result.dateTransaction")}
+                              {t(
+                                "project.transferRequest.result.dateTransaction",
+                              )}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-900 dark:text-white">
@@ -748,7 +765,9 @@ const AccountingTransferRequest = () => {
 
                           <div>
                             <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-300">
-                              {t("project.transferRequest.result.paymentMethod")}
+                              {t(
+                                "project.transferRequest.result.paymentMethod",
+                              )}
                             </p>
 
                             <p className="mt-1 text-sm text-slate-900 dark:text-white">
@@ -819,7 +838,13 @@ const AccountingTransferRequest = () => {
               {t("common.cancel")}
             </Button>
 
-            <Button color="blue" disabled={!consultResult || loadingTransfer} onClick={() => {transferConsult()}} >
+            <Button
+              color="blue"
+              disabled={!consultResult || loadingTransfer}
+              onClick={() => {
+                transferConsult();
+              }}
+            >
               <FiSend className="mr-2" />
               {t("project.transferRequest.transfer")}
             </Button>
