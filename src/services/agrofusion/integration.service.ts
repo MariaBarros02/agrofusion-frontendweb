@@ -5,6 +5,7 @@ import type { CheckDetailResponse, PaginatedChecksResponse } from "../../dto/res
 import type { CheckTypeListResponse } from "../../dto/response/listCheckTypes-response.dto";
 import type { AccountingTransferRequest } from "../../dto/request/accountingTransfer-request.dto";
 import type { CheckRefreshResponse } from "../../dto/response/accountingDiff-response.dto";
+import type { AccountingUpdateResponse } from "../../dto/response/accountingUpdate-response";
 
 export const listChecksService = async (
   payload: listChecksRequest,
@@ -34,3 +35,9 @@ export const consultAccountingDiffService = async (transfer_id: string): Promise
   return data;
 };
 
+
+export const updateVoucherService = async (transfer_id: string, data: any): Promise<AccountingUpdateResponse> => {
+  const response = await integrationApi.updateVoucher(transfer_id, {diff: data});
+  console.log(response.data);
+  return response.data;
+}

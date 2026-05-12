@@ -1,4 +1,3 @@
-
 import type {
   AccountingMetadata,
   AccountingSummary,
@@ -43,6 +42,22 @@ export type CheckRefreshResponse = {
   previous_summary: AccountingSummary;
   /** Summary de la nueva consulta al endpoint externo */
   current_summary: AccountingSummary;
+
+  /**
+   * Lista completa de facturas en su estado actual.
+   * Incluye tanto las modificadas como las que no tuvieron cambios.
+   * Se debe pasar tal cual al endpoint de update-accounting para que
+   * el comprobante quede con todas las facturas vigentes.
+   */
+  current_invoices: AccountingInvoice[];
+
+  /**
+   * Lista completa de transacciones en su estado actual.
+   * Incluye tanto las modificadas como las que no tuvieron cambios.
+   * Se debe pasar tal cual al endpoint de update-accounting para que
+   * el comprobante quede con todas las transacciones vigentes.
+   */
+  current_transactions: AccountingTransaction[];
  
   /**
    * Facturas que fueron creadas, modificadas o eliminadas.

@@ -1449,7 +1449,7 @@
       "actionValue": "Lote contable enviado",
       "exchangeId": "Identificación",
       "systemName": "Sistema",
-      "shipment": "Número de envíos",
+      "shipment": "Número de reenvíos",
       "noDiff": "No hay diferencias entre el comprobante contable actual y los datos contables del proyecto externo.",
       "version": "Versión",
       "errorMessage": "El lote ha sido marcado como fallido porque no se recibió respuesta de contabilidad (ACK) después de 3 reintentos (90 min totales).",
@@ -1534,8 +1534,9 @@
       "comparison": "Comparacion entre comprobante actual y datos contables del proyecto externo",
       "previousInfo": "Comprobante actual en agrofusion/contabilidad",
       "currentInfo" : "Datos contables del proyecto externo",
-      "noInfo": "Sin datos para mostrar"
-
+      "noInfo": "Sin datos para mostrar",
+      "noInvoices": "No hay facturas por actualizar",
+      "noTransactions": "No hay pagos por actualizar"
     }
   }
 }

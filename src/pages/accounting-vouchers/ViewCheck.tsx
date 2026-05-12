@@ -92,6 +92,7 @@ const ViewCheck = () => {
           message: t("checks.detail.noDiff"),
           type: "warning",
         });
+        return
       }
       setDiffResult(response);
       setOpenUpdateModal(true);
@@ -423,6 +424,7 @@ const ViewCheck = () => {
         onClose={() => setOpenUpdateModal(false)}
         loading={loadingDiff}
         data={diffResult}
+        transfer_id={checkId}
       />
 
       {alert && (
