@@ -246,7 +246,7 @@ const ProjectsList = () => {
       {/* Filtros y acción Agregar proyecto */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
         <div className="flex flex-wrap items-end flex-1 gap-2 overflow-x-auto">
-          <div className="w-72">
+          <div className="md:w-72  w-full">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -256,7 +256,7 @@ const ProjectsList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -285,7 +285,7 @@ const ProjectsList = () => {
             {t("common.filterReset")}
           </Button>
           <Link to="/administration/projects/create">
-            <Button color="blue" size="xs">
+            <Button color="green" size="xs">
               {t("project.create.addProject")}
             </Button>
           </Link>

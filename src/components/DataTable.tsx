@@ -35,6 +35,7 @@ const statusColors: Record<string, string> = {
 
   PENDING: "bg-orange-400 text-white",
   PROCESSING: "bg-blue-500 text-white",
+  PARTIAL: "bg-orange-400 text-white",
   SENT: "bg-green-500 text-white",
   FAILED: "bg-red-500 text-white",
   CANCELLED: "bg-gray-500 text-white",
@@ -159,9 +160,9 @@ export default function DataTable<T extends Record<string, any>>({
   }, [openStatusRowIndex]);
 
   return (
-    <div className="w-full space-y-4">
-      <div className="relative overflow-visible border rounded-2xl">
-        <table className="w-full text-sm table-fixed rounded-2xl">
+    <div className="w-full space-y-4 overflow-auto">
+      <div className="relative w-full overflow-x-auto border rounded-2xl">
+        <table className="min-w-full text-sm table-auto rounded-2xl">
           <thead className="bg-gray-200 rounded-2xl dark:bg-gray-800">
             <tr className="rounded-2xl">
               {columns.map((col) => (
@@ -337,14 +338,14 @@ export default function DataTable<T extends Record<string, any>>({
                           className="px-3 py-3 text-center"
                         >
                           <span className="inline-flex justify-center gap-2 whitespace-nowrap">
-                          {actionsCol.actions.map((action, i) => {
-                            const isDisabled = action.disabled?.(row);
+                            {actionsCol.actions.map((action, i) => {
+                              const isDisabled = action.disabled?.(row);
 
-                            return (
-                              <button
-                                key={i}
-                                disabled={isDisabled}
-                                className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg whitespace-nowrap
+                              return (
+                                <button
+                                  key={i}
+                                  disabled={isDisabled}
+                                  className={`inline-flex items-center gap-2 px-3 py-1 border rounded-lg whitespace-nowrap
         ${action.className ?? ""}
         ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
       `}

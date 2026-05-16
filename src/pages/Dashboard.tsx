@@ -63,7 +63,7 @@ const Dashboard = () => {
       const projectSlug = project.instance_code.toLowerCase();
 
       window.open(
-        `https://www.inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
+        `https://inmero.co/${projectSlug}/sso?token=${result.sso_token}`,
         "_blank"
       );
       return;
@@ -173,11 +173,11 @@ const Dashboard = () => {
                   key={project.external_project_id}
                   className="flex items-center gap-3 p-5 bg-white border shadow-sm dark:border-gray-600 rounded-2xl dark:bg-gray-700 "
                 >
-                  <div className="flex-shrink-0 w-48 h-64 overflow-hidden md:w-60 rounded-2xl">
+                  <div className="flex-shrink-0 w-32 h-80 overflow-hidden md:w-60 md:h-64 rounded-2xl">
                     <img
                       src={`${import.meta.env.VITE_API_AUTH_AF_URL}${project.project_image_url}`}
                       alt={project.project_name}
-                      className="object-cover w-full h-full"
+                      className="object-cover object-center w-full h-full"
                     />
                   </div>
                   <div>
@@ -237,7 +237,7 @@ const Dashboard = () => {
                       })}
                     </div>
                     <Link
-                      className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 hover:underline"
+                      className="flex items-center gap-1 mt-1 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:underline"
                       to={`/projects/${project.external_project_id}/accounting-endpoints`}
                     >
                       <FiLink />

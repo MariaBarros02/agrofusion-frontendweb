@@ -485,14 +485,14 @@ const ProjectAccountingEndpoints = () => {
       key: "external_project_code",
       label: t("project.accountingEndpoints.columns.projectCode"),
       type: "text",
-      width: "130px",
+      width: "120px",
       format: (value: string) => value || "-",
     },
     {
       key: "operation_type",
       label: t("project.accountingEndpoints.columns.operationType"),
       type: "text",
-      width: "200px",
+      width: "100px",
     },
     {
       key: "method",
@@ -556,8 +556,8 @@ const ProjectAccountingEndpoints = () => {
       />
 
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex flex-wrap flex-1 gap-2 overflow-visible">
-          <div className="w-72">
+        <div className="md:flex  gap-2 overflow-visible">
+          <div className="md:w-60 ">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -568,7 +568,7 @@ const ProjectAccountingEndpoints = () => {
             />
           </div>
 
-          <div className="w-52">
+          <div className="w-42">
             <Label className="text-xs">
               {t("project.accountingEndpoints.filters.method")}
             </Label>
@@ -589,7 +589,7 @@ const ProjectAccountingEndpoints = () => {
             </Select>
           </div>
 
-          <div className="w-60">
+          <div className="md:w-52">
             <Label className="text-xs">
               {t("project.accountingEndpoints.filters.operationType")}
             </Label>

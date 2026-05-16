@@ -190,11 +190,10 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
   };
   return (
     <div
-      className={`
-        fixed top-0 left-0 z-40 h-screen
-        transform transition-transform duration-300 
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0 md:static 
+            className={`
+      fixed top-0 left-0 z-40 h-screen
+          transform transition-transform duration-300
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
       <div className="h-full p-3">
@@ -208,23 +207,27 @@ export function NavSideBar({ isOpen, onClose }: NavSideBarProps) {
             !rounded-xl [&>div]:!rounded-xl  shadow-md
           "
         >
-          {/* LOGO */}
-          <SidebarLogo
-            href="#"
-            onClick={(e) => {e.preventDefault(); navigate("/dashboard")}}
-            img={logoAgrofusionRemovebg2}            
+          <div className="flex items-center">
+                      <SidebarLogo
+            href="/dashboard"
+            onClick={() => navigate("/dashboard")}
+
+            img={logoAgrofusionRemovebg2}
             imgAlt="AgroFusion logo"
           >
             <div className=" !rounded-xl flex items-center justify-between w-full">
               <p className="font-semibold">AgroFusion</p>
+              
+            </div>
+          </SidebarLogo>
               <button
                 onClick={onClose}
-                className="mt-1 text-gray-500 ml-14 md:hidden"
+                className="mt-1 mb-4 text-gray-500 ml-14"
               >
                 <HiX size={22} />
               </button>
-            </div>
-          </SidebarLogo>
+          </div>
+          {/* LOGO */}
 
           {/* ITEMS */}
           <SidebarItems

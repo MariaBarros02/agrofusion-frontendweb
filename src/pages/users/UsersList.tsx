@@ -183,8 +183,8 @@ const UsersList = () => {
       <TitleTarget title="users.title" description="users.description" />
       {/* filtros */}
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 md:flex rounded-2xl">
-        <div className="flex gap-2">
-          <div className="w-72">
+        <div className="md:flex gap-2">
+          <div className="md:w-72 w-full">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -194,7 +194,7 @@ const UsersList = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="w-52">
+          <div className="md:w-52 w-full">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -212,7 +212,7 @@ const UsersList = () => {
               <option value="BLOCKED"> {t("common.blocked")}</option>
             </Select>
           </div>
-          <div className="max-w-md">
+          <div className="md:max-w-md w-full">
             <Label className="text-xs">{t("users.associateRole")}</Label>
             <Select
               icon={LuList}
@@ -245,7 +245,7 @@ const UsersList = () => {
             {t("common.filterReset")}
           </Button>
           <Button
-            color="blue"
+            color="green"
             size="xs"
             onClick={() => navigate("/administration/users/create-user")}
           >
@@ -287,6 +287,7 @@ const UsersList = () => {
               columns={columns}
               onPageChange={handlePageChange}
               paginationText={t("users.users")}
+              maxVisiblePages={5}
             />
           )}
         </>

@@ -26,6 +26,11 @@ interface AuthState {
     isRefreshing: boolean;
     setRefreshing: (val: boolean) => void;  
   email: string | null;
+
+
+  sidebarOpen: boolean;
+  setSidebarOpen: (value: boolean) => void;
+
   /**
    * Función para hidratar el estado al iniciar sesión.
    * @param access - JWT de acceso.
@@ -53,6 +58,10 @@ export const useAuthStore = create<AuthState>()(
       id: null,
       isHydrated: false,
       isRefreshing: false,
+
+      sidebarOpen: true,
+      setSidebarOpen: (value: boolean) =>
+        set({ sidebarOpen: value }),
       setRefreshing: (val: boolean) => set({ isRefreshing: val }),
 
       // --- ACCIONES ---

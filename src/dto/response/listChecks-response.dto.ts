@@ -3,6 +3,7 @@ export type CheckListItemResponse = {
     transaction_type: string;
     project_name?: string;
     project_code?: string;
+    accounting_entry_id?: string;
     state: string;
     issued_at?: string;
     amount?: number;
