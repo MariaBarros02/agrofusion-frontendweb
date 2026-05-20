@@ -32,7 +32,8 @@ const statusColors: Record<string, string> = {
   ACTIVE: "bg-green-500 text-white",
   INACTIVE: "bg-amber-400 text-black",
   DELETED: "bg-red-500 text-white",
-
+  ACCEPTED: "bg-green-500 text-white",
+  REJECTED: "bg-red-500 text-white",
   PENDING: "bg-orange-400 text-white",
   PROCESSING: "bg-blue-500 text-white",
   PARTIAL: "bg-orange-400 text-white",
