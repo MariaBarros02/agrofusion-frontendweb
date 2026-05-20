@@ -410,7 +410,7 @@ const ListChecks = () => {
 
       <div className="p-3 mb-2 bg-white border shadow-sm dark:bg-gray-700 dark:border-gray-600 rounded-2xl">
         <div className="flex flex-wrap flex-1 gap-2 mb-3 overflow-visible">
-          <div className="md:w-60 w-full">
+          <div className="w-full md:w-60">
             <Label className="text-xs">{t("common.search")}</Label>
             <TextInput
               icon={HiSearch}
@@ -446,7 +446,7 @@ const ListChecks = () => {
             </div>
           </div>
 
-          <div className="md:w-52 w-full">
+          <div className="w-full md:w-52">
             <Label className="text-xs">{t("checks.filters.type")}</Label>
             <Select
               icon={FiFileText}
@@ -463,7 +463,7 @@ const ListChecks = () => {
             </Select>
           </div>
 
-          <div className="md:w-52 w-full">
+          <div className="w-full md:w-52">
             <Label className="text-xs">{t("common.state")}</Label>
             <Select
               icon={FiFlag}
@@ -472,11 +472,10 @@ const ListChecks = () => {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="">{t("checks.filters.allStates")}</option>
-              <option value="pending">{t("common.pending")}</option>
               <option value="processing">{t("common.processing")}</option>
-              <option value="sent">{t("common.sent")}</option>
-              <option value="failed">{t("common.failed")}</option>
-              <option value="cancelled">{t("common.cancelled")}</option>
+              <option value="accepted">{t("common.accepted")}</option>
+              <option value="rejected">{t("common.rejected")}</option>
+              <option value="partial">{t("common.partial")}</option>
             </Select>
           </div>
 
@@ -655,7 +654,7 @@ const ListChecks = () => {
                 }`}
               >
                 <div className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center border-blue-500">
-                  {exportFormat === fmt && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                  {exportFormat === fmt && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{t(`checks.exportModal.fmt${fmt === "JSON" ? "Json" : fmt === "CSV" ? "Csv" : "Xml"}`)}</p>
