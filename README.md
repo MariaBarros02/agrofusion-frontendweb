@@ -22,7 +22,7 @@ Antes de comenzar, asegúrate de tener listos los siguientes superpoderes 🦸�
 Abre tu terminal en la carpeta donde desees guardar el proyecto y ejecuta:
 
 ```bash
-git clone https://github.com/MariaBarros02/agrofusion-frontendweb.git
+git clone https://github.com/Server-IA/agrofusion-frontendweb.git
 cd agrofusion-frontendweb
 ``` 
 ## 🔐 Variables de entorno
